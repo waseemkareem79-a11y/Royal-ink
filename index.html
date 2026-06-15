@@ -64,7 +64,6 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 
 .badge-line { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background-color: rgba(201,168,76,0.15); color: var(--ink-gold); }
 
-/* ── أزرار التنقل والتحكم الفائق بالسرعة ── */
 .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding: 10px; }
 .page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; transition: 0.2s; }
 .page-btn:hover:not(:disabled) { border-color: var(--ink-gold); color: var(--ink-gold); }
@@ -102,7 +101,7 @@ header { display: flex; justify-content: space-between; align-items: center; mar
     <p>النظام السحابي المتكامل فائق الأداء والسرعة</p>
     <div class="form-group">
       <label>الحساب الإلكتروني</label>
-      <input type="email" id="loginEmail" placeholder="admin@royalink.com">
+      <input type="email" id="loginEmail" placeholder="waseem.kareem79@gmail.com">
     </div>
     <div class="form-group">
       <label>رمز المرور</label>
@@ -186,7 +185,7 @@ const PROJECT_BOX_ID = "royal_ink_full_details_v3";
 let ALL_RECORDS = [];
 let FILTERED_RECORDS = [];
 let currentPage = 1;
-const recordsPerPage = 20; // 💡 عرض 20 كرت فقط في الصفحة لتسريع الدخول الصاروخي
+const recordsPerPage = 20; 
 let activeRole = "viewer";
 
 window.onload = function() {
@@ -198,7 +197,8 @@ function processLogin() {
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
   const pass = document.getElementById("loginPassword").value;
 
-  if(email === "admin@royalink.com" && pass === "Admin@2026") {
+  // 💡 تحديث الحساب الجديد وكلمة السر المحدثة هنا
+  if(email === "waseem.kareem79@gmail.com" && pass === "5420826") {
     setupUserSession("admin");
   } else if (email === "user@royalink.com" && pass === "User@2026") {
     setupUserSession("viewer");
@@ -304,7 +304,6 @@ function updateInterface() {
   renderPageCards();
 }
 
-// ── محرك العرض السريع والمقيد بـ 20 كرت فقط في المرة لقضاء تام على البطء ──
 function renderPageCards() {
   const container = document.getElementById("labels-cards-container");
   container.innerHTML = "";
@@ -331,7 +330,6 @@ function renderPageCards() {
   
   document.getElementById("paginationWrapper").style.display = "flex";
   
-  // عرض النطاق المحدد فقط لسرعة صاروخية
   for (let i = startIndex; i < endIndex; i++) {
     const item = FILTERED_RECORDS[i];
     const keys = Object.keys(item);
@@ -379,4 +377,5 @@ function openDetailedModalGlobalIndex(globalIndex) {
   let modalBody = `<div style="line-height: 2.2; font-size: 14px;">`;
   keys.forEach(k => {
     let style = "";
-    if(k.includes("كود") || k.includes("ر
+    if(k.includes("كود") || k.includes("رقم")) style = `style="color: var(--ink-gold); font-weight: bold;"`;
+    if(k.includes("عنوان") || k.includes("موقع") || k.includes("مخزن")) style = `style="co
