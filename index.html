@@ -77,7 +77,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 /* أزرار التصفح والصفحات */
 .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 5px 0; }
 .nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 6px 16px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
-.nav-page-btn:disabled { opacity: 0.3; }
+.nav-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -89,7 +89,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
       <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، اللون، الشركة، أو الكود..." oninput="runLiveFilter(this.value)">
     </div>
     <div class="status-bar">
-      <div>المستودع الرقمي: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> سجل مجمع</div>
+      <div>المستودع الرقمي: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> ليبل مجمع</div>
       <div style="color:var(--accent-green)">● متصل ومباشر</div>
     </div>
   </div>
@@ -107,7 +107,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 
     <section id="sec-import" class="view-section">
       <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
-        <span style="font-size:45px; display:block; margin-bottom:12px">📤</span>
+        <span style="font-size:45px; display:block; margin-bottom:12px">📥</span>
         <h3>رفع وتحديث السيرفر المحلي</h3>
         <p style="font-size:13px; color:var(--ink-silver); margin-top:5px">اختر ملف الإكسل لتصفية وربط الألوان والخلطات تلقائياً بدون تكرار</p>
         <input type="file" id="hiddenFileInput" style="display:none" accept="*" onchange="readExcelFileCleanly(event)">
@@ -156,21 +156,26 @@ function fetchStoredDatabase() {
   }
 }
 
+// 🧠 خوارزمية التصفية المتقدمة لفك وقراءة الأعمدة الأفقية الممتدة والمنبثقة من صورك
 function processAndCleanRecords() {
   const aggregationMap = new Map();
-  const blacklistedKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "empty", "رقم الكود", "كود", "code"];
+  
+  // الكلمات التي يجب استبعادها تماماً من القراءة والتجميع لمنع الكروت الوهمية
+  const ignoredKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "رقم الكود", "كود", "code", "قياس العلبة", "العبوة", "خط الإنتاج", "خط الانتاج"];
 
   SYSTEM_RECORDS.forEach(row => {
+    // جلب المفاتيح الأساسية للسطر
     let label = (row["اسم الليبل"] || row["الليبل"] || row["Label Name"] || "").toString().trim();
     let company = (row["الشركة"] || row["اسم الشركة"] || row["Company"] || "عام").toString().trim();
-    let size = (row["العبوة"] || row["قياس العلبة"] || row["حجم العبوة"] || "غير محدد").toString().trim();
+    let size = (row["العبوة"] || row["قياس العلبة"] || row["حجم العبوة"] || "-").toString().trim();
     let codeNum = (row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-").toString().trim();
     let lineName = (row["خط الإنتاج"] || row["خط الانتاج"] || "الخط الرئيسي").toString().trim();
 
-    if (!label || blacklistedKeywords.some(keyword => label.toLowerCase().includes(keyword))) return;
-    if (blacklistedKeywords.some(keyword => company.toLowerCase().includes(keyword))) return;
-    if (label.includes("EMPTY__")) return;
+    // 1. التحقق من سلامة الليبل الرئيسي واستبعاد العناوين المكررة أو الفارغة
+    if (!label || ignoredKeywords.some(keyword => label.toLowerCase() === keyword) || label.includes("EMPTY__")) return;
+    if (ignoredKeywords.some(keyword => company.toLowerCase() === keyword)) return;
 
+    // تكوين هوية فريدة وموحدة لكل ليبل
     const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
 
     if (!aggregationMap.has(uniqueIdentityKey)) {
@@ -184,12 +189,41 @@ function processAndCleanRecords() {
       });
     }
 
-    let color = (row["اللون"] || row["اسم اللون"] || row["Color"] || "").toString().trim();
-    let formula = (row["الخلطة"] || row["خلطة اللون"] || row["Formula"] || "").toString().trim();
+    const currentLabelObj = aggregationMap.get(uniqueIdentityKey);
 
-    if (color && !blacklistedKeywords.some(kw => color.toLowerCase().includes(kw)) && !color.includes("EMPTY__")) {
-      aggregationMap.get(uniqueIdentityKey).associatedColors.push({ color, formula });
-    }
+    // 2. الفحص الذكي لكافة الخلايا الأفقية في السطر لاستخراج الألوان والخلطات تلقائياً (من اللون الأول وحتى الأخير)
+    Object.keys(row).forEach(key => {
+      let cleanKey = key.toString().trim().toLowerCase();
+      
+      // استهداف الأعمدة التي تحتوي على كلمة لون أو اسم اللون، وتجاهل الـ EMPTY والـ العناوين الأساسية
+      if ((cleanKey.includes("لون") || cleanKey.includes("color")) && !cleanKey.includes("كود") && !cleanKey.includes("اسم الليبل")) {
+        let colorValue = row[key] ? row[key].toString().trim() : "";
+        
+        if (colorValue && !colorValue.includes("EMPTY__") && !ignoredKeywords.some(kw => colorValue.toLowerCase() === kw)) {
+          
+          // محاولة العثور على حقل الخلطة التابع والمجاور لهذا اللون هندسياً
+          let formulaValue = "";
+          let keyIndex = Object.keys(row).indexOf(key);
+          
+          // البحث عن العمود التالي مباشرة فإذا كان خلطة أو قيمة مرافقة نعتمدها
+          let nextKey = Object.keys(row)[keyIndex + 1];
+          if (nextKey && (nextKey.toLowerCase().includes("خلطة") || nextKey.toLowerCase().includes("formula") || nextKey.toLowerCase().includes("empty"))) {
+             let nextVal = row[nextKey] ? row[nextKey].toString().trim() : "";
+             if (nextVal && !nextVal.includes("EMPTY__")) {
+                formulaValue = nextVal;
+             }
+          }
+          
+          // منع التكرار للون داخل نفس الكرت
+          if (!currentLabelObj.associatedColors.some(c => c.color === colorValue)) {
+            currentLabelObj.associatedColors.push({
+              color: colorValue,
+              formula: formulaValue
+            });
+          }
+        }
+      }
+    });
   });
 
   COMPILED_LABELS = Array.from(aggregationMap.values());
@@ -248,13 +282,13 @@ function showColorsModalPanel(index) {
   
   let modalHtml = "";
   if (currentObj.associatedColors.length === 0) {
-    modalHtml = `<p style="text-align:center; color:var(--ink-dim); padding:20px; font-size:13px;">لم يتم إرفاق تفاصيل ألوان أو تركيبات لهذا السجل.</p>`;
+    modalHtml = `<p style="text-align:center; color:var(--ink-dim); padding:20px; font-size:13px;">لم يتم ربط تفاصيل ألوان أو تركيبات لهذا السجل.</p>`;
   } else {
     currentObj.associatedColors.forEach(item => {
       modalHtml += `
         <div class="color-row-item">
           <div class="color-name-hdr">🎨 ${item.color}</div>
-          <div class="formula-text-block">${item.formula ? item.formula : "لا توجد تفاصيل خلطة مسجلة لهذه الدرجة"}</div>
+          <div class="formula-text-block">${item.formula ? item.formula : "تم رصد اللون بنجاح وبانتظار تعبئة الخلطة"}</div>
         </div>`;
     });
   }
