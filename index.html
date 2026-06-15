@@ -2,507 +2,485 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink Cloud — النظام المطور والمجمع</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Royal Ink Cloud — المستودع الرقمي المجمع</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
 
 :root {
-  --ink-black: #0D0D0F; --ink-deep: #131318; --ink-panel: #1A1A22; --ink-card: #20202C;
+  --ink-black: #0D0D0F; --ink-deep: #131318; --ink-panel: #1A1A22; --ink-card: #1E1E2A;
   --ink-border: #2C2C3E; --ink-gold: #C9A84C; --ink-gold-lt: #E8C97A; --ink-gold-dk: #8B6F2E;
   --ink-silver: #9898B0; --ink-dim: #5A5A72; --ink-white: #F0EEF8;
   --accent-green: #3DDC84; --accent-red: #FF5252;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
 /* شاشة تسجيل الدخول */
 #login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--ink-black); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.login-box { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 35px 30px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+.login-box { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 35px 25px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
 .login-box h2 { text-align: center; margin-bottom: 8px; color: var(--ink-gold); font-weight: 900; font-size: 24px; }
 .login-box p { text-align: center; color: var(--ink-silver); font-size: 12px; margin-bottom: 25px; }
 .form-group { margin-bottom: 18px; }
 .form-group label { display: block; font-size: 12px; color: var(--ink-silver); margin-bottom: 6px; font-weight: 600; }
-.form-group input, .form-group select { width: 100%; background-color: var(--ink-deep); border: 1px solid var(--ink-border); padding: 12px 14px; border-radius: 8px; color: var(--ink-white); outline: none; font-family: inherit; font-size: 14px; }
-.form-group input:focus, .form-group select:focus { border-color: var(--ink-gold); }
+.form-group input { width: 100%; background-color: var(--ink-deep); border: 1px solid var(--ink-border); padding: 12px 14px; border-radius: 8px; color: var(--ink-white); outline: none; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+.form-group input:focus { border-color: var(--ink-gold); }
 .login-btn { width: 100%; background: linear-gradient(90deg, var(--ink-gold-dk), var(--ink-gold)); border: none; padding: 13px; border-radius: 8px; color: var(--ink-black); font-weight: 700; font-family: inherit; cursor: pointer; font-size: 14px; margin-top: 10px; }
 
-/* الشاشة الرئيسية */
-#app-screen { display: none; }
-aside { width: 280px; background-color: var(--ink-deep); border-left: 1px solid var(--ink-border); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; right: 0; z-index: 100; }
-.brand { padding: 25px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--ink-border); }
-.brand .logo { width: 35px; height: 35px; background: linear-gradient(135deg, var(--ink-gold), var(--ink-gold-dk)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--ink-black); font-size: 18px; }
-.brand h1 { font-size: 16px; font-weight: 700; }
-nav { padding: 15px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-nav button { background: none; border: none; color: var(--ink-silver); padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-family: inherit; font-size: 14px; font-weight: 600; text-align: right; width: 100%; }
-nav button.active { background: linear-gradient(90deg, rgba(201,168,76,0.12), transparent); color: var(--ink-gold); border-right: 3px solid var(--ink-gold); }
+/* الهيكل الرئيسي للتطبيق */
+#app-screen { display: none; flex-direction: column; min-height: 100vh; }
 
-.admin-action { display: none; }
+/* شريط البحث العلوي المثبت (ممتاز للهاتف) */
+.fixed-header { position: sticky; top: 0; background-color: rgba(13, 13, 15, 0.95); backdrop-filter: blur(10px); z-index: 90; padding: 15px; border-bottom: 1px solid var(--ink-border); display: flex; flex-direction: column; gap: 10px; }
+.search-wrapper { position: relative; width: 100%; }
+.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.search-wrapper input:focus { border-color: var(--ink-gold); }
+.status-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-silver); px: 5px; }
 
-.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 200; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); align-items: center; justify-items: center; }
-.mobile-nav button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
-.mobile-nav button.active { color: var(--ink-gold); }
-
-main { margin-right: 280px; flex: 1; padding: 30px; min-width: 0; }
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 15px; flex-wrap: wrap; }
-.search-wrapper { position: relative; flex: 1; max-width: 500px; width: 100%; }
-.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; }
-
+/* محتوى الواجهات */
+main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800px; margin: 0 auto; }
 .view-section { display: none; }
 .view-section.active { display: block; }
 
-/* تصميم شبكة الليبلات المجمعة والنظيفة */
-.labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-.label-card { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 14px; padding: 20px; position: relative; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-.label-card:hover { transform: translateY(-2px); border-color: var(--ink-gold); }
-.card-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.5); padding-bottom: 8px; }
-.card-title { font-size: 17px; font-weight: 700; color: var(--ink-white); }
-.card-code { font-size: 13px; font-weight: 700; color: var(--ink-gold); background: rgba(201,168,76,0.1); padding: 2px 8px; border-radius: 4px; }
-.detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-.detail-label { color: var(--ink-silver); font-weight: 600; }
-.detail-value { color: var(--ink-white); font-weight: 700; text-align: left; }
-.badge-line { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background-color: rgba(61,220,132,0.15); color: var(--accent-green); }
+/* ترتيب شبكة الكروت المنظم والمقفل تلقائياً */
+.labels-container { display: flex; flex-direction: column; gap: 14px; }
+.label-card { background-color: var(--ink-card); border: 1px solid var(--ink-border); border-radius: 12px; padding: 16px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.4); padding-bottom: 8px; }
+.card-title { font-size: 16px; font-weight: 700; color: var(--ink-gold-lt); max-width: 70%; word-break: break-word; }
+.card-badge-code { font-size: 12px; font-weight: 700; color: var(--ink-gold); background: rgba(201,168,76,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.2); }
 
-/* الجداول المنبثقة للألوان والخلطات */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.85); backdrop-filter: blur(6px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 15px; }
+.grid-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.detail-lbl { font-size: 11px; color: var(--ink-silver); }
+.detail-val { font-size: 13px; font-weight: 600; color: var(--ink-white); }
+
+/* زر استعراض خلطات الألوان التابعة داخل الكرت */
+.action-trigger-btn { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+.action-trigger-btn:active { background-color: var(--ink-deep); }
+
+/* نافذة عرض الألوان والخلطات المنبثقة السفلى (تصميم هاتف ذكي ممتاز) */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.8); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-window { background-color: var(--ink-panel); border: 1px solid var(--ink-border); width: 100%; max-width: 600px; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 85vh; }
-.modal-header { background-color: var(--ink-deep); padding: 18px 20px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-window { background-color: var(--ink-panel); border-top: 2px solid var(--ink-gold); width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; transform: translateY(100%); transition: transform 0.25s ease-out; }
+.modal-overlay.active .modal-window { transform: translateY(0); }
+.modal-header { background-color: var(--ink-deep); padding: 16px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
 
-.color-table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
-.color-table th, .color-table td { padding: 12px; border-bottom: 1px solid var(--ink-border); font-size: 14px; }
-.color-table th { color: var(--ink-silver); font-weight: 600; }
-.formula-box { background: var(--ink-deep); border: 1px solid var(--ink-border); padding: 10px 14px; border-radius: 8px; margin-top: 5px; font-size: 13px; color: var(--ink-gold-lt); display: none; line-height: 1.6; }
+.color-row-item { background: var(--ink-deep); border: 1px solid var(--ink-border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.5; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
 
-/* لوحة إدارة الحسابات */
-.user-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.user-table th, .user-table td { padding: 12px; text-align: right; border-bottom: 1px solid var(--ink-border); }
+/* التبويبات السفلية الثابتة في الهاتف */
+.bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 100; display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); align-items: center; justify-items: center; }
+.bottom-nav-bar button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
+.bottom-nav-bar button.active { color: var(--ink-gold); }
+.admin-tab { display: none; }
 
-.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding: 10px; }
-.page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; }
-.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+/* أدوات الأدمن والتحكم */
+.dropzone-area { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 12px; padding: 40px 15px; text-align: center; cursor: pointer; margin-top: 20px; }
+.admin-card-box { background: var(--ink-panel); padding: 20px; border-radius: 12px; border: 1px solid var(--ink-border); margin-top: 15px; }
+.user-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--ink-border); font-size: 13px; }
 
-.dropzone { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 14px; padding: 50px 20px; text-align: center; cursor: pointer; }
+/* الإشعارات السريعة التلقائية */
+#toast-container { position: fixed; top: 20px; left: 20px; right: 20px; z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast-msg { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; boxShadow: 0 5px 15px rgba(0,0,0,0.4); animation: fadeIn 0.3s; }
+.toast-msg.success { border-right: 4px solid var(--accent-green); color: var(--accent-green); }
+.toast-msg.error { border-right: 4px solid var(--accent-red); color: var(--accent-red); }
 
-#toasts { position: fixed; bottom: 80px; left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-.toast { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-.toast.success { border-right: 4px solid var(--accent-green); }
-.toast.error { border-right: 4px solid var(--accent-red); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-@media (max-width: 768px) {
-  aside { display: none; }
-  .mobile-nav { display: grid; }
-  main { margin-right: 0; padding: 15px; padding-bottom: 90px; }
-  .labels-grid { grid-template-columns: 1fr; }
-}
+/* أزرار التصفح والصفحات */
+.pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 5px 0; }
+.nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 6px 16px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
+.nav-page-btn:disabled { opacity: 0.3; }
 </style>
 </head>
 <body>
 
-<!-- شاشة الدخول الفورية -->
+<!-- شاشة تسجيل الدخول -->
 <div id="login-screen">
   <div class="login-box">
     <h2>Royal Ink Cloud</h2>
-    <p>برجاء إدخال بيانات حساب المسؤول أو حساب المشاهدة المعتمد</p>
+    <p>نظام إدارة ومطابقة خلطات الحبر الذكي</p>
     <div class="form-group">
-      <label>البريد الإلكتروني</label>
+      <label>الحساب الإلكتروني</label>
       <input type="email" id="loginEmail" placeholder="waseem.kareem79@gmail.com" autocomplete="off">
     </div>
     <div class="form-group">
       <label>رمز المرور</label>
       <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off">
     </div>
-    <button class="login-btn" onclick="processLogin()">تسجيل دخول آمن</button>
+    <button class="login-btn" onclick="verifySystemLogin()">دخول آمن</button>
   </div>
 </div>
 
-<!-- الشاشة التطبيقية الرئيسية -->
+<!-- واجهة التطبيق المتكاملة -->
 <div id="app-screen">
-  <aside>
-    <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span id="role-badge" style="font-size:11px; color:var(--ink-gold)">التحقق...</span></div></div>
-    <nav>
-      <button onclick="switchView('labels')" id="btn-labels" class="active">📋 مستودع الليبلات المجمع</button>
-      <button onclick="switchView('import')" id="btn-import" class="admin-action">📥 تحديث البيانات والمزامنة</button>
-      <button onclick="switchView('users')" id="btn-users" class="admin-action">👥 إدارة صلاحيات المشاهدة</button>
-      <button onclick="performLogout()" style="color:var(--accent-red); margin-top:auto">🚪 خروج من النظام</button>
-    </nav>
-  </aside>
-
-  <div class="mobile-nav">
-    <button onclick="switchView('labels')" id="mbnt-labels" class="active">📋 الليبلات</button>
-    <button onclick="switchView('import')" id="mbnt-import" class="admin-action">📥 رفع إكسل</button>
-    <button onclick="switchView('users')" id="mbnt-users" class="admin-action">👥 الحسابات</button>
+  
+  <!-- البار العلوي الثابت للبحث السريع التلقائي (ممتاز للموبايل) -->
+  <div class="fixed-header">
+    <div class="search-wrapper">
+      <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، اللون، الشركة، أو الكود..." oninput="runLiveFilter(this.value)">
+    </div>
+    <div class="status-bar">
+      <div>المستودع: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> سجل مجمع</div>
+      <div id="user-role-text" style="color:var(--accent-green)">المشاهدة النشطة</div>
+    </div>
   </div>
 
+  <!-- حاوي عرض البيانات الرئيسي -->
   <main>
-    <header>
-      <div class="search-wrapper">
-        <input type="text" id="mainSearch" placeholder="ابحث باسم الليبل، اللون، الشركة، العبوة أو الخط..." oninput="triggerLiveSearch(this.value)">
-      </div>
-      <div style="font-size:12px; color:var(--accent-green)">● المزامنة السحابية نشطة ومستقرة</div>
-    </header>
-
-    <!-- واجهة عرض المستودع المجمع -->
-    <section id="view-labels" class="view-section active">
-      <div style="margin-bottom: 15px; font-size: 13px; color: var(--ink-silver);">
-        إجمالي الليبلات المجمعة والفريدة: <span id="total-count-badge" style="color: var(--ink-gold); font-weight: bold;">0</span>
-      </div>
-      <div class="labels-grid" id="labels-cards-container"></div>
-
-      <div class="pagination-controls" id="paginationWrapper">
-        <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">السابق</button>
-        <span id="pageInfoText" style="font-size: 13px;">صفحة 1 من 1</span>
-        <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">التالي</button>
+    <!-- 1. واجهة المستودع الرقمي النظيف -->
+    <section id="sec-labels" class="view-section active">
+      <div class="labels-container" id="labels-render-target"></div>
+      
+      <div class="pagination-container" id="paginationController">
+        <button class="nav-page-btn" id="btnPrev" onclick="navigatePage(-1)">السابق</button>
+        <span id="txtPageInfo" style="font-size:12px">صفحة 1 من 1</span>
+        <button class="nav-page-btn" id="btnNext" onclick="navigatePage(1)">التالي</button>
       </div>
     </section>
 
-    <!-- واجهة رفع الإكسل (حصري للأدمن) -->
-    <section id="view-import" class="view-section admin-action">
-      <div style="max-width:550px; margin:20px auto;">
-        <div class="dropzone" onclick="document.getElementById('excelFileInput').click()">
-          <span style="font-size:45px; display:block; margin-bottom:15px">📊</span>
-          <h3>مزامنة ورفع ملف المستودع الرئيسي</h3>
-          <p>اضغط هنا لرفع ملف الإكسل لتحديث خلطات وألوان الليبلات فوراً على السيرفر المحلي</p>
-          <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls" onchange="processFileDynamically(event)">
-        </div>
+    <!-- 2. واجهة رفع ومزامنة الإكسل (أدمن فقط) -->
+    <section id="sec-import" class="view-section">
+      <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
+        <span style="font-size:40px; display:block; margin-bottom:10px">📊</span>
+        <h3>رفع ومزامنة الملف الرئيسي</h3>
+        <p style="font-size:12px; color:var(--ink-silver); margin-top:5px">اضغط هنا لاستيراد وتصفية ملف الإكسل لتحديث السيرفر المحلي فوراً</p>
+        <input type="file" id="hiddenFileInput" style="display:none" accept=".xlsx, .xls" onchange="readExcelFileCleanly(event)">
       </div>
     </section>
 
-    <!-- واجهة إدارة المستخدمين والمشاهدين (حصري للأدمن) -->
-    <section id="view-users" class="view-section admin-action">
-      <div style="max-width: 600px; background: var(--ink-panel); padding: 25px; border-radius: 12px; border:1px solid var(--ink-border)">
-        <h3 style="color:var(--ink-gold); margin-bottom:15px">إضافة حساب مشاهدة جديد</h3>
+    <!-- 3. واجهة إدارة الصلاحيات (أدمن فقط) -->
+    <section id="sec-users" class="view-section">
+      <div class="admin-card-box">
+        <h3 style="color:var(--ink-gold); font-size:15px; margin-bottom:12px">توليد حساب موظف (مشاهدة فقط)</h3>
         <div class="form-group">
-          <label>البريد الإلكتروني للموظف</label>
-          <input type="email" id="newUserEmail" placeholder="user@royalink.com">
+          <label>البريد الإلكتروني للجديد</label>
+          <input type="email" id="newAccEmail" placeholder="employee@royalink.com">
         </div>
         <div class="form-group">
-          <label>رمز المرور (كلمة السر)</label>
-          <input type="text" id="newUserPassword" placeholder="User@2026">
+          <label>كلمة المرور المقترحة</label>
+          <input type="text" id="newAccPass" placeholder="Ink2026">
         </div>
-        <button class="login-btn" style="margin-bottom:20px" onclick="addNewViewerAccount()">توليد وتثبيت الحساب</button>
-
-        <h4 style="color:var(--ink-silver); margin-bottom:10px; border-top:1px solid var(--ink-border); padding-top:15px">الحسابات الحالية النشطة بالمشاهدة</h4>
-        <table class="user-table">
-          <thead>
-            <tr><th>الحساب</th><th>كلمة السر</th><th>الصلاحية المحددة</th></tr>
-          </thead>
-          <tbody id="usersTableBody"></tbody>
-        </table>
+        <button class="login-btn" onclick="createNewViewer()">تثبيت وتوليد الحساب</button>
+        
+        <h3 style="color:var(--ink-silver); font-size:14px; margin-top:20px; margin-bottom:8px; border-top:1px solid var(--ink-border); padding-top:15px">الحسابات المعتمدة الحالية</h3>
+        <div id="localUsersList"></div>
       </div>
     </section>
   </main>
-</div>
 
-<!-- مودال عرض الألوان والخلطات الذكي -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-  <div class="modal-window" onclick="event.stopPropagation()">
-    <div class="modal-header">
-       <h3 id="modalTitleText" style="color: var(--ink-white);"></h3>
-       <button style="background:none; border:none; color:var(--ink-silver); font-size:20px; cursor:pointer" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalBodyContent"></div>
+  <!-- التبويبات السفلية الثابتة المناسبة للهواتف الذكية للتحرك بسلاسة -->
+  <div class="bottom-nav-bar">
+    <button onclick="changeActiveTab('labels')" id="tab-labels" class="active">📋 الليبلات</button>
+    <button onclick="changeActiveTab('import')" id="tab-import" class="admin-tab">📥 رفع إكسل</button>
+    <button onclick="changeActiveTab('users')" id="tab-users" class="admin-tab">👥 الصلاحيات</button>
+    <button onclick="triggerLogout()" style="color:var(--accent-red)">🚪 خروج</button>
   </div>
 </div>
 
-<div id="toasts"></div>
+<!-- المودال السفلي الذكي لعرض الألوان والخلطات بدون خربطة -->
+<div class="modal-overlay" id="globalModalOverlay" onclick="closeGlobalModal()">
+  <div class="modal-window" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalHeaderTitle" style="font-size:15px; color:var(--ink-white)">الألوان والتركيبات</h3>
+      <button style="background:none; border:none; color:var(--ink-silver); font-size:18px; cursor:pointer" onclick="closeGlobalModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalViewBody"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
 
 <script>
-const DATA_STORAGE_KEY = "royal_ink_master_db";
-const USERS_STORAGE_KEY = "royal_ink_viewers_db";
+const DB_MASTER_KEY = "royal_ink_clean_db";
+const DB_USERS_KEY = "royal_ink_auth_users";
 
-let MASTER_RECORDS = []; // البيانات الخام الكليّة
-let GROUPED_LABELS = []; // الليبلات مجمعة بشكل فريد ونظيف
-let FILTERED_LABELS = []; // الليبلات المفلترة بناء على البحث
-let currentPage = 1;
-const recordsPerPage = 12;
-let currentUserRole = "viewer";
+let SYSTEM_RECORDS = [];
+let COMPILED_LABELS = [];
+let DISPLAY_LABELS = [];
+let pageIndex = 1;
+const itemsPerPage = 10;
+let userAccessRole = "viewer";
 
-// الحسابات الافتراضية الثابتة
-const defaultAdmin = { email: "waseem.kareem79@gmail.com", pass: "5420826", role: "admin" };
+// بيانات حساب الأدمن الرئيسي الثابتة الخاص بك
+const primaryAdmin = { email: "waseem.kareem79@gmail.com", pass: "5420826", role: "admin" };
 
 window.onload = function() {
-  if(!localStorage.getItem(USERS_STORAGE_KEY)) {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([
+  if (!localStorage.getItem(DB_USERS_KEY)) {
+    localStorage.setItem(DB_USERS_KEY, JSON.stringify([
       { email: "viewer@royalink.com", pass: "123456", role: "viewer" }
     ]));
   }
-  const savedUser = sessionStorage.getItem("royal_active_role");
-  if(savedUser) { loginSuccess(savedUser); }
+  const sessionRole = sessionStorage.getItem("active_session_role");
+  if (sessionRole) { initSession(sessionRole); }
 };
 
-function processLogin() {
+function verifySystemLogin() {
   const email = document.getElementById("loginEmail").value.replace(/\s+/g, '').toLowerCase().trim();
   const pass = document.getElementById("loginPassword").value.trim();
 
-  if(email === defaultAdmin.email && pass === defaultAdmin.pass) {
-    loginSuccess("admin");
+  if (email === primaryAdmin.email && pass === primaryAdmin.pass) {
+    initSession("admin");
     return;
   }
 
-  const viewers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
-  const foundViewer = viewers.find(u => u.email === email && u.pass === pass);
+  const storedUsers = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
+  const validUser = storedUsers.find(u => u.email === email && u.pass === pass);
 
-  if(foundViewer) {
-    loginSuccess("viewer");
+  if (validUser) {
+    initSession("viewer");
   } else {
-    showToast("خطأ في البريد الإلكتروني أو رمز المرور الخاص بك!", "error");
+    pushToastNotification("البيانات المدخلة غير صحيحة، يرجى إعادة التحقق!", "error");
   }
 }
 
-function loginSuccess(role) {
-  currentUserRole = role;
-  sessionStorage.setItem("royal_active_role", role);
+function initSession(role) {
+  userAccessRole = role;
+  sessionStorage.setItem("active_session_role", role);
   document.getElementById("login-screen").style.display = "none";
-  document.getElementById("app-screen").style.display = "block";
+  document.getElementById("app-screen").style.display = "flex";
 
-  if(role === "admin") {
-    document.getElementById("role-badge").innerText = "المدير العام (الأدمن)";
-    document.querySelectorAll(".admin-action").forEach(el => {
-      el.style.display = (el.id && el.id.startsWith("mbnt-")) ? "flex" : "block";
-    });
-    renderUsersList();
+  if (role === "admin") {
+    document.getElementById("user-role-text").innerText = "لوحة المدير العام (الأدمن)";
+    document.querySelectorAll(".admin-tab").forEach(el => el.style.display = "flex");
+    refreshAdminUsersUi();
   } else {
-    document.getElementById("role-badge").innerText = "حساب مشاهدة واطلاع فقط";
+    document.getElementById("user-role-text").innerText = "وضع الاطلاع والمشاهدة المحدود";
   }
 
-  loadSystemDatabase();
+  fetchStoredDatabase();
 }
 
-function performLogout() {
-  sessionStorage.removeItem("royal_active_role");
+function triggerLogout() {
+  sessionStorage.removeItem("active_session_role");
   window.location.reload();
 }
 
-function loadSystemDatabase() {
-  const data = localStorage.getItem(DATA_STORAGE_KEY);
-  if(data) {
-    MASTER_RECORDS = JSON.parse(data);
-    buildGroupedLabels();
+function fetchStoredDatabase() {
+  const localData = localStorage.getItem(DB_MASTER_KEY);
+  if (localData) {
+    SYSTEM_RECORDS = JSON.parse(localData);
+    processAndCleanRecords();
   } else {
-    displayEmptyState("يرجى قيام الأدمن برفع ملف المستودع الرئيسي (Excel) لبدء العمل.");
+    showPlaceholderState("لا توجد بيانات حالياً. يرجى الطلب من الأدمن رفع ملف الإكسل الرئيسي لتحديث القائمة.");
   }
 }
 
-// بناء وتجميع داتا الليبلات بشكل فريد وذكي ومقفل
-function buildGroupedLabels() {
-  const map = new Map();
+// الفلترة والتنقية القصوى والمنظمة للتخلص من الحقول الفارغة والخربطة
+function processAndCleanRecords() {
+  const aggregationMap = new Map();
 
-  MASTER_RECORDS.forEach(row => {
-    // محاذاة أسماء الأعمدة الديناميكية لضمان القراءة دون أخطاء
-    const labelName = row["اسم الليبل"] || row["الليبل"] || row["Label Name"] || "";
-    if(!labelName || String(labelName).toLowerCase().includes("empty")) return; // استبعاد التخريب
+  // مصفوفة الكلمات المستبعدة تماماً لكي لا تظهر كبيانات حقيقية داخل الكروت
+  const blacklistedKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "empty", "رقم الكود", "كود", "code"];
 
-    const labelCode = row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-";
-    const company = row["الشركة"] || row["اسم الشركة"] || "-";
-    const size = row["العبوة"] || row["قياس العلبة"] || "-";
-    const line = row["خط الإنتاج"] || row["خط الانتاج"] || "LINE 1";
+  SYSTEM_RECORDS.forEach(row => {
+    // جلب القيم من مفاتيح الإكسل بشكل ديناميكي مرن
+    let label = (row["اسم الليبل"] || row["الليبل"] || row["Label Name"] || "").toString().trim();
+    let company = (row["الشركة"] || row["اسم الشركة"] || row["Company"] || "عام").toString().trim();
+    let size = (row["العبوة"] || row["قياس العلبة"] || row["حجم العبوة"] || "غير محدد").toString().trim();
+    let codeNum = (row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-").toString().trim();
+    let lineName = (row["خط الإنتاج"] || row["خط الانتاج"] || "الخط الرئيسي").toString().trim();
 
-    const key = `${labelName}_${labelCode}_${company}`;
+    // 1. تصفية السجل إذا كان فارغاً أو يحتوي على الكلمات المفتاحية الحقلية لتجنب الخربطة الظاهرة بالصورة
+    if (!label || blacklistedKeywords.some(keyword => label.toLowerCase().includes(keyword))) return;
+    if (blacklistedKeywords.some(keyword => company.toLowerCase().includes(keyword))) return;
 
-    if(!map.has(key)) {
-      map.set(key, {
-        name: labelName,
-        code: labelCode,
-        company: company,
-        size: size,
-        line: line,
-        colors: []
+    // تنظيف النصوص من أي رموز تخريبية ناتجة عن الأعمدة الفارغة في الإكسل
+    if (label.includes("EMPTY__")) return;
+
+    // بناء المعرف المجمع الفريد لكي يندمج السجل ولا يتكرر
+    const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
+
+    if (!aggregationMap.has(uniqueIdentityKey)) {
+      aggregationMap.set(uniqueIdentityKey, {
+        labelName: label,
+        companyName: company,
+        packageSize: size,
+        itemCode: codeNum,
+        productionLine: lineName,
+        associatedColors: []
       });
     }
 
-    // استخراج بيانات الألوان والخلطات المرتبطة بالليبل من نفس السطر
-    const colorName = row["اللون"] || row["اسم اللون"] || row["Color"] || "";
-    const formula = row["الخلطة"] || row["خلطة اللون"] || row["Formula"] || "";
+    // استخراج الخلطة والألوان المرتبطة بنفس السطر
+    let color = (row["اللون"] || row["اسم اللون"] || row["Color"] || "").toString().trim();
+    let formula = (row["الخلطة"] || row["خلطة اللون"] || row["Formula"] || "").toString().trim();
 
-    if(colorName && !String(colorName).toLowerCase().includes("empty")) {
-      map.get(key).colors.push({ colorName, formula });
+    // عدم إضافة الألوان الفارغة أو الحقول التي تكرر اسم العمود
+    if (color && !blacklistedKeywords.some(kw => color.toLowerCase().includes(kw)) && !color.includes("EMPTY__")) {
+      aggregationMap.get(uniqueIdentityKey).associatedColors.push({ color, formula });
     }
   });
 
-  GROUPED_LABELS = Array.from(map.values());
-  FILTERED_LABELS = [...GROUPED_LABELS];
-  currentPage = 1;
-  updateUI();
+  COMPILED_LABELS = Array.from(aggregationMap.values());
+  DISPLAY_LABELS = [...COMPILED_LABELS];
+  pageIndex = 1;
+  renderViewUiCards();
 }
 
-function updateUI() {
-  document.getElementById("total-count-badge").innerText = GROUPED_LABELS.length;
-  renderLabelCards();
-}
+function renderViewUiCards() {
+  const grid = document.getElementById("labels-render-target");
+  grid.innerHTML = "";
 
-function renderLabelCards() {
-  const container = document.getElementById("labels-cards-container");
-  container.innerHTML = "";
+  const totalItems = DISPLAY_LABELS.length;
+  document.getElementById("records-counter").innerText = totalItems;
 
-  const total = FILTERED_LABELS.length;
-  const totalPages = Math.ceil(total / recordsPerPage) || 1;
-  if(currentPage > totalPages) currentPage = totalPages;
+  const totalPagesCount = Math.ceil(totalItems / itemsPerPage) || 1;
+  if (pageIndex > totalPagesCount) pageIndex = totalPagesCount;
 
-  const start = (currentPage - 1) * recordsPerPage;
-  const end = Math.min(start + recordsPerPage, total);
+  const startIndex = (pageIndex - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-  document.getElementById("pageInfoText").innerText = `صفحة ${currentPage} من ${totalPages}`;
-  document.getElementById("prevPageBtn").disabled = (currentPage === 1);
-  document.getElementById("nextPageBtn").disabled = (currentPage === totalPages);
+  document.getElementById("txtPageInfo").innerText = `صفحة ${pageIndex} من ${totalPagesCount}`;
+  document.getElementById("btnPrev").disabled = (pageIndex === 1);
+  document.getElementById("btnNext").disabled = (pageIndex === totalPagesCount);
 
-  if(total === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">لا توجد نتائج مطابقة لبحثك الحالي...</div>`;
+  if (totalItems === 0) {
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:14px;">لا توجد نتائج مطابقة لبحثك...</div>`;
     return;
   }
 
-  for(let i = start; i < end; i++) {
-    const item = FILTERED_LABELS[i];
-    container.innerHTML += `
-      <div class="label-card" onclick="openLabelDetailsModal(${i})">
-        <div class="card-header-info">
-          <span class="card-title">${item.name}</span>
-          <span class="card-code">${item.code}</span>
+  for (let i = startIndex; i < endIndex; i++) {
+    const dataObj = DISPLAY_LABELS[i];
+    grid.innerHTML += `
+      <div class="label-card">
+        <div class="card-top">
+          <span class="card-title">${dataObj.labelName}</span>
+          <span class="card-badge-code">${dataObj.itemCode}</span>
         </div>
-        <div class="detail-row"><span class="detail-label">الشركة المتعاقدة:</span><span class="detail-value">${item.company}</span></div>
-        <div class="detail-row"><span class="detail-label">قياس العبوة:</span><span class="detail-value">${item.size}</span></div>
-        <div class="detail-row"><span class="detail-label">خط الإنتاج المجمع:</span><span class="badge-line">${item.line}</span></div>
-        <div style="margin-top:10px; font-size:11px; color:var(--ink-gold); text-align:left;">✨ يحتوي على (${item.colors.length}) ألوان تابعة اضغط للعرض</div>
+        <div class="grid-details">
+          <div class="detail-item"><span class="detail-lbl">الشركة:</span><span class="detail-val">${dataObj.companyName}</span></div>
+          <div class="detail-item"><span class="detail-lbl">العبوة:</span><span class="detail-val">${dataObj.packageSize}</span></div>
+          <div class="detail-item" style="grid-column: span 2"><span class="detail-lbl">خط الإنتاج التابع:</span><span class="detail-val" style="color:var(--accent-green)">${dataObj.productionLine}</span></div>
+        </div>
+        <button class="action-trigger-btn" onclick="showColorsModalPanel(${i})">
+          🎨 عرض الألوان والتركيبات (${dataObj.associatedColors.length})
+        </button>
       </div>`;
   }
 }
 
-// فتح المودال لإظهار الألوان التابعة والخلطة فور الضغط
-function openLabelDetailsModal(index) {
-  const item = FILTERED_LABELS[index];
-  if(!item) return;
+// عرض الألوان والخلطات بطريقة منسقة كلياً بدون تداخل أو خربطة
+function showColorsModalPanel(index) {
+  const currentObj = DISPLAY_LABELS[index];
+  if (!currentObj) return;
 
-  document.getElementById("modalTitleText").innerText = `إدارة ألوان ليبل: ${item.name}`;
+  document.getElementById("modalHeaderTitle").innerText = `ليبل: ${currentObj.labelName}`;
   
-  let html = `
-    <div style="margin-bottom:15px; font-size:13px; line-height:1.8; border-bottom:1px solid var(--ink-border); padding-bottom:10px;">
-      <p><span style="color:var(--ink-silver)">كود السجل الرئيسي:</span> <b style="color:var(--ink-gold)">${item.code}</b></p>
-      <p><span style="color:var(--ink-silver)">الشركة والعلبة:</span> <b>${item.company} (${item.size})</b></p>
-    </div>
-  `;
-
-  if(item.colors.length === 0) {
-    html += `<p style="color:var(--ink-dim); text-align:center; padding:20px;">لم يتم ربط ألوان أو خلطات حبر لهذا الليبل بملف الإكسل.</p>`;
+  let modalHtml = "";
+  if (currentObj.associatedColors.length === 0) {
+    modalHtml = `<p style="text-align:center; color:var(--ink-dim); padding:20px; font-size:13px;">لم يتم إرفاق تفاصيل ألوان أو تركيبات لهذا الليبل بالملف.</p>`;
   } else {
-    html += `
-      <table class="color-table">
-        <thead>
-          <tr><th>اللون التابع</th><th>مواصفات الخلطة والتركيب</th></tr>
-        </thead>
-        <tbody>
-    `;
-    item.colors.forEach((c, idx) => {
-      html += `
-        <tr>
-          <td style="font-weight:bold; color:var(--ink-white)">🎨 ${c.colorName}</td>
-          <td>
-            <button class="page-btn" style="padding:4px 10px; font-size:11px;" onclick="toggleFormulaBox(${idx})">استعراض تفاصيل الخلطة</button>
-            <div id="formula-box-${idx}" class="formula-box">${c.formula ? c.formula : "لا توجد تفاصيل خلطة مدونة لهذا اللون"}</div>
-          </td>
-        </tr>
-      `;
-    });
-    html += `</tbody></table>`;
-  }
-
-  document.getElementById("modalBodyContent").innerHTML = html;
-  document.getElementById("modalOverlay").classList.add("active");
-}
-
-function toggleFormulaBox(idx) {
-  const box = document.getElementById(`formula-box-${idx}`);
-  box.style.display = (box.style.display === "block") ? "none" : "block";
-}
-
-// معالجة البحث الحي والسريع والمجمع
-function triggerLiveSearch(val) {
-  const query = val.toLowerCase().trim();
-  if(!query) {
-    FILTERED_LABELS = [...GROUPED_LABELS];
-  } else {
-    FILTERED_LABELS = GROUPED_LABELS.filter(item => {
-      const matchMain = item.name.toLowerCase().includes(query) || 
-                        item.code.toLowerCase().includes(query) || 
-                        item.company.toLowerCase().includes(query) || 
-                        item.line.toLowerCase().includes(query);
-      const matchColors = item.colors.some(c => c.colorName.toLowerCase().includes(query) || c.formula.toLowerCase().includes(query));
-      return matchMain || matchColors;
+    currentObj.associatedColors.forEach(item => {
+      modalHtml += `
+        <div class="color-row-item">
+          <div class="color-name-hdr">🎨 ${item.color}</div>
+          <div class="formula-text-block">${item.formula ? item.formula : "لا توجد تفاصيل خلطة مسجلة"}</div>
+        </div>`;
     });
   }
-  currentPage = 1;
-  renderLabelCards();
+
+  document.getElementById("modalViewBody").innerHTML = modalHtml;
+  document.getElementById("globalModalOverlay").classList.add("active");
 }
 
-// مزامنة ورفع ملف الإكسل (صلاحية الأدمن فقط)
-function processFileDynamically(event) {
-  if(currentUserRole !== "admin") return showToast("عذراً، رفع الملفات والمزامنة هي صلاحية حصرية للأدمن فقط!", "error");
-  const file = event.target.files[0];
-  if(!file) return;
+function runLiveFilter(searchVal) {
+  const filterKey = searchVal.toLowerCase().trim();
+  if (!filterKey) {
+    DISPLAY_LABELS = [...COMPILED_LABELS];
+  } else {
+    DISPLAY_LABELS = COMPILED_LABELS.filter(item => {
+      const mainMatch = item.labelName.toLowerCase().includes(filterKey) || 
+                        item.itemCode.toLowerCase().includes(filterKey) || 
+                        item.companyName.toLowerCase().includes(filterKey) || 
+                        item.productionLine.toLowerCase().includes(filterKey);
+      const colorMatch = item.associatedColors.some(c => c.color.toLowerCase().includes(filterKey) || c.formula.toLowerCase().includes(filterKey));
+      return mainMatch || colorMatch;
+    });
+  }
+  pageIndex = 1;
+  renderViewUiCards();
+}
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
+// معالجة وقراءة ملف الإكسل بشكل فوري (صلاحية الأدمن فقط)
+function readExcelFileCleanly(event) {
+  if (userAccessRole !== "admin") return pushToastNotification("خطأ: لا تملك صلاحية رفع الملفات للمزامنة!", "error");
+  
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
+
+  const fileReader = new FileReader();
+  fileReader.onload = function(e) {
     try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheet = workbook.SheetNames[0];
-      const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+      const bufferData = new Uint8Array(e.target.result);
+      const parsedWorkbook = XLSX.read(bufferData, { type: 'array' });
+      const targetSheet = parsedWorkbook.SheetNames[0];
+      const parsedJson = XLSX.utils.sheet_to_json(parsedWorkbook.Sheets[targetSheet], { defval: "" });
 
-      if(jsonData.length === 0) {
-        showToast("الملف الذي تم رفعه لا يحتوي على أي بيانات!", "error");
+      if (parsedJson.length === 0) {
+        pushToastNotification("الملف فارغ ولا يحتوي على سجلات!", "error");
         return;
       }
 
-      localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(jsonData));
-      MASTER_RECORDS = jsonData;
-      buildGroupedLabels();
-      showToast("تم مزامنة المستودع بنجاح فائق وتجميع الألوان والخلطات تلقائياً!", "success");
-      switchView("labels");
-    } catch(err) {
-      showToast("حدث خطأ في قراءة ملف الإكسل، تأكد من سلامة الامتداد.", "error");
+      localStorage.setItem(DB_MASTER_KEY, JSON.stringify(parsedJson));
+      SYSTEM_RECORDS = parsedJson;
+      processAndCleanRecords();
+      pushToastNotification("تم تنقية ومزامنة كافة السجلات بنجاح فائق!", "success");
+      changeActiveTab("labels");
+    } catch (err) {
+      pushToastNotification("خطأ أثناء معالجة ملف الإكسل المرفوع.", "error");
     }
   };
-  reader.readAsArrayBuffer(file);
+  fileReader.readAsArrayBuffer(selectedFile);
 }
 
-// توليد حسابات المشاهدة من قبل الأدمن
-function addNewViewerAccount() {
-  const email = document.getElementById("newUserEmail").value.replace(/\s+/g, '').toLowerCase().trim();
-  const pass = document.getElementById("newUserPassword").value.trim();
+// توليد الحسابات الفرعية للمشاهدين
+function createNewViewer() {
+  const email = document.getElementById("newAccEmail").value.replace(/\s+/g, '').toLowerCase().trim();
+  const pass = document.getElementById("newAccPass").value.trim();
 
-  if(!email || !pass) return showToast("برجاء إدخال الإيميل وكلمة السر معاً لتوليد الحساب!", "error");
+  if (!email || !pass) return pushToastNotification("يرجى ملء الحقول لتوليد الحساب!", "error");
 
-  let viewers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
-  if(viewers.some(v => v.email === email) || email === defaultAdmin.email) {
-    return showToast("هذا الحساب موجود بالفعل ومسجل في النظام مسبقاً!", "error");
+  let users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
+  if (users.some(u => u.email === email) || email === primaryAdmin.email) {
+    return pushToastNotification("الحساب مسجل مسبقاً في النظام!", "error");
   }
 
-  viewers.push({ email, pass, role: "viewer" });
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(viewers));
-  showToast("تم إنشاء وتثبيت حساب المشاهدة بنجاح تامة في النظام", "success");
-  
-  document.getElementById("newUserEmail").value = "";
-  document.getElementById("newUserPassword").value = "";
-  renderUsersList();
+  users.push({ email, pass, role: "viewer" });
+  localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+  pushToastNotification("تم تثبيت حساب المشاهدة بنجاح", "success");
+
+  document.getElementById("newAccEmail").value = "";
+  document.getElementById("newAccPass").value = "";
+  refreshAdminUsersUi();
 }
 
-function renderUsersList() {
-  const tbody = document.getElementById("usersTableBody");
-  tbody.innerHTML = "";
-  const viewers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
-  
-  viewers.forEach(v => {
-    tbody.innerHTML += `<tr><td>${v.email}</td><td><code>${v.pass}</code></td><td style="color:var(--accent-green)">👀 صلاحية مشاهدة واطلاع</td></tr>`;
+function refreshAdminUsersUi() {
+  const container = document.getElementById("localUsersList");
+  container.innerHTML = "";
+  const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
+  users.forEach(u => {
+    container.innerHTML += `<div class="user-list-item"><span>${u.email}</span><code>${u.pass}</code></div>`;
   });
 }
 
-function changePage(dir) { currentPage += dir; renderLabelCards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getElementById(`btn-${view}`)) document.getElementById(`btn-${view}`).classList.add("active"); if(document.getElementById(`mbnt-${view}`)) document.getElementById(`mbnt-${view}`).classList.add("active"); }
-function closeModal() { document.getElementById("modalOverlay").classList.remove("active"); }
-function displayEmptyState(msg) { document.getElementById("labels-cards-container").innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">${msg}</div>`; document.getElementById("paginationWrapper").style.display = "none"; }
-function showToast(msg,type="info"){ const el=document.createElement("div"); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById("toasts").appendChild(el); setTimeout(()=>el.remove(),3500); }
+function changeActiveTab(targetTab) {
+  document.querySelectorAll(".view-section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".bottom-nav-bar button").forEach(b => b.classList.remove("active"));
+  
+  document.getElementById(`sec-${targetTab}`).classList.add("active");
+  document.getElementById(`tab-${targetTab}`).classList.add("active");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeGlobalModal() { document.getElementById("globalModalOverlay").classList.remove("active"); }
+function navigatePage(direction) { pageIndex += direction; renderViewUiCards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function showPlaceholderState(msg) { document.getElementById("labels-render-target").innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:13px">${msg}</div>`; document.getElementById("paginationController").style.display = "none"; }
+function pushToastNotification(text, type = "success") { const t = document.createElement("div"); t.className = `toast-msg ${type}`; t.innerText = text; document.getElementById("toast-container").appendChild(t); setTimeout(() => t.remove(), 3500); }
 </script>
 </body>
 </html>
