@@ -1,366 +1,449 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Royal Ink Cloud — المستودع الرقمي الذكي</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
-
-:root {
-  --ink-black: #0D0D0F; --ink-deep: #131318; --ink-panel: #1A1A22; --ink-card: #1E1E2A;
-  --ink-border: #2C2C3E; --ink-gold: #C9A84C; --ink-gold-lt: #E8C97A; --ink-gold-dk: #8B6F2E;
-  --ink-silver: #9898B0; --ink-dim: #5A5A72; --ink-white: #F0EEF8;
-  --accent-green: #3DDC84; --accent-red: #FF5252;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-
-/* شريط البحث العلوي الذكي والمثبت */
-.fixed-header { position: sticky; top: 0; background-color: rgba(13, 13, 15, 0.95); backdrop-filter: blur(10px); z-index: 90; padding: 15px; border-bottom: 1px solid var(--ink-border); display: flex; flex-direction: column; gap: 10px; }
-.search-wrapper { position: relative; width: 100%; }
-.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 16px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
-.search-wrapper input:focus { border-color: var(--ink-gold); }
-.status-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-silver); padding: 0 5px; }
-
-/* محتوى الواجهات */
-main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800px; margin: 0 auto; }
-.view-section { display: none; }
-.view-section.active { display: block; }
-
-/* ترتيب شبكة كروت الليبلات المجمعة الذكية */
-.labels-container { display: flex; flex-direction: column; gap: 14px; }
-.label-card { background-color: var(--ink-card); border: 1px solid var(--ink-border); border-radius: 12px; padding: 16px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.4); padding-bottom: 8px; }
-.card-title { font-size: 16px; font-weight: 700; color: var(--ink-gold-lt); max-width: 70%; word-break: break-word; }
-.card-badge-code { font-size: 12px; font-weight: 700; color: var(--ink-gold); background: rgba(201,168,76,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.2); }
-
-.grid-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.detail-item { display: flex; flex-direction: column; gap: 2px; }
-.detail-lbl { font-size: 11px; color: var(--ink-silver); }
-.detail-val { font-size: 13px; font-weight: 600; color: var(--ink-white); }
-
-/* زر استعراض خلطات الألوان التابعة داخل الكرت */
-.action-trigger-btn { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 11px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-.action-trigger-btn:active { background-color: var(--ink-deep); }
-
-/* نافذة عرض الألوان والخلطات المنبثقة السفلى للهواتف */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.8); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-window { background-color: var(--ink-panel); border-top: 2px solid var(--ink-gold); width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; transform: translateY(100%); transition: transform 0.25s ease-out; }
-.modal-overlay.active .modal-window { transform: translateY(0); }
-.modal-header { background-color: var(--ink-deep); padding: 16px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
-
-.color-row-item { background: var(--ink-deep); border: 1px solid var(--ink-border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-.color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-.formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.6; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
-
-/* التبويبات السفلية للتحرك المباشر الحر المريح */
-.bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 100; display: grid; grid-template-columns: 1fr 1fr; align-items: center; justify-items: center; }
-.bottom-nav-bar button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
-.bottom-nav-bar button.active { color: var(--ink-gold); }
-
-/* أدوات الرفع والمزامنة الاحتياطية */
-.dropzone-area { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 12px; padding: 50px 15px; text-align: center; cursor: pointer; margin-top: 20px; }
-
-/* الإشعارات السريعة التلقائية */
-#toast-container { position: fixed; top: 20px; left: 20px; right: 20px; z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast-msg { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4); animation: fadeIn 0.3s; }
-.toast-msg.success { border-right: 4px solid var(--accent-green); color: var(--accent-green); }
-.toast-msg.error { border-right: 4px solid var(--accent-red); color: var(--accent-red); }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* أزرار التصفح والصفحات */
-.pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 5px 0; }
-.nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 8px 18px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
-.nav-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-</style>
-</head>
-<body>
-
-<div id="app-screen" style="display: flex; flex-direction: column; width: 100%;">
-  
-  <div class="fixed-header">
-    <div class="search-wrapper">
-      <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، الشركة، الكود، أو درجة اللون..." oninput="runLiveFilter(this.value)">
-    </div>
-    <div class="status-bar">
-      <div>المستودع الذكي: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> سجل مجمع</div>
-      <div style="color:var(--accent-green)">● تحديث مباشر وتلقائي</div>
-    </div>
-  </div>
-
-  <main>
-    <section id="sec-labels" class="view-section active">
-      <div class="labels-container" id="labels-render-target"></div>
-      
-      <div class="pagination-container" id="paginationController">
-        <button class="nav-page-btn" id="btnPrev" onclick="navigatePage(-1)">السابق</button>
-        <span id="txtPageInfo" style="font-size:12px; font-weight: 600;">صفحة 1 من 1</span>
-        <button class="nav-page-btn" id="btnNext" onclick="navigatePage(1)">التالي</button>
-      </div>
-    </section>
-
-    <section id="sec-import" class="view-section">
-      <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
-        <span style="font-size:45px; display:block; margin-bottom:12px">📥</span>
-        <h3>تحديث قاعدة البيانات السحابية</h3>
-        <p style="font-size:13px; color:var(--ink-silver); margin-top:5px">يمكنك اختيار ملف الإكسل المحدث في أي وقت لإعادة بنائه فوراً</p>
-        <input type="file" id="hiddenFileInput" style="display:none" accept="*" onchange="readExcelFileCleanly(event)">
-      </div>
-    </section>
-  </main>
-
-  <div class="bottom-nav-bar">
-    <button onclick="changeActiveTab('labels')" id="tab-labels" class="active">📋 تصفح المستودع</button>
-    <button onclick="changeActiveTab('import')" id="tab-import">📤 رفع وتحديث قاعدة البيانات</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="globalModalOverlay" onclick="closeGlobalModal()">
-  <div class="modal-window" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h3 id="modalHeaderTitle" style="font-size:15px; color:var(--ink-white)">الألوان والتركيبات المعتمدة</h3>
-      <button style="background:none; border:none; color:var(--ink-silver); font-size:18px; cursor:pointer" onclick="closeGlobalModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalViewBody"></div>
-  </div>
-</div>
-
-<div id="toast-container"></div>
-
-<script>
-const DB_MASTER_KEY = "royal_ink_clean_db";
-
-let SYSTEM_RECORDS = [];
-let COMPILED_LABELS = [];
-let DISPLAY_LABELS = [];
-let pageIndex = 1;
-const itemsPerPage = 12;
-
-window.onload = function() {
-  fetchStoredDatabase();
-};
-
-function fetchStoredDatabase() {
-  const localData = localStorage.getItem(DB_MASTER_KEY);
-  if (localData) {
-    SYSTEM_RECORDS = JSON.parse(localData);
-    processAndCleanRecords();
-  } else {
-    showPlaceholderState("مرحباً بك! يرجى الانتقال إلى قسم (رفع وتحديث قاعدة البيانات) واختيار ملف الإكسل لمرة واحدة، ليقوم التطبيق بحفظه وتثبيته في هاتفك للأبد وبشكل مباشر.");
-  }
-}
-
-// 🧠 المحرك الهندسي لتجميع وفرز الـ 58 عموداً أفقياً في ملف رويال إنك
-function processAndCleanRecords() {
-  const aggregationMap = new Map();
-  const ignoredKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "رقم الكود", "كود", "code", "EMPTY__"];
-
-  SYSTEM_RECORDS.forEach(row => {
-    let label = (row["اسم الليبل"] || row["الليبل"] || "").toString().trim();
-    let company = (row["اسم الشركة"] || row["الشركة"] || "عام").toString().trim();
-    let codeNum = (row["رقم الكود"] || row["كود الليبل"] || "-").toString().trim();
-    let size = (row["قياس العلبة"] || row["العبوة"] || "-").toString().trim();
-    let lineName = (row["اسم الخط"] || row["خط الإنتاج"] || "-").toString().trim();
-    let shelfNum = (row["رقم الرف"] || "-").toString().trim();
-    let plateType = (row["نوع البليت"] || "-").toString().trim();
-
-    if (!label || ignoredKeywords.some(kw => label.toLowerCase() === kw.toLowerCase()) || label.includes("EMPTY__")) return;
-
-    // توليد المعرف الموحد للكرت المجمع
-    const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
-
-    if (!aggregationMap.has(uniqueIdentityKey)) {
-      aggregationMap.set(uniqueIdentityKey, {
-        labelName: label,
-        companyName: company,
-        itemCode: codeNum,
-        packageSize: size,
-        productionLine: lineName,
-        shelfLocation: shelfNum,
-        plateKind: plateType,
-        associatedColors: []
-      });
-    }
-
-    const currentLabelObj = aggregationMap.get(uniqueIdentityKey);
-
-    // 🕵️‍♂️ تفكيك مصفوفة الأعمدة الثمانية للألوان والنسب الممتدة أفقياً
-    const colorIndices = ["الاول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن"];
-    const colorNamesMapping = ["اسم اللون الأول", "اسم اللون الثاني", "اسم اللون الثالث", "اسم اللون الرابع", "اسم اللون الخامس", "اسم اللون السادس", "اسم اللون السابع", "اسم اللون الثامن"];
-    
-    colorIndices.forEach((numText, index) => {
-      let colorKey = `اللون ${numText}`;
-      let ratioKey = `نسبة اللون ${numText}`;
-      let qtyKey = `الکمية المطلوبة للون ${numText}` || `الكمية المطلوبة للون ${numText}`;
-      let noteKey = `ملاحظات اللون ${numText}`;
-      let customNameKey = colorNamesMapping[index];
-
-      let colorVal = (row[colorKey] || "").toString().trim();
-      let ratioVal = (row[ratioKey] || "").toString().trim();
-      let qtyVal = (row[qtyKey] || row[`الكمية المطلوبة للون ${numText}`] || "").toString().trim();
-      let noteVal = (row[noteKey] || row[`ملاحظات اللون ${numText}`] || row[`ملاحظات اللون السايع`] || "").toString().trim();
-      let descName = (row[customNameKey] || "").toString().trim();
-
-      if (colorVal && !colorVal.includes("EMPTY__") && !ignoredKeywords.some(kw => colorVal === kw)) {
-        if (!currentLabelObj.associatedColors.some(c => c.code === colorVal)) {
-          currentLabelObj.associatedColors.push({
-            code: colorVal,
-            name: descName || `درجة ${numText}`,
-            ratio: ratioVal ? `${ratioVal}%` : "غير محددة",
-            quantity: qtyVal ? `${qtyVal} KG` : "-",
-            notes: noteVal && !noteVal.includes("EMPTY__") ? noteVal : "لا توجد"
-          });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام رويال إنك - الفلترة الفورية والأكواد الكاملة</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        
+        /* تأثير مميز للزر النشط */
+        .btn-active {
+            background-color: #1d4ed8 !important;
+            color: #ffffff !important;
+            border-color: #1d4ed8 !important;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
         }
-      }
-    });
-  });
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
 
-  COMPILED_LABELS = Array.from(aggregationMap.values());
-  DISPLAY_LABELS = [...COMPILED_LABELS];
-  pageIndex = 1;
-  renderViewUiCards();
-}
-
-function renderViewUiCards() {
-  const grid = document.getElementById("labels-render-target");
-  grid.innerHTML = "";
-
-  const totalItems = DISPLAY_LABELS.length;
-  document.getElementById("records-counter").innerText = totalItems;
-
-  const totalPagesCount = Math.ceil(totalItems / itemsPerPage) || 1;
-  if (pageIndex > totalPagesCount) pageIndex = totalPagesCount;
-
-  const startIndex = (pageIndex - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  document.getElementById("txtPageInfo").innerText = `صفحة ${pageIndex} من ${totalPagesCount}`;
-  document.getElementById("btnPrev").disabled = (pageIndex === 1);
-  document.getElementById("btnNext").disabled = (pageIndex === totalPagesCount);
-
-  if (totalItems === 0) {
-    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:14px;">لا توجد نتائج مطابقة لبحثك الحالي...</div>`;
-    return;
-  }
-
-  for (let i = startIndex; i < endIndex; i++) {
-    const dataObj = DISPLAY_LABELS[i];
-    grid.innerHTML += `
-      <div class="label-card">
-        <div class="card-top">
-          <span class="card-title">${dataObj.labelName}</span>
-          <span class="card-badge-code">كود: ${dataObj.itemCode}</span>
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-wide flex items-center gap-2 text-amber-400">
+                    <span>👑</span> رويال إنك - المعاينة والفلترة الفورية
+                </h1>
+                <p class="text-slate-300 text-xs md:text-sm mt-1">اضغط على أي خط أو قياس لتظهر النتائج والشركات فوراً وبشكل لحظي</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls, .xlsm" class="hidden" onchange="loadAndProcessExcel(event)">
+                <button onclick="document.getElementById('excel-file-input').click()" 
+                        class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 transition transform active:scale-95 cursor-pointer text-sm">
+                    🔄 مزامنة وتحديث من ملف الإكسل
+                </button>
+            </div>
         </div>
-        <div class="grid-details">
-          <div class="detail-item"><span class="detail-lbl">الشركة:</span><span class="detail-val">${dataObj.companyName}</span></div>
-          <div class="detail-item"><span class="detail-lbl">العبوة:</span><span class="detail-val">${dataObj.packageSize}</span></div>
-          <div class="detail-item"><span class="detail-lbl">اسم الخط:</span><span class="detail-val" style="color:var(--accent-green)">${dataObj.productionLine}</span></div>
-          <div class="detail-item"><span class="detail-lbl">رقم الرف / البليت:</span><span class="detail-val" style="color:var(--ink-gold-lt)">الرف ${dataObj.shelfLocation} (${dataObj.plateKind})</span></div>
+
+        <div class="bg-slate-900/80 border-t border-slate-700/50 px-4 py-3">
+            <div class="max-w-4xl mx-auto relative">
+                <input type="text" id="system-search" oninput="liveRender()" 
+                       placeholder="🔍 ابحث هنا فوراً عن (اسم شركة، ليبل، كود لون، حبر، رف، بليت)..." 
+                       class="w-full p-3.5 pr-12 rounded-xl border-0 shadow-lg text-slate-900 focus:ring-4 focus:ring-amber-400 bg-white placeholder-slate-400 text-sm md:text-base outline-none transition">
+                <div class="absolute right-4 top-3.5 text-xl text-slate-400">🔍</div>
+            </div>
         </div>
-        <button class="action-trigger-btn" onclick="showColorsModalPanel(${i})">
-          🎨 كشف درجات الألوان والتركيبات (${dataObj.associatedColors.length})
-        </button>
-      </div>`;
-  }
-}
+    </header>
 
-function showColorsModalPanel(index) {
-  const currentObj = DISPLAY_LABELS[index];
-  if (!currentObj) return;
+    <section class="bg-white border-b border-slate-200/80 shadow-sm py-4 px-4 sticky top-[138px] z-40">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <span class="text-xs font-bold text-slate-400 ml-2">⛓️ خطوط الإنتاج:</span>
+                <button onclick="filterByLine('LINE-1', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الأول (LINE-1)</button>
+                <button onclick="filterByLine('LINE-2', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الثاني (LINE-2)</button>
+                <button onclick="filterByLine('LINE-3', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الثالث (LINE-3)</button>
+            </div>
 
-  document.getElementById("modalHeaderTitle").innerText = `تفاصيل ألوان ليبل: ${currentObj.labelName}`;
-  
-  let modalHtml = "";
-  if (currentObj.associatedColors.length === 0) {
-    modalHtml = `<p style="text-align:center; color:var(--ink-dim); padding:20px; font-size:13px;">لم يتم ربط تفاصيل ألوان أو تركيبات لهذا السجل.</p>`;
-  } else {
-    currentObj.associatedColors.forEach(item => {
-      modalHtml += `
-        <div class="color-row-item">
-          <div class="color-name-hdr">
-            <span>🎨 كود الحبر: <b style="color:var(--ink-gold-lt)">${item.code}</b></span>
-            <span style="font-size:11px; color:var(--ink-silver)">${item.name}</span>
-          </div>
-          <div class="formula-text-block">النسبة المعتمدة: ${item.ratio} | الكمية: ${item.quantity}\nالملاحظات المرفقة: ${item.notes}</div>
-        </div>`;
-    });
-  }
+            <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+                <span class="text-xs font-bold text-slate-400 ml-2">📏 القياسات والحجم:</span>
+                <button onclick="filterBySize('185', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">185</button>
+                <button onclick="filterBySize('250', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">250</button>
+                <button onclick="filterBySize('300', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">300</button>
+                <button onclick="filterBySize('330', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">330</button>
+                <button onclick="clearAllFilters()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition cursor-pointer mr-2">تصفير الفلاتر 🔄</button>
+            </div>
 
-  document.getElementById("modalViewBody").innerHTML = modalHtml;
-  document.getElementById("globalModalOverlay").classList.add("active");
-}
+        </div>
+    </section>
 
-function runLiveFilter(searchVal) {
-  const filterKey = searchVal.toLowerCase().trim();
-  if (!filterKey) {
-    DISPLAY_LABELS = [...COMPILED_LABELS];
-  } else {
-    DISPLAY_LABELS = COMPILED_LABELS.filter(item => {
-      const mainMatch = item.labelName.toLowerCase().includes(filterKey) || 
-                        item.itemCode.toLowerCase().includes(filterKey) || 
-                        item.companyName.toLowerCase().includes(filterKey) || 
-                        item.productionLine.toLowerCase().includes(filterKey);
-                        
-      const colorMatch = item.associatedColors.some(c => c.code.toLowerCase().includes(filterKey) || c.name.toLowerCase().includes(filterKey) || c.notes.toLowerCase().includes(filterKey));
-      return mainMatch || colorMatch;
-    });
-  }
-  pageIndex = 1;
-  renderViewUiCards();
-}
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 flex flex-col gap-4">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
+                <h2 class="text-sm md:text-base font-bold text-slate-700 flex items-center gap-2">📦 الشركات والليبلات النشطة حالياً</h2>
+                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">يرجى رفع ملف رويال لبدء العمل</span>
+            </div>
 
-function readExcelFileCleanly(event) {
-  const selectedFile = event.target.files[0];
-  if (!selectedFile) return;
+            <div id="welcome-box" class="bg-white p-16 text-center text-slate-400 rounded-2xl border border-slate-200 shadow-sm">
+                <span class="text-6xl block mb-4">📥</span>
+                <h3 class="text-lg font-bold text-slate-700 mb-1">النظام جاهز وبانتظار الملف</h3>
+                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">قم بمزامنة ملف الإكسل المعتمد من الزر الأصفر بالأعلى لتظهر لك كل الشركات والليبلات والخطوط فورا.</p>
+            </div>
 
-  pushToastNotification("جاري فك وقراءة ملف رويال إنك الضخم... يرجى الانتظار ثوانٍ", "success");
+            <div id="labels-live-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
+        </div>
 
-  const fileReader = new FileReader();
-  fileReader.onload = function(e) {
-    try {
-      const bufferData = new Uint8Array(e.target.result);
-      const parsedWorkbook = XLSX.read(bufferData, { type: 'array' });
-      
-      // استهداف ورقة السجلات المجمعة الرئيسية SHEET1
-      const targetSheet = parsedWorkbook.SheetNames[0]; 
-      const parsedJson = XLSX.utils.sheet_to_json(parsedWorkbook.Sheets[targetSheet], { defval: "" });
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sticky top-[220px] hidden lg:block min-h-[350px]">
+                <div id="panel-empty" class="text-center py-24 text-slate-400 flex flex-col items-center justify-center gap-2">
+                    <span class="text-5xl">🔬</span>
+                    <p class="font-bold text-xs text-slate-600">لوحة فحص الأوزان والخلطات</p>
+                    <p class="text-[11px] text-slate-400">عند الضغط على أي ليبل أو كود لون، ستظهر لك المكونات كاملة بالنسب المئوية المعتمدة هنا.</p>
+                </div>
+                <div id="panel-content" class="hidden"></div>
+            </div>
+        </div>
+    </main>
 
-      if (parsedJson.length === 0) {
-        pushToastNotification("الملف المرفوع فارغ تماماً!", "error");
-        return;
-      }
+    <div id="formula-modal" class="fixed inset-0 bg-slate-950/60 z-50 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modal-box">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">🧪 تفاصيل ونسب خلطة الألوان الفنية الكاملة</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-xl cursor-pointer">&times;</button>
+            </div>
+            <div class="p-5 max-h-[75vh] overflow-y-auto" id="modal-body"></div>
+            <div class="bg-slate-50 px-5 py-3 flex justify-end border-t border-slate-100">
+                <button onclick="closeModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-sm cursor-pointer">إغلاق النافذة</button>
+            </div>
+        </div>
+    </div>
 
-      localStorage.setItem(DB_MASTER_KEY, JSON.stringify(parsedJson));
-      SYSTEM_RECORDS = parsedJson;
-      processAndCleanRecords();
-      pushToastNotification("تمت المزامنة وحفظ قاعدة البيانات بنجاح تام!", "success");
-      changeActiveTab('labels');
-    } catch (err) {
-      pushToastNotification("حدث خطأ أثناء معالجة ملف الإكسل. تأكد من أنه ملف الشركة الأصلي.", "error");
-    }
-  };
-  fileReader.readAsArrayBuffer(selectedFile);
-}
+    <footer class="bg-slate-900 text-slate-500 text-center py-4 text-xs border-t border-slate-800 mt-auto">
+        لوحة تحكم رويال إنك المطورة - فلترة حية فورية ومطابقة أكواد الأحبار التفصيلية كاملة.
+    </footer>
 
-function changeActiveTab(targetTab) {
-  document.querySelectorAll(".view-section").forEach(s => s.classList.remove("active"));
-  document.querySelectorAll(".bottom-nav-bar button").forEach(b => b.classList.remove("active"));
-  
-  document.getElementById(`sec-${targetTab}`).classList.add("active");
-  document.getElementById(`tab-${targetTab}`).classList.add("active");
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+    <script>
+        let labelsData = [];       // مصفوفة المنتجات الأساسية
+        let formulasData = {};     // قاموس الخلطات والأحبار الكاملة
+        
+        // متغيرات الفلاتر النشطة حالياً لتشغيل الفورية اللحظية
+        let currentSelectedLine = null;
+        let currentSelectedSize = null;
 
-function closeGlobalModal() { document.getElementById("globalModalOverlay").classList.remove("active"); }
-function navigatePage(direction) { pageIndex += direction; renderViewUiCards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function showPlaceholderState(msg) { document.getElementById("labels-render-target").innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-silver); font-size:13px; line-height:1.8;">${msg}</div>`; document.getElementById("paginationController").style.display = "none"; }
-function pushToastNotification(text, type = "success") { const t = document.createElement("div"); t.className = `toast-msg ${type}`; t.innerText = text; document.getElementById("toast-container").appendChild(t); setTimeout(() => t.remove(), 4000); }
-</script>
+        // دالة قراءة ومزامنة وتفكيك الإكسل حياً في ثانية واحدة وتحديث قاعدة البيانات
+        function loadAndProcessExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('counter-meta').innerText = "جاري قراءة وتحديث البيانات فوراً...";
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // 1. معالجة وتخزين جدول خلطات الأحبار (INK MIX) أولاً لتسهيل المطابقة الكاملة للأكواد
+                formulasData = {};
+                if (workbook.Sheets['INK MIX']) {
+                    const sheet = workbook.Sheets['INK MIX'];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    
+                    for (let i = 3; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || !row[0]) continue;
+
+                        const inkCode = String(row[0]).trim();
+                        const inkName = row[1] ? String(row[1]).trim() : 'حبر ملون معتمد';
+
+                        let ingredients = [];
+                        // سحب الخلطة المكونة الثمانية كاملة بالأوزان والوصف والنسبة
+                        for (let bIdx = 3; bIdx < 35; bIdx += 4) {
+                            if (row[bIdx]) {
+                                ingredients.push({
+                                    base: String(row[bIdx]).trim(),
+                                    desc: row[bIdx+1] ? String(row[bIdx+1]).trim() : 'حبر أساسي',
+                                    percentage: row[bIdx+2] !== undefined ? String(row[bIdx+2]).trim() : '0'
+                                });
+                            }
+                        }
+
+                        formulasData[inkCode] = {
+                            color_name: inkName,
+                            ingredients: ingredients
+                        };
+                    }
+                }
+
+                // 2. معالجة وتخزين جدول الليبلات والمنتجات والخطوط (SHEET1)
+                labelsData = [];
+                if (workbook.Sheets['SHEET1']) {
+                    const sheet = workbook.Sheets['SHEET1'];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    
+                    for (let i = 3; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || !row[0]) continue;
+
+                        let colorCodes = [];
+                        const cols = [7, 12, 17, 22, 27, 32, 37, 42]; // أعمدة أكواد الأحبار
+                        cols.forEach(idx => {
+                            if (row[idx]) colorCodes.push(String(row[idx]).trim());
+                        });
+
+                        labelsData.push({
+                            name: String(row[0]).trim(),
+                            company: row[1] ? String(row[1]).trim() : 'غير محدد',
+                            code: row[2] ? String(row[2]).trim() : '-',
+                            size: row[3] ? String(row[3]).trim().toUpperCase() : '-',
+                            line: row[4] ? String(row[4]).trim().toUpperCase() : '-',
+                            shelf: row[5] ? String(row[5]).trim() : '-',
+                            plate: row[6] ? String(row[6]).trim() : '-',
+                            colors: colorCodes
+                        });
+                    }
+                }
+
+                // فتح وتفعيل حاويات العرض وإخفاء شاشة الترحيب
+                document.getElementById('welcome-box').style.display = 'none';
+                document.getElementById('labels-live-container').classList.remove('hidden');
+                
+                // التحديث والرسم الفوري على الشاشة
+                liveRender();
+                alert(`🎯 تمت المزامنة الفورية بنجاح!\nتم تحميل وفهرسة ${labelsData.length} منتج، ومطابقتها مع ${Object.keys(formulasData).length} كود لون كامل.`);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // دالة تصفية فورية ولحظية بمجرد الضغط على زر الخط (لاين 1، لاين 2، لاين 3)
+        function filterByLine(lineName, btnElement) {
+            // إزالة التحديد عن بقية أزرار الخطوط
+            document.querySelectorAll('.line-btn').forEach(btn => btn.classList.remove('btn-active'));
+            
+            if (currentSelectedLine === lineName) {
+                currentSelectedLine = null; // إلغاء الفلتر إذا ضغط عليه مرة ثانية
+            } else {
+                currentSelectedLine = lineName;
+                btnElement.classList.add('btn-active');
+            }
+            liveRender(); // تحديث فوري فائق السرعة
+        }
+
+        // دالة تصفية فورية ولحظية بمجرد الضغط على أزرار القياسات (185، 250، 300، 330)
+        function filterBySize(sizeName, btnElement) {
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('btn-active'));
+            
+            if (currentSelectedSize === sizeName) {
+                currentSelectedSize = null;
+            } else {
+                currentSelectedSize = sizeName;
+                btnElement.classList.add('btn-active');
+            }
+            liveRender(); // تحديث فوري فائق السرعة
+        }
+
+        // دالة تصفير كافة الفلاتر النشطة لإرجاع عرض كافة البيانات
+        function clearAllFilters() {
+            currentSelectedLine = null;
+            currentSelectedSize = null;
+            document.getElementById('system-search').value = '';
+            document.querySelectorAll('.line-btn, .size-btn').forEach(btn => btn.classList.remove('btn-active'));
+            liveRender();
+        }
+
+        // تخمين ومعاينة بصرية تقريبية للألوان لتسهيل الفحص
+        function getColorHex(colorName, colorCode) {
+            const name = (colorName || '').toUpperCase();
+            const code = (colorCode || '').toUpperCase();
+            if (name.includes('BLACK') || code.includes('BLACK')) return '#1e293b';
+            if (name.includes('WHITE') || code.includes('WHITE')) return '#f8fafc';
+            if (name.includes('RED') || code.includes('RED')) return '#ef4444';
+            if (name.includes('GREEN') || code.includes('GREEN')) return '#22c55e';
+            if (name.includes('BLUE') || code.includes('BLUE')) return '#3b82f6';
+            if (name.includes('YELLOW') || code.includes('YELLOW')) return '#eab308';
+            if (name.includes('GOLD') || code.includes('GOLD')) return '#f59e0b';
+            if (name.includes('ORANGE') || code.includes('ORANGE')) return '#f97316';
+            if (name.includes('GRAY') || code.includes('GRAY')) return '#64748b';
+            if (name.includes('VIOLET') || code.includes('VIOLET')) return '#a855f7';
+            return '#cbd5e1';
+        }
+
+        // محرك الرندرة والفلترة الفوري والذكي المشترك (يعمل بأجزاء من الثانية)
+        function liveRender() {
+            const container = document.getElementById('labels-live-container');
+            const query = document.getElementById('system-search').value.trim().toLowerCase();
+            container.innerHTML = '';
+
+            if (labelsData.length === 0) return;
+
+            // إجراء تصفية فورية هجينة بناءً على الأزرار المضغوطة وخانة البحث الشامل
+            let filtered = labelsData.filter(item => {
+                if (currentSelectedLine && !item.line.includes(currentSelectedLine)) return false;
+                if (currentSelectedSize && !item.size.includes(currentSelectedSize)) return false;
+                
+                if (query !== '') {
+                    return item.name.toLowerCase().includes(query) ||
+                           item.company.toLowerCase().includes(query) ||
+                           item.code.toLowerCase().includes(query) ||
+                           item.line.toLowerCase().includes(query) ||
+                           item.size.toLowerCase().includes(query) ||
+                           item.colors.some(c => c.toLowerCase().includes(query)) ||
+                           item.colors.some(c => formulasData[c] && formulasData[c].color_name.toLowerCase().includes(query));
+                }
+                return true;
+            });
+
+            document.getElementById('counter-meta').innerText = `المعروض حالياً: ${filtered.length} سجل مطابق`;
+
+            // بناء وعرض الكروت فوراً على الشاشة
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200/70 hover:shadow-md hover:border-blue-400 transition cursor-pointer flex flex-col justify-between";
+                card.onclick = () => showLabelDetailsInSidebar(item);
+
+                // بناء كتل الأكواد والأسماء الكاملة للألوان لتظهر داخل الكرت بوضوح تام (ليست مجرد رموز!)
+                let colorsListHtml = '';
+                item.colors.forEach(c => {
+                    const formula = formulasData[c];
+                    const fullName = formula ? formula.color_name : 'حبر مخصص';
+                    const hex = getColorHex(fullName, c);
+                    
+                    colorsListHtml += `
+                        <div onclick="event.stopPropagation(); viewFullInkFormula('${c}')" class="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-blue-50/50 transition">
+                            <div class="flex items-center gap-2 truncate">
+                                <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0 shadow-inner" style="background-color: ${hex}"></span>
+                                <span class="text-xs font-bold text-slate-700 truncate">${fullName}</span>
+                            </div>
+                            <span class="text-[10px] font-bold font-mono text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-slate-200 shrink-0">كود: ${c}</span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <h3 class="font-bold text-slate-900 text-sm md:text-base truncate">${item.name}</h3>
+                            <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-blue-100 shrink-0">كود ${item.code}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 space-y-1 mb-3">
+                            <div>🏢 الشركة: <span class="text-slate-900 font-bold">${item.company}</span></div>
+                            <div class="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded-md mt-1 text-[11px]">
+                                <div>⛓️ <span class="text-blue-700 font-bold">${item.line}</span></div>
+                                <div>📏 قياس: <span class="text-amber-600 font-bold">${item.size}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-3">
+                        <div class="text-[11px] text-slate-400 font-bold mb-1.5">🎨 الألوان والكودات الكاملة لها:</div>
+                        <div class="grid grid-cols-1 gap-1.5">${colorsListHtml || '<span class="text-slate-400 italic text-xs">لا توجد أحبار مسجلة</span>'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // دالة فحص واستعراض نسب تركيب الحبر الفنية كاملة بالأوزان (عند الضغط على كود اللون)
+        window.viewFullInkFormula = function(colorCode) {
+            const formula = formulasData[colorCode];
+            let html = '';
+
+            if (!formula) {
+                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في جدول خلطات الأحبار الحالي.</div>`;
+            } else {
+                let tableRows = '';
+                formula.ingredients.forEach(ing => {
+                    tableRows += `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                            <td class="p-3 text-xs font-bold text-blue-700 font-mono">${ing.base}</td>
+                            <td class="p-3 text-xs text-slate-700 font-semibold">${ing.desc}</td>
+                            <td class="p-3 text-xs text-left"><span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-lg font-bold font-mono text-[11px]">${ing.percentage}%</span></td>
+                        </tr>
+                    `;
+                });
+
+                // العثور على المنتجات الأخرى المشتركة في هذا اللون
+                const sharedList = labelsData.filter(l => l.colors.includes(colorCode));
+                let sharedHtml = sharedList.slice(0, 5).map(m => `<span class="bg-indigo-50 text-indigo-800 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-bold">${m.name}</span>`).join(' ');
+
+                html = `
+                    <div class="mb-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="text-xs text-slate-400 font-bold">كود اللون الفني: <span class="text-slate-900 font-mono text-xs">${colorCode}</span></div>
+                        <div class="text-xs font-bold text-slate-700 mt-1">اسم اللون المعتمد: <span class="text-blue-700 text-sm font-bold">${formula.color_name}</span></div>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-400 mb-2">🔬 نسب الأوزان والمكونات المخبرية الكاملة للخلط:</h4>
+                    <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white mb-4">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-white text-[11px]"><th class="p-2.5">كود الأساس</th><th class="p-2.5">الوصف واللون</th><th class="p-2.5 text-left">النسبة</th></tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                    <div class="pt-2.5 border-t border-slate-100">
+                        <div class="text-[11px] text-slate-400 font-bold mb-1.5">📦 الليبلات المشتركة في هذا اللون حالياً:</div>
+                        <div class="flex flex-wrap gap-1">${sharedHtml || '<span class="text-slate-400 italic text-[11px]">لا توجد ليبلات أخرى</span>'}</div>
+                    </div>
+                `;
+            }
+
+            // تحديث لوحة العرض الجانبية (للكمبيوتر والتابلت)
+            document.getElementById('panel-empty').style.display = 'none';
+            const sidebar = document.getElementById('panel-content');
+            sidebar.style.display = 'block';
+            sidebar.innerHTML = `<div class="bg-slate-950 text-amber-400 p-2.5 rounded-xl mb-4 text-center text-xs font-bold border border-slate-800 shadow">🔬 فحص نسب وتركيب خلطة اللون</div>${html}`;
+
+            // فتح وتفعيل المنبثق التلقائي (للهواتف الذكية لسهولة القراءة الميدانية)
+            document.getElementById('modal-body').innerHTML = html;
+            const modal = document.getElementById('formula-modal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => document.getElementById('modal-box').classList.remove('scale-95', 'opacity-0'), 50);
+        }
+
+        // دالة استعراض وفحص بطاقة الليبل الشاملة في اللوحة الجانبية
+        function showLabelDetailsInSidebar(item) {
+            let innerColorsRows = '';
+            item.colors.forEach(c => {
+                const f = formulasData[c];
+                const name = f ? f.color_name : 'حبر ملون مخصص';
+                const hex = getColorHex(name, c);
+                innerColorsRows += `
+                    <div onclick="viewFullInkFormula('${c}')" class="p-2.5 border border-slate-100 rounded-xl bg-slate-50 flex items-center justify-between hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer transition">
+                        <div class="flex items-center gap-2.5 truncate">
+                            <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0 shadow-inner" style="background-color: ${hex}"></span>
+                            <div class="truncate">
+                                <div class="text-xs font-bold text-slate-800 truncate">${name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">الكود الكامل: ${c}</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-blue-600 bg-white font-bold px-2 py-0.5 rounded border border-slate-200 shrink-0">عرض الخلطة 🧪</span>
+                    </div>
+                `;
+            });
+
+            const html = `
+                <div class="bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4 rounded-xl border border-blue-100 mb-4">
+                    <h3 class="text-sm md:text-base font-bold text-indigo-950 mb-2 truncate">${item.name}</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div>🏢 الشركة: <strong class="text-slate-900">${item.company}</strong></div>
+                        <div>🔢 الكود: <strong class="text-slate-900">${item.code}</strong></div>
+                        <div>⛓️ الخط: <strong class="text-blue-600 font-bold">${item.line}</strong></div>
+                        <div>📏 القياس: <strong class="text-amber-600 font-bold">${item.size}</strong></div>
+                        <div>📍 رقم الرف: <strong class="text-slate-900">${item.shelf}</strong></div>
+                        <div>📦 البليت: <strong class="text-slate-900">${item.plate}</strong></div>
+                    </div>
+                </div>
+                <h4 class="text-xs font-bold text-slate-400 mb-2">الأحبار المعتمدة المكونة للطباعة (${item.colors.length}):</h4>
+                <div class="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">${innerColorsRows || '<p class="text-xs text-slate-400 italic">لا توجد أحبار مخصصة.</p>'}</div>
+            `;
+
+            document.getElementById('panel-empty').style.display = 'none';
+            const sidebar = document.getElementById('panel-content');
+            sidebar.style.display = 'block'; sidebar.innerHTML = html;
+
+            if(window.innerWidth < 1024) {
+                sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // إغلاق المنبثق بنعومة وسلاسة
+        window.closeModal = function() {
+            document.getElementById('modal-box').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => document.getElementById('formula-modal').classList.add('hidden'), 150);
+        }
+    </script>
 </body>
 </html>
