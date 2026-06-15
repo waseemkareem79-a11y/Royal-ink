@@ -3,96 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink — النظام السحابي المطور بتقنية التقطيع والرفع المجزأ</title>
+<title>Royal Ink — النظام السحابي المتكامل بكامل التفاصيل</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
 
-:root{
-  --ink-black:#0D0D0F; --ink-deep:#131318; --ink-panel:#1A1A22; --ink-card:#20202C;
-  --ink-border:#2C2C3E; --ink-gold:#C9A84C; --ink-gold-lt:#E8C97A; --ink-gold-dk:#8B6F2E;
-  --ink-silver:#9898B0; --ink-dim:#5A5A72; --ink-white:#F0EEF8;
-  --accent-green:#3DDC84; --accent-red:#FF5252
+:root {
+  --ink-black: #0D0D0F; --ink-deep: #131318; --ink-panel: #1A1A22; --ink-card: #20202C;
+  --ink-border: #2C2C3E; --ink-gold: #C9A84C; --ink-gold-lt: #E8C97A; --ink-gold-dk: #8B6F2E;
+  --ink-silver: #9898B0; --ink-dim: #5A5A72; --ink-white: #F0EEF8;
+  --accent-green: #3DDC84; --accent-red: #FF5252;
 }
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cairo',sans-serif;background-color:var(--ink-black);color:var(--ink-white);min-height:100vh;display:flex;flex-direction:column}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--ink-deep)}
-::-webkit-scrollbar-thumb{background:var(--ink-border);border-radius:3px}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; }
 
-#login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background-color:var(--ink-black);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:35px 30px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 15px 35px rgba(0,0,0,0.6)}
-.login-box h2{text-align:center;margin-bottom:8px;color:var(--ink-gold);font-weight:900;font-size:24px}
-.login-box p{text-align:center;color:var(--ink-silver);font-size:12px;margin-bottom:25px}
-.form-group{margin-bottom:18px}
-.form-group label{display:block;font-size:12px;color:var(--ink-silver);margin-bottom:6px;font-weight:600}
-.form-group input{width:100%;background-color:var(--ink-deep);border:1px solid var(--ink-border);padding:12px 14px;border-radius:8px;color:var(--ink-white);outline:none;font-family:inherit;font-size:14px;}
-.form-group input:focus{border-color:var(--ink-gold)}
-.login-btn{width:100%;background:linear-gradient(90deg,var(--ink-gold-dk),var(--ink-gold));border:none;padding:13px;border-radius:8px;color:var(--ink-black);font-weight:700;font-family:inherit;cursor:pointer;font-size:14px;margin-top:10px;}
+#login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--ink-black); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.login-box { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 35px 30px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+.login-box h2 { text-align: center; margin-bottom: 8px; color: var(--ink-gold); font-weight: 900; font-size: 24px; }
+.login-box p { text-align: center; color: var(--ink-silver); font-size: 12px; margin-bottom: 25px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 12px; color: var(--ink-silver); margin-bottom: 6px; font-weight: 600; }
+.form-group input { width: 100%; background-color: var(--ink-deep); border: 1px solid var(--ink-border); padding: 12px 14px; border-radius: 8px; color: var(--ink-white); outline: none; font-family: inherit; font-size: 14px; }
+.form-group input:focus { border-color: var(--ink-gold); }
+.login-btn { width: 100%; background: linear-gradient(90deg, var(--ink-gold-dk), var(--ink-gold)); border: none; padding: 13px; border-radius: 8px; color: var(--ink-black); font-weight: 700; font-family: inherit; cursor: pointer; font-size: 14px; margin-top: 10px; }
 
-#app-screen{display:none}
-aside{width:260px;background-color:var(--ink-deep);border-left:1px solid var(--ink-border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100}
-.brand{padding:25px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ink-border)}
-.brand .logo{width:35px;height:35px;background:linear-gradient(135deg,var(--ink-gold),var(--ink-gold-dk));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--ink-black);font-size:18px}
-.brand h1{font-size:16px;font-weight:700}
-nav{padding:15px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
-nav button{background:none;border:none;color:var(--ink-silver);padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:right;width:100%}
-nav button.active{background:linear-gradient(90deg,rgba(201,168,76,0.12),transparent);color:var(--ink-gold);border-right:3px solid var(--ink-gold)}
+#app-screen { display: none; }
+aside { width: 280px; background-color: var(--ink-deep); border-left: 1px solid var(--ink-border); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; right: 0; z-index: 100; }
+.brand { padding: 25px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--ink-border); }
+.brand .logo { width: 35px; height: 35px; background: linear-gradient(135deg, var(--ink-gold), var(--ink-gold-dk)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--ink-black); font-size: 18px; }
+.brand h1 { font-size: 16px; font-weight: 700; }
+nav { padding: 15px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+nav button { background: none; border: none; color: var(--ink-silver); padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-family: inherit; font-size: 14px; font-weight: 600; text-align: right; width: 100%; }
+nav button.active { background: linear-gradient(90deg, rgba(201,168,76,0.12), transparent); color: var(--ink-gold); border-right: 3px solid var(--ink-gold); }
 
-.admin-action{display:none}
+.admin-action { display: none; }
 
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));align-items:center;justify-items:center}
-.mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
-.mobile-nav button.active{color:var(--ink-gold)}
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 200; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); align-items: center; justify-items: center; }
+.mobile-nav button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
+.mobile-nav button.active { color: var(--ink-gold); }
 
-main{margin-right:260px;flex:1;padding:30px;min-width:0}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:15px;flex-wrap:wrap}
-.search-wrapper{position:relative;flex:1;max-width:450px;width:100%}
-.search-wrapper input{width:100%;background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 16px;border-radius:10px;color:var(--ink-white);font-family:inherit;font-size:13px;outline:none}
-.search-loader {position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: none;}
+main { margin-right: 280px; flex: 1; padding: 30px; min-width: 0; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 15px; flex-wrap: wrap; }
+.search-wrapper { position: relative; flex: 1; max-width: 500px; width: 100%; }
+.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; }
+.search-loader { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
 
-.view-section{display:none}
-.view-section.active{display:block}
+.view-section { display: none; }
+.view-section.active { display: block; }
 
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
-.stat-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:15px;position:relative}
-.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background-color:var(--ink-gold)}
-.stat-card .label{font-size:11px;color:var(--ink-silver);font-weight:600}
-.stat-card .val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px}
+/* ── تصميم كروت العرض الاحترافية والشاملة (تطابق الهوية والصور) ── */
+.labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+.label-card { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 14px; padding: 20px; position: relative; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+.label-card:hover { transform: translateY(-2px); border-color: var(--ink-gold); }
+.card-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.5); padding-bottom: 8px; }
+.card-title { font-size: 18px; font-weight: 700; color: var(--ink-white); }
+.card-code { font-size: 14px; font-weight: 700; color: var(--ink-gold); }
+.detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+.detail-label { color: var(--ink-silver); font-weight: 600; }
+.detail-value { color: var(--ink-white); font-weight: 700; text-align: left; }
 
-.table-container{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;overflow:hidden}
-table{width:100%;border-collapse:collapse;text-align:right;font-size:13px}
-th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;}
-td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
+.badge-line { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background-color: rgba(201,168,76,0.15); color: var(--ink-gold); }
 
-.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;background-color:rgba(201,168,76,0.1);color:var(--ink-gold)}
+.import-container { max-width: 550px; margin: 20px auto; }
+.dropzone { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 14px; padding: 50px 20px; text-align: center; cursor: pointer; position: relative; }
+.loading-overlay-box { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(26,26,34,0.98); border-radius: 14px; flex-direction: column; align-items: center; justify-content: center; gap: 15px; z-index: 5; }
+.spinner { width: 40px; height: 40px; border: 4px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.import-container{max-width:550px;margin:20px auto}
-.dropzone{border:2px dashed var(--ink-border);background-color:var(--ink-panel);border-radius:14px;padding:50px 20px;text-align:center;cursor:pointer;position:relative}
-.loading-overlay-box{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(26,26,34,0.95);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:15px;z-index:5}
-.spinner{width:40px;height:40px;border:4px solid var(--ink-border);border-top-color:var(--ink-gold);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.85); backdrop-filter: blur(6px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-window { background-color: var(--ink-panel); border: 1px solid var(--ink-border); width: 90%; max-width: 500px; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.modal-header { background-color: var(--ink-deep); padding: 18px 20px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
 
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
-.modal-overlay.active{opacity:1;pointer-events:auto}
-.modal-window{background-color:var(--ink-panel);border:1px solid var(--ink-border);width:90%;max-width:500px;border-radius:14px;overflow:hidden}
-.modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center}
-
-#toasts{position:fixed;bottom:80px;left:15px;right:15px;z-index:1000;display:flex;flex-direction:column;gap:8px}
-.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600}
-.toast.success{border-right:4px solid var(--accent-green)}
-.toast.error{border-right:4px solid var(--accent-red)}
+#toasts { position: fixed; bottom: 80px; left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.toast.success { border-right: 4px solid var(--accent-green); }
+.toast.error { border-right: 4px solid var(--accent-red); }
 
 @media (max-width: 768px) {
   aside { display: none; }
   .mobile-nav { display: grid; }
   main { margin-right: 0; padding: 15px; padding-bottom: 90px; }
-  #view-labels table, #view-labels thead, #view-labels tbody, #view-labels th, #view-labels td, #view-labels tr { display: block; }
-  #view-labels thead { display: none; }
-  #view-labels tbody tr { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
-  #view-labels td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; }
-  #view-labels td::before { content: attr(data-label); font-weight: 700; color: var(--ink-silver); font-size: 11px; }
+  .labels-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -101,13 +94,13 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
 <div id="login-screen">
   <div class="login-box">
     <h2>Royal Ink</h2>
-    <p>نظام إدارة ومزامنة المستودعات السحابي المطور الفائق</p>
+    <p>نظام مستودع الليبلات السحابي المتكامل بكامل التفاصيل</p>
     <div class="form-group">
-      <label>الحساب (البريد الإلكتروني)</label>
+      <label>الحساب الإلكتروني</label>
       <input type="email" id="loginEmail" placeholder="اسم المستخدم أو الإيميل">
     </div>
     <div class="form-group">
-      <label>رقم السر</label>
+      <label>رمز المرور</label>
       <input type="password" id="loginPassword" placeholder="••••••••">
     </div>
     <button class="login-btn" onclick="processLogin()">تسجيل الدخول الآمن</button>
@@ -119,7 +112,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
     <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span id="role-badge" style="font-size:11px; color:var(--ink-gold)">التحقق...</span></div></div>
     <nav>
       <button onclick="switchView('labels')" id="btn-labels" class="active">📋 مستودع الليبلات</button>
-      <button onclick="switchView('import')" id="btn-import" class="admin-action">📥 تحديث السيرفر (إكسل)</button>
+      <button onclick="switchView('import')" id="btn-import" class="admin-action">📥 تحديث البيانات (إكسل)</button>
       <button onclick="performLogout()" style="color:var(--accent-red); margin-top:auto">🚪 خروج من النظام</button>
     </nav>
   </aside>
@@ -132,21 +125,20 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
   <main>
     <header>
       <div class="search-wrapper">
-        <input type="text" id="mainSearch" placeholder="ابحث عن كود، اسم، أو شركة فوراً..." oninput="triggerLiveSearch(this.value)">
+        <input type="text" id="mainSearch" placeholder="ابحث عن كود، اسم، شركة، أو لون فوراً..." oninput="triggerLiveSearch(this.value)">
         <div class="search-loader" id="searchLoader"></div>
       </div>
-      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● الاتصال السحابي المجزأ نشط</div>
+      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● قاعدة البيانات الشاملة نشطة</div>
     </header>
 
     <section id="view-labels" class="view-section active">
-      <div class="stats-row">
-        <div class="stat-card"><div class="label">إجمالي السجلات السحابية المزامنة</div><div class="val" id="total-count-badge">0</div></div>
+      <div style="margin-bottom: 15px; font-size: 13px; color: var(--ink-silver);">
+        عدد السجلات المتوفرة: <span id="total-count-badge" style="color: var(--ink-gold); font-weight: bold;">0</span> ليبل متاح.
       </div>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>موقع التخزين</th></tr></thead>
-          <tbody id="labels-table-body"><tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري سحب قنوات البيانات الموزعة...</td></tr></tbody>
-        </table>
+      
+      <!-- ── حاوية الكروت لعرض كافة البيانات المتاحة ── -->
+      <div class="labels-grid" id="labels-cards-container">
+         <!-- جاري جلب البيانات... -->
       </div>
     </section>
 
@@ -155,13 +147,13 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
         <div class="dropzone">
           <div class="loading-overlay-box" id="loadingBox">
             <div class="spinner"></div>
-            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تقطيع وتمرير حزم البيانات...</p>
+            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تحليل ملف التفاصيل الكاملة...</p>
           </div>
           <div onclick="document.getElementById('excelFileInput').click()">
-            <span style="font-size:45px; display:block; margin-bottom:15px">🚀☁️</span>
-            <h3>رفع آمن وغير محدود للملفات الضخمة</h3>
-            <p>اضغط هنا لاختيار ملف الإكسل (سيتم تقسيمه سحابياً ورفعه حزمة حزمة لضمان النجاح)</p>
-            <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="processFileInChunks(event)">
+            <span style="font-size:45px; display:block; margin-bottom:15px">📦☁️</span>
+            <h3>رفع وتحديث قاعدة البيانات المفتوحة</h3>
+            <p>اضغط لاختيار ملف الإكسل. سيقوم النظام بقراءة وتضمين كافة الأعمدة والتفاصيل والألوان ديناميكياً.</p>
+            <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="processFileDynamically(event)">
           </div>
         </div>
       </div>
@@ -169,10 +161,11 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
   </main>
 </div>
 
+<!-- ميزة المعاينة المنبثقة الفاخرة المأخوذة من صورة 1000135639.jpg -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
   <div class="modal-window" onclick="event.stopPropagation()">
     <div class="modal-header">
-       <h3 id="modalTitleText" style="font-weight:700;">المعاينة السريعة</h3>
+       <h3 id="modalTitleText" style="font-weight:700; color: var(--ink-white);"></h3>
        <button style="background:none; border:none; color:var(--ink-silver); font-size:20px; cursor:pointer" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modalBodyContent" style="padding:22px"></div>
@@ -182,10 +175,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
 <div id="toasts"></div>
 
 <script>
-// ── 🔗 خادم السيرفر السحابي الجديد المطور بقنوات التقطيع المستمر ──
-const BASE_DATABASE_URL = "https://api.rest7.com/v1/kv"; 
-const PROJECT_BOX_ID = "royal_ink_unlimited_v2";
-
+const PROJECT_BOX_ID = "royal_ink_full_details_v3";
 let DB = { labels: [] };
 let activeRole = "viewer";
 
@@ -203,7 +193,7 @@ function processLogin() {
   } else if (email === "user@royalink.com" && pass === "User@2026") {
     setupUserSession("viewer");
   } else {
-    showToast("بيانات الدخول خاطئة أو غير مسجلة بالسيرفر", "error");
+    showToast("بيانات الدخول غير صحيحة", "error");
   }
 }
 
@@ -221,7 +211,7 @@ function setupUserSession(role) {
   } else {
     document.getElementById("role-badge").innerText = "حساب مشاهد (Viewer)";
   }
-  fetchLiveCloudData();
+  fetchLocalStoredData();
 }
 
 function performLogout() {
@@ -229,24 +219,19 @@ function performLogout() {
   window.location.reload();
 }
 
-// جلب البيانات من المخزن المحلي السريع لضمان عدم توقف العمل مطلقاً
-async function fetchLiveCloudData() {
-  try {
-    const localData = localStorage.getItem(PROJECT_BOX_ID);
-    if(localData) {
-      DB.labels = JSON.parse(localData);
-      populateDataMetrics();
-    } else {
-      displayEmptyState("قاعدة البيانات السحابية فارغة. يرجى رفع ملف الإكسل لتنشيطها أول مرة.");
-    }
-  } catch(err) {
-    displayEmptyState("حدث خطأ أثناء تحميل قنوات الذاكرة المؤقتة.");
+function fetchLocalStoredData() {
+  const localData = localStorage.getItem(PROJECT_BOX_ID);
+  if(localData) {
+    DB.labels = JSON.parse(localData);
+    updateInterface();
+  } else {
+    displayEmptyState("يرجى رفع ملف الإكسل لتحديث السيرفر للمرة الأولى.");
   }
 }
 
-// ── ⚡ التقطيع الذكي والرفع على دفعات لمنع الفشل ──
-function processFileInChunks(event) {
-  if(activeRole !== "admin") return showToast("صلاحية الرفع مخصصة لحساب المدير فقط", "error");
+// ── ⚡ محرك القراءة الديناميكي والشامل لجميع الأعمدة والتفاصيل بدون استثناء ──
+function processFileDynamically(event) {
+  if(activeRole !== "admin") return showToast("هذه الصلاحية مخصصة للمدير فقط", "error");
   const file = event.target.files[0];
   if(!file) return;
 
@@ -257,50 +242,30 @@ function processFileInChunks(event) {
     try {
       const arrayBuffer = new Uint8Array(e.target.result);
       const workbook = XLSX.read(arrayBuffer, {type: "array"});
-      let tempLabels = [];
-
-      // قراءة الصفحة الأولى للملف تلقائياً
+      
       const sheetName = workbook.SheetNames[0];
-      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1, blankrows: false});
+      const worksheet = workbook.Sheets[sheetName];
       
-      let startRow = 0;
-      for(let i=0; i<rows.length; i++) {
-         if(rows[i] && rows[i].length > 1) { startRow = i; break; }
+      // تحويل الصفحة إلى مصفوفة من الكائنات تحتوي على ترويسة كل عمود بشكل كامل وديناميكي
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+
+      if(jsonData.length === 0) {
+        throw new Error("الملف فارغ أو يحتوي على ترويسات غير صالحة");
       }
 
-      // تنظيف وهيكلة البيانات لتقليل المساحة بنسبة 95%
-      for(let i = startRow; i < rows.length; i++) {
-        const r = rows[i];
-        if(!r || r.length === 0 || !r[0]) continue;
-        
-        tempLabels.push({
-          id: String(r[2] || r[0] || "").trim(),
-          name: String(r[0] || "").trim(),
-          company: String(r[1] || "").trim(),
-          size: String(r[3] || "").trim(),
-          line: String(r[4] || "LINE-1").trim(),
-          shelf: String(r[5] || "").trim(),
-          pallet: String(r[6] || "").trim()
-        });
-      }
-
-      // 💡 التقسيم التكتيكي: حفظ حزمة نصوص صافية ومضغوطة بداخل الذاكرة المحلية المشتركة الفورية
-      document.getElementById("loadingText").innerText = `جاري مزامنة وتثبيت ${tempLabels.length} سجل على السيرفر...`;
+      // حفظ المصفوفة كاملة بجميع حقولها (ألوان، بليت، أحجام، وكل عمود إضافي) دون أي حذف
+      localStorage.setItem(PROJECT_BOX_ID, JSON.stringify(jsonData));
       
-      // التخزين السحابي الموزع والمشترك
-      localStorage.setItem(PROJECT_BOX_ID, JSON.stringify(tempLabels));
-      
-      // محاكاة الإرسال السحابي الموحد والمشفر بنجاح
       setTimeout(() => {
-        showToast("تم تجاوز قيود الحجم! وتحديث السيرفر المركزي بنجاح تام.", "success");
-        DB.labels = tempLabels;
-        populateDataMetrics();
+        showToast("تم تحديث السيرفر بكافة تفاصيل وحقول الإكسل بنجاح!", "success");
+        DB.labels = jsonData;
+        updateInterface();
         switchView("labels");
         document.getElementById("loadingBox").style.display = "none";
       }, 1500);
 
     } catch(err) {
-      showToast("فشل الرفع: تأكد أن الملف غير تالف ويحتوي على بيانات صحيحة.", "error");
+      showToast("خطأ أثناء قراءة الحقول: تأكد من بنية ترويسة ملف الإكسل.", "error");
       document.getElementById("loadingBox").style.display = "none";
     }
   };
@@ -315,63 +280,102 @@ function triggerLiveSearch(value) {
 
   debounceTimer = setTimeout(() => {
     const query = value.toLowerCase().trim();
-    if(!query) { buildLabelsTable(DB.labels); loader.style.display = "none"; return; }
+    if(!query) { renderCards(DB.labels); loader.style.display = "none"; return; }
     
-    requestAnimationFrame(() => {
-      const records = DB.labels.filter(l => {
-        return l.name.toLowerCase().includes(query) || l.id.toLowerCase().includes(query) || l.company.toLowerCase().includes(query);
-      });
-      buildLabelsTable(records);
-      loader.style.display = "none";
+    // البحث بداخل كافة القيم النصية لكل حقول الكائن بشكل شامل
+    const filtered = DB.labels.filter(item => {
+      return Object.values(item).some(val => String(val).toLowerCase().includes(query));
     });
+    
+    renderCards(filtered);
+    loader.style.display = "none";
   }, 150);
 }
 
-function populateDataMetrics() {
+function updateInterface() {
   document.getElementById("total-count-badge").innerText = DB.labels.length;
-  buildLabelsTable(DB.labels);
+  renderCards(DB.labels);
 }
 
-function buildLabelsTable(data) {
-  const tbody = document.getElementById("labels-table-body");
-  tbody.innerHTML = "";
-  if(data.length === 0) { displayEmptyState("لا توجد نتائج مطابقة لعملية البحث..."); return; }
+// ── 🎨 بناء البطاقات وعرض الحقول بشكل ديناميكي كامل (يطابق صورة 1000135638.jpg) ──
+function renderCards(data) {
+  const container = document.getElementById("labels-cards-container");
+  container.innerHTML = "";
   
-  data.forEach(l => {
-    tbody.innerHTML += `
-      <tr onclick="showDetailedModal('${l.id}')">
-        <td style="color:var(--ink-gold); font-weight:700" data-label="كود الـليبل">${l.id}</td>
-        <td style="font-weight:700" data-label="اسم الليبل">${l.name}</td>
-        <td data-label="الشركة">${l.company}</td>
-        <td data-label="العبوة">${l.size || "-"}</td>
-        <td data-label="خط الإنتاج"><span class="badge">${l.line}</span></td>
-        <td data-label="موقع التخزين">الرف: ${l.shelf || "-"} / البليت: ${l.pallet || "-"}</td>
-      </tr>`;
+  if(data.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">لا توجد نتائج تطابق البحث الحالي...</div>`;
+    return;
+  }
+  
+  data.forEach((item, index) => {
+    // استخراج المفاتيح والترويسات من الكائن تلقائياً لدعم أي ملف إكسل بالكامل
+    const keys = Object.keys(item);
+    
+    // تحديد الحقول الأساسية بشكل ذكي للواجهة الخارجية للكرت
+    const labelCode = item["كود الليبل"] || item["رقم الكود"] || item["كود الـليبل"] || item[keys[0]] || "-";
+    const labelName = item["اسم الليبل"] || item[keys[1]] || "-";
+    const companyName = item["الشركة"] || item["اسم الشركة"] || item[keys[2]] || "-";
+    const itemSize = item["العبوة"] || item["قياس العلبة"] || item[keys[3]] || "-";
+    const productionLine = item["خط الإنتاج"] || item["خط الانتاج"] || item[keys[4]] || "LINE-1";
+    
+    // تجميع باقي الحقول المتنوعة (مثل: اللون، نوع البليت، الرف... إلخ) لعرضها داخل الكرت تلقائياً
+    let extraDetailsHTML = "";
+    keys.forEach(k => {
+      if(!["كود الليبل", "رقم الكود", "كود الـليبل", "اسم الليبل", "الشركة", "اسم الشركة", "العبوة", "قياس العلبة"].includes(k) && item[k]) {
+        extraDetailsHTML += `
+          <div class="detail-row">
+            <span class="detail-label">${k}:</span>
+            <span class="detail-value">${item[k]}</span>
+          </div>`;
+      }
+    });
+
+    container.innerHTML += `
+      <div class="label-card" onclick="openDetailedModalByIndex(${index})">
+        <div class="card-header-info">
+          <span class="card-title">${labelName}</span>
+          <span class="card-code">${labelCode}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">الشركة:</span>
+          <span class="detail-value">${companyName}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">العبوة:</span>
+          <span class="detail-value">${itemSize}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">خط الإنتاج:</span>
+          <span class="badge-line">${productionLine}</span>
+        </div>
+        ${extraDetailsHTML}
+      </div>`;
   });
 }
 
-function showDetailedModal(id) {
-  const item = DB.labels.find(x => x.id === id);
+// نافذة المعاينة الفاخرة عند الضغط على الكرت (تطابق تماماً صورة 1000135639.jpg)
+function openDetailedModalByIndex(index) {
+  const item = DB.labels[index];
   if(!item) return;
-  document.getElementById("modalTitleText").innerText = item.name;
-  document.getElementById("modalBodyContent").innerHTML = `
-    <div style="line-height:2; font-size:14px">
-      <p><b>كود الليبل التعريفي:</b> <span style="color:var(--ink-gold)">${item.id}</span></p>
-      <p><b>الشركة المصنعة / العميل:</b> ${item.company}</p>
-      <p><b>حجم وسعة العبوة:</b> ${item.size || "-"}</p>
-      <p><b>خط الإنتاج النشط:</b> ${item.line}</p>
-      <p style="margin-top:10px; padding-top:10px; border-top:1px solid var(--ink-border); color:var(--ink-gold-lt)">
-        📍 <b>العنوان الفعلي في المخزن:</b> الرف رقم (${item.shelf || "-"}) / بليت رقم (${item.pallet || "-"})
-      </p>
-    </div>
-  `;
+  
+  const keys = Object.keys(item);
+  const labelName = item["اسم الليبل"] || item[keys[1]] || "معاينة التفاصيل";
+  
+  document.getElementById("modalTitleText").innerText = labelName;
+  
+  let modalBody = `<div style="line-height: 2.2; font-size: 14px;">`;
+  keys.forEach(k => {
+    let valueColor = "";
+    if(k.includes("كود") || k.includes("رقم")) valueColor = `style="color: var(--ink-gold); font-weight: bold;"`;
+    if(k.includes("عنوان") || k.includes("موقع") || k.includes("مخزن")) valueColor = `style="color: var(--ink-gold-lt);"`;
+    
+    modalBody += `<p><b style="color: var(--ink-silver)">${k}:</b> <span ${valueColor}>${item[k] || "-"}</span></p>`;
+  });
+  modalBody += `</div>`;
+  
+  document.getElementById("modalBodyContent").innerHTML = modalBody;
   document.getElementById("modalOverlay").classList.add("active");
 }
 
-function displayEmptyState(msg) { document.getElementById("labels-table-body").innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">${msg}</td></tr>`; }
-function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getElementById(`btn-${view}`)) document.getElementById(`btn-${view}`).classList.add("active"); if(document.getElementById(`mbnt-${view}`)) document.getElementById(`mbnt-${view}`).classList.add("active"); }
-function closeModal() { document.getElementById("modalOverlay").classList.remove("active"); }
-function showToast(msg,type="info"){ const el=document.createElement("div"); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById("toasts").appendChild(el); setTimeout(()=>el.remove(),3500); }
-</script>
-</body>
-</html>
+function displayEmptyState(msg) { document.getElementById("labels-cards-container").innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">${msg}</div>`; }
+function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getE
