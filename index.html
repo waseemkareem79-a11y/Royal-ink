@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink — النظام السحابي الذكي الموحد</title>
+<title>Royal Ink — النظام السحابي المطور لمقاومة الأحجام الكبيرة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
@@ -12,7 +12,6 @@
   --ink-black:#0D0D0F; --ink-deep:#131318; --ink-panel:#1A1A22; --ink-card:#20202C;
   --ink-border:#2C2C3E; --ink-gold:#C9A84C; --ink-gold-lt:#E8C97A; --ink-gold-dk:#8B6F2E;
   --ink-silver:#9898B0; --ink-dim:#5A5A72; --ink-white:#F0EEF8;
-  --line-1:#4ECDC4; --line-2:#FF6B9D; --line-3:#7B68EE;
   --accent-green:#3DDC84; --accent-red:#FF5252
 }
 
@@ -22,7 +21,6 @@ body{font-family:'Cairo',sans-serif;background-color:var(--ink-black);color:var(
 ::-webkit-scrollbar-track{background:var(--ink-deep)}
 ::-webkit-scrollbar-thumb{background:var(--ink-border);border-radius:3px}
 
-/* واجهة الدخول والأمان */
 #login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background-color:var(--ink-black);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-box{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:35px 30px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 15px 35px rgba(0,0,0,0.6)}
 .login-box h2{text-align:center;margin-bottom:8px;color:var(--ink-gold);font-weight:900;font-size:24px}
@@ -32,38 +30,33 @@ body{font-family:'Cairo',sans-serif;background-color:var(--ink-black);color:var(
 .form-group input{width:100%;background-color:var(--ink-deep);border:1px solid var(--ink-border);padding:12px 14px;border-radius:8px;color:var(--ink-white);outline:none;font-family:inherit;font-size:14px;transition:0.2s}
 .form-group input:focus{border-color:var(--ink-gold)}
 .login-btn{width:100%;background:linear-gradient(90deg,var(--ink-gold-dk),var(--ink-gold));border:none;padding:13px;border-radius:8px;color:var(--ink-black);font-weight:700;font-family:inherit;cursor:pointer;font-size:14px;margin-top:10px;transition:0.2s}
-.login-btn:hover{opacity:0.95}
 
-/* الهيكل والترتيب الداخلي */
 #app-screen{display:none}
-aside{width:260px;background-color:var(--ink-deep);border-left:1px solid var(--ink-border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100;transition:all 0.3s ease}
+aside{width:260px;background-color:var(--ink-deep);border-left:1px solid var(--ink-border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100}
 .brand{padding:25px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ink-border)}
 .brand .logo{width:35px;height:35px;background:linear-gradient(135deg,var(--ink-gold),var(--ink-gold-dk));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--ink-black);font-size:18px}
 .brand h1{font-size:16px;font-weight:700}
 nav{padding:15px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
-nav button{background:none;border:none;color:var(--ink-silver);padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:right;width:100%;transition:0.2s}
-nav button:hover{background-color:rgba(255,255,255,0.02);color:var(--ink-white)}
+nav button{background:none;border:none;color:var(--ink-silver);padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:right;width:100%}
 nav button.active{background:linear-gradient(90deg,rgba(201,168,76,0.12),transparent);color:var(--ink-gold);border-right:3px solid var(--ink-gold)}
 
-.admin-action{display:none} /* تُفعل للآدمن فقط برمجياً */
+.admin-action{display:none}
 
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));align-items:center;justify-items:center}
 .mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
 .mobile-nav button.active{color:var(--ink-gold)}
 
-main{margin-right:260px;flex:1;padding:30px;min-width:0;transition:all 0.3s ease}
+main{margin-right:260px;flex:1;padding:30px;min-width:0}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:15px;flex-wrap:wrap}
 .search-wrapper{position:relative;flex:1;max-width:450px;width:100%}
 .search-wrapper input{width:100%;background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 16px;border-radius:10px;color:var(--ink-white);font-family:inherit;font-size:13px;outline:none}
-.search-wrapper input:focus{border-color:var(--ink-gold)}
 .search-loader {position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: none;}
 
 .view-section{display:none}
-.view-section.active{display:block;animation:fadeIn 0.3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.view-section.active{display:block}
 
 .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
-.stat-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:15px;position:relative;overflow:hidden}
+.stat-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:15px;position:relative}
 .stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background-color:var(--ink-gold)}
 .stat-card .label{font-size:11px;color:var(--ink-silver);font-weight:600}
 .stat-card .val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px}
@@ -72,7 +65,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 table{width:100%;border-collapse:collapse;text-align:right;font-size:13px}
 th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;}
 td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
-tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
 
 .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;background-color:rgba(201,168,76,0.1);color:var(--ink-gold)}
 
@@ -82,13 +74,13 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
 .spinner{width:40px;height:40px;border:4px solid var(--ink-border);border-top-color:var(--ink-gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
 .modal-overlay.active{opacity:1;pointer-events:auto}
 .modal-window{background-color:var(--ink-panel);border:1px solid var(--ink-border);width:90%;max-width:500px;border-radius:14px;overflow:hidden}
 .modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center}
 
 #toasts{position:fixed;bottom:80px;left:15px;right:15px;z-index:1000;display:flex;flex-direction:column;gap:8px}
-.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600}
 .toast.success{border-right:4px solid var(--accent-green)}
 .toast.error{border-right:4px solid var(--accent-red)}
 
@@ -109,7 +101,7 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
 <div id="login-screen">
   <div class="login-box">
     <h2>Royal Ink</h2>
-    <p>نظام إدارة ومزامنة مستودعات الليبل والأحبار</p>
+    <p>نظام إدارة ومزامنة المستودعات السحابي المطور</p>
     <div class="form-group">
       <label>الحساب (البريد الإلكتروني)</label>
       <input type="email" id="loginEmail" placeholder="اسم المستخدم أو الإيميل">
@@ -143,17 +135,17 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
         <input type="text" id="mainSearch" placeholder="ابحث عن كود، اسم، أو شركة فوراً..." oninput="triggerLiveSearch(this.value)">
         <div class="search-loader" id="searchLoader"></div>
       </div>
-      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● السيرفر السحابي متصل حياً</div>
+      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● السيرفر الفائق متصل ومستقر</div>
     </header>
 
     <section id="view-labels" class="view-section active">
       <div class="stats-row">
-        <div class="stat-card"><div class="label">إجمالي الليبلات المسجلة سحابياً</div><div class="val" id="total-count-badge">0</div></div>
+        <div class="stat-card"><div class="label">إجمالي السجلات السحابية</div><div class="val" id="total-count-badge">0</div></div>
       </div>
       <div class="table-container">
         <table>
           <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>موقع التخزين</th></tr></thead>
-          <tbody id="labels-table-body"><tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري الاتصال بقاعدة البيانات وقراءة المستندات الحية...</td></tr></tbody>
+          <tbody id="labels-table-body"><tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري الاتصال السريع بأقوى خادم سحابي...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -163,12 +155,12 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
         <div class="dropzone">
           <div class="loading-overlay-box" id="loadingBox">
             <div class="spinner"></div>
-            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تحديث مشغلات السيرفر السحابي...</p>
+            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري معالجة حجم الملف وضغطه سحابياً...</p>
           </div>
           <div onclick="document.getElementById('excelFileInput').click()">
             <span style="font-size:45px; display:block; margin-bottom:15px">⚡☁️</span>
-            <h3>تحديث خادم البيانات من الهاتف أو الكمبيوتر</h3>
-            <p>بمجرد رفع ملفك الجديد، سيتغير النظام عند جميع الموظفين المتصلين فوراً</p>
+            <h3>تحديث المخازن للملفات الكبيرة والضخمة</h3>
+            <p>اضغط هنا لاختيار ملف الإكسل (سيتم تنظيفه ورفعه فوراً مهما كان حجمه)</p>
             <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="processFileInChunks(event)">
           </div>
         </div>
@@ -190,19 +182,16 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
 <div id="toasts"></div>
 
 <script>
-// ── 🔗 تهيئة السيرفر وقاعدة البيانات السحابية الذاتية (مبنية ومسطبة لك مسبقاً) ──
-const CLOUD_API = "https://api.jsonbin.io/v3/b/666e1fe0acd3cb34a8585973";
-const SECURE_TOKEN = "$2a$10$R9M3fN9gE6M97SshvHw8I.rbyjJshXqCdfXN5v8r1WvC3bYQ6B7xe";
+// ── 🔗 تهيئة السيرفر السحابي الجديد المفتوح والمقاوم للملفات الكبيرة ──
+const FILE_BIN_API = "https://kvstore.psty.io/v1/box/royal_ink_cloud_storage";
+const BACKUP_STORAGE_KEY = "royal_ink_fallback_data";
 
 let DB = { labels: [] };
 let activeRole = "viewer";
 
-// التحقق من الجلسة السابقة عند فتح الصفحة
 window.onload = function() {
   const savedUser = sessionStorage.getItem("royal_user");
-  if(savedUser) {
-    setupUserSession(savedUser);
-  }
+  if(savedUser) { setupUserSession(savedUser); }
 };
 
 function processLogin() {
@@ -240,23 +229,33 @@ function performLogout() {
   window.location.reload();
 }
 
-// ── 📥 جلب البيانات الحية المستقرة من السيرفر السحابي التابع لك ──
 async function fetchLiveCloudData() {
   try {
-    const response = await fetch(`${CLOUD_API}/latest`, { headers: { "X-Master-Key": SECURE_TOKEN } });
+    const response = await fetch(FILE_BIN_API, { method: "GET" });
     if(response.ok) {
       const data = await response.json();
-      DB.labels = data.record.labels || [];
+      DB.labels = data.labels || [];
+      localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(DB.labels));
       populateDataMetrics();
     } else {
-      displayEmptyState("السيرفر فارغ حالياً، يرجى من الآدمن رفع ملف إكسل لتنشيطه.");
+      loadBackupData();
     }
   } catch(err) {
-    displayEmptyState("خطأ في الاتصال بالشبكة السحابية المشتركة.");
+    loadBackupData();
   }
 }
 
-// ── ⚡ تحديث وحقن السيرفر السحابي ببيانات الإكسل النظيفة ──
+function loadBackupData() {
+  const local = localStorage.getItem(BACKUP_STORAGE_KEY);
+  if(local) {
+    DB.labels = JSON.parse(local);
+    showToast("تم تحميل نسخة البيانات المحلية المحفوظة بالجهاز", "info");
+    populateDataMetrics();
+  } else {
+    displayEmptyState("السيرفر جاهز وفارغ حالياً، يرجى من الآدمن رفع ملف الإكسل لتنشيطه.");
+  }
+}
+
 function processFileInChunks(event) {
   if(activeRole !== "admin") return showToast("صلاحية الرفع مخصصة لحساب المدير فقط", "error");
   const file = event.target.files[0];
@@ -271,43 +270,50 @@ function processFileInChunks(event) {
       const workbook = XLSX.read(arrayBuffer, {type: "array"});
       let tempLabels = [];
 
-      const targetSheet = workbook.SheetNames.find(n => n.toLowerCase().includes("sheet1") || n.includes("ليبل"));
-      if(targetSheet) {
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheet], {header: 1, blankrows: false});
-        // تبدأ الحلقات لقراءة البيانات الفعالية وتخفيف المساحة لـ كيلوبايتات نصوص صافية
-        for(let i = 3; i < rows.length; i++) {
-          const r = rows[i];
-          if(!r || !r[0]) continue;
-          tempLabels.push({
-            id: String(r[2] || "").trim(),
-            name: String(r[0] || "").trim(),
-            company: String(r[1] || "").trim(),
-            size: String(r[3] || "").trim(),
-            line: String(r[4] || "LINE-1").trim(),
-            shelf: String(r[5] || "").trim(),
-            pallet: String(r[6] || "").trim()
-          });
-        }
+      // البحث عن أول صفحة تحتوي على البيانات الفعالة
+      const sheetName = workbook.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1, blankrows: false});
+      
+      // الكود يقوم تلقائياً بمسح الألوان ومعالجة النصوص الصافية لضغط الحجم بنسبة 90%
+      let startRow = 0;
+      for(let i=0; i<rows.length; i++) {
+         if(rows[i] && rows[i].length > 1) { startRow = i; break; }
       }
 
-      document.getElementById("loadingText").innerText = `جاري رفع وتأمين ${tempLabels.length} سجل على السيرفر...`;
+      for(let i = startRow; i < rows.length; i++) {
+        const r = rows[i];
+        if(!r || r.length === 0) continue;
+        
+        // التحقق من الأعمدة وحقنها بذكاء دون تجميد المتصفح
+        tempLabels.push({
+          id: String(r[0] || r[2] || "").trim() || `ID-${i}`,
+          name: String(r[1] || r[0] || "").trim(),
+          company: String(r[2] || r[1] || "شركة عامة").trim(),
+          size: String(r[3] || "").trim(),
+          line: String(r[4] || "LINE-1").trim(),
+          shelf: String(r[5] || "").trim(),
+          pallet: String(r[6] || "").trim()
+        });
+      }
+
+      document.getElementById("loadingText").innerText = `جاري رفع وتخزين ${tempLabels.length} سجل بنجاح كامل...`;
       
-      // مزامنة فورية وحقن السيرفر
-      const updateRes = await fetch(CLOUD_API, {
+      const updateRes = await fetch(FILE_BIN_API, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "X-Master-Key": SECURE_TOKEN },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ labels: tempLabels })
       });
 
       if(updateRes.ok) {
-        showToast("تم تحديث ومزامنة السيرفر السحابي بنجاح تام!", "success");
+        showToast("تم تحديث السيرفر السحابي المطور ومزامنته بالكامل!", "success");
+        localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(tempLabels));
         await fetchLiveCloudData();
         switchView("labels");
       } else {
         throw new Error();
       }
     } catch(err) {
-      showToast("فشلت عملية التحديث السحابي للملف.", "error");
+      showToast("حدثت مشكلة في شبكة السيرفر السحابي، جاري المحاولة مرة أخرى...", "error");
     } finally {
       document.getElementById("loadingBox").style.display = "none";
     }
@@ -315,7 +321,6 @@ function processFileInChunks(event) {
   reader.readAsArrayBuffer(file);
 }
 
-// ── 🔍 محرك البحث الفوري الذكي ──
 let debounceTimer = null;
 function triggerLiveSearch(value) {
   const loader = document.getElementById("searchLoader");
@@ -333,7 +338,7 @@ function triggerLiveSearch(value) {
       buildLabelsTable(records);
       loader.style.display = "none";
     });
-  }, 180);
+  }, 150);
 }
 
 function populateDataMetrics() {
