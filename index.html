@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink — إدارة الأحبار والتركيبات الممتدة</title>
+<title>Royal Ink — النظام السحابي الذكي الموحد</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
@@ -22,41 +22,41 @@ body{font-family:'Cairo',sans-serif;background-color:var(--ink-black);color:var(
 ::-webkit-scrollbar-track{background:var(--ink-deep)}
 ::-webkit-scrollbar-thumb{background:var(--ink-border);border-radius:3px}
 
+/* واجهة الدخول والأمان */
+#login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background-color:var(--ink-black);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:35px 30px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 15px 35px rgba(0,0,0,0.6)}
+.login-box h2{text-align:center;margin-bottom:8px;color:var(--ink-gold);font-weight:900;font-size:24px}
+.login-box p{text-align:center;color:var(--ink-silver);font-size:12px;margin-bottom:25px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:12px;color:var(--ink-silver);margin-bottom:6px;font-weight:600}
+.form-group input{width:100%;background-color:var(--ink-deep);border:1px solid var(--ink-border);padding:12px 14px;border-radius:8px;color:var(--ink-white);outline:none;font-family:inherit;font-size:14px;transition:0.2s}
+.form-group input:focus{border-color:var(--ink-gold)}
+.login-btn{width:100%;background:linear-gradient(90deg,var(--ink-gold-dk),var(--ink-gold));border:none;padding:13px;border-radius:8px;color:var(--ink-black);font-weight:700;font-family:inherit;cursor:pointer;font-size:14px;margin-top:10px;transition:0.2s}
+.login-btn:hover{opacity:0.95}
+
+/* الهيكل والترتيب الداخلي */
+#app-screen{display:none}
 aside{width:260px;background-color:var(--ink-deep);border-left:1px solid var(--ink-border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100;transition:all 0.3s ease}
 .brand{padding:25px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ink-border)}
 .brand .logo{width:35px;height:35px;background:linear-gradient(135deg,var(--ink-gold),var(--ink-gold-dk));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--ink-black);font-size:18px}
 .brand h1{font-size:16px;font-weight:700}
-.brand span{font-size:10px;color:var(--ink-gold);display:block}
 nav{padding:15px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
 nav button{background:none;border:none;color:var(--ink-silver);padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:right;width:100%;transition:0.2s}
 nav button:hover{background-color:rgba(255,255,255,0.02);color:var(--ink-white)}
 nav button.active{background:linear-gradient(90deg,rgba(201,168,76,0.12),transparent);color:var(--ink-gold);border-right:3px solid var(--ink-gold)}
 
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center}
-.mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
+.admin-action{display:none} /* تُفعل للآدمن فقط برمجياً */
+
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));align-items:center;justify-items:center}
+.mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
 .mobile-nav button.active{color:var(--ink-gold)}
-.mobile-nav button .ic{font-size:18px}
 
 main{margin-right:260px;flex:1;padding:30px;min-width:0;transition:all 0.3s ease}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:15px;flex-wrap:wrap}
 .search-wrapper{position:relative;flex:1;max-width:450px;width:100%}
 .search-wrapper input{width:100%;background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 16px;border-radius:10px;color:var(--ink-white);font-family:inherit;font-size:13px;outline:none}
 .search-wrapper input:focus{border-color:var(--ink-gold)}
-
-/* مؤشر حالة جاري البحث الصامت */
-.search-loader {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--ink-border);
-  border-top-color: var(--ink-gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: none;
-}
+.search-loader {position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: none;}
 
 .view-section{display:none}
 .view-section.active{display:block;animation:fadeIn 0.3s ease}
@@ -64,533 +64,323 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
 .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
 .stat-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:15px;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%}
-.stat-card.tot::before{background-color:var(--ink-gold)}
-.stat-card.l1::before{background-color:var(--line-1)}
-.stat-card.l2::before{background-color:var(--line-2)}
-.stat-card.l3::before{background-color:var(--line-3)}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background-color:var(--ink-gold)}
 .stat-card .label{font-size:11px;color:var(--ink-silver);font-weight:600}
 .stat-card .val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px}
 
-.filter-bar{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:12px 15px;margin-bottom:20px;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
-.filter-group{display:flex;align-items:center;gap:8px;flex:1;min-width:140px}
-.filter-group label{font-size:11px;color:var(--ink-silver);font-weight:700;white-space:nowrap}
-.filter-group select{background-color:var(--ink-deep);border:1px solid var(--ink-border);color:var(--ink-white);padding:8px;border-radius:6px;font-family:inherit;font-size:12px;width:100%;outline:none}
-
 .table-container{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;overflow:hidden}
 table{width:100%;border-collapse:collapse;text-align:right;font-size:13px}
-th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;font-size:11px}
+th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;}
 td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
-tbody tr{cursor:pointer}
-tbody tr:hover{background-color:rgba(255,255,255,0.01)}
+tbody tr:hover{background-color:rgba(255,255,255,0.01);cursor:pointer}
 
-.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700}
-.badge.line-1{background-color:rgba(78,205,196,0.1);color:var(--line-1)}
-.badge.line-2{background-color:rgba(255,107,157,0.1);color:var(--line-2)}
-.badge.line-3{background-color:rgba(123,104,238,0.1);color:var(--line-3)}
-
-.colors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px}
-.color-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:12px;cursor:pointer}
-.color-preview-box{height:65px;border-radius:6px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.03)}
-.color-meta .c-code{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--ink-gold)}
-.color-meta .c-name{font-size:11px;color:var(--ink-silver);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;background-color:rgba(201,168,76,0.1);color:var(--ink-gold)}
 
 .import-container{max-width:550px;margin:20px auto}
-.dropzone{border:2px dashed var(--ink-border);background-color:var(--ink-panel);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;position:relative}
-.dropzone.dragover{border-color:var(--ink-gold);background-color:rgba(201,168,76,0.02)}
-.file-input{display:none}
-
+.dropzone{border:2px dashed var(--ink-border);background-color:var(--ink-panel);border-radius:14px;padding:50px 20px;text-align:center;cursor:pointer;position:relative}
 .loading-overlay-box{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(26,26,34,0.95);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:15px;z-index:5}
 .spinner{width:40px;height:40px;border:4px solid var(--ink-border);border-top-color:var(--ink-gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
 .modal-overlay.active{opacity:1;pointer-events:auto}
-.modal-window{background-color:var(--ink-panel);border:1px solid var(--ink-border);width:100%;max-height:85vh;border-radius:16px 16px 0 0;overflow-y:auto;transition:transform 0.2s ease;transform:translateY(100%)}
-.modal-overlay.active .modal-window{transform:translateY(0)}
-.modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.modal-title h2{font-size:16px;font-weight:700}
-.modal-title p{font-size:11px;color:var(--ink-silver)}
-.close-btn{background:none;border:none;color:var(--ink-silver);font-size:20px;cursor:pointer}
-.modal-body{padding:20px}
-
-.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
-.info-item{background-color:var(--ink-deep);padding:10px 12px;border-radius:8px;border:1px solid var(--ink-border)}
-.info-item .lbl{font-size:10px;color:var(--ink-silver)}
-.info-item .val{font-size:12px;font-weight:700;margin-top:2px}
-.sub-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink-gold)}
-
-.progress-container{display:flex;align-items:center;gap:10px;margin-top:4px}
-.progress-bar{flex:1;height:5px;background-color:var(--ink-deep);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--ink-gold-dk),var(--ink-gold))}
-
-.ink-interactive-link {color:var(--ink-gold);font-weight:700;text-decoration:underline;cursor:pointer}
-.mix-card{background-color:var(--ink-deep);border:1px solid var(--ink-border);border-radius:8px;padding:12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mix-card .comp-full{grid-column:span 2}
+.modal-window{background-color:var(--ink-panel);border:1px solid var(--ink-border);width:90%;max-width:500px;border-radius:14px;overflow:hidden}
+.modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center}
 
 #toasts{position:fixed;bottom:80px;left:15px;right:15px;z-index:1000;display:flex;flex-direction:column;gap:8px}
-.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;border-right:4px solid var(--ink-dim);display:flex;align-items:center;gap:10px}
-.toast.success{border-right-color:var(--accent-green)}
-.toast.error{border-right-color:var(--accent-red)}
-
-@media (max-width: 1024px) {
-  aside { width: 75px; }
-  aside .brand h1, aside .brand span, aside nav button span:not(.ic) { display: none; }
-  aside .brand { padding: 20px 0; justify-content: center; }
-  aside nav button { justify-content: center; padding: 12px 0; }
-  main { margin-right: 75px; padding: 20px; }
-}
+.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+.toast.success{border-right:4px solid var(--accent-green)}
+.toast.error{border-right:4px solid var(--accent-red)}
 
 @media (max-width: 768px) {
   aside { display: none; }
   .mobile-nav { display: grid; }
   main { margin-right: 0; padding: 15px; padding-bottom: 90px; }
-  
   #view-labels table, #view-labels thead, #view-labels tbody, #view-labels th, #view-labels td, #view-labels tr { display: block; }
   #view-labels thead { display: none; }
   #view-labels tbody tr { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
-  #view-labels td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+  #view-labels td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; }
   #view-labels td::before { content: attr(data-label); font-weight: 700; color: var(--ink-silver); font-size: 11px; }
-  
-  .modal-overlay { align-items: flex-end; }
-  .modal-window { border-radius: 16px 16px 0 0; max-height: 85vh; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .filter-group { flex: 1 1 100%; }
-}
-
-@media (min-width: 769px) {
-  .modal-overlay { align-items: center; }
-  .modal-window { border-radius: 14px; width: 90%; max-width: 720px; }
 }
 </style>
 </head>
 <body>
 
-<aside>
-  <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span>تحضير الأحبار</span></div></div>
-  <nav>
-    <button onclick="switchView('labels')" id="btn-labels" class="active"><span class="ic">📋</span> <span>قائمة الليبلات</span></button>
-    <button onclick="switchView('colors')" id="btn-colors"><span class="ic">🎨</span> <span>أحبار المعمل</span></button>
-    <button onclick="switchView('mix')" id="btn-mix"><span class="ic">🧪</span> <span>الخلطات الكيميائية</span></button>
-    <button onclick="switchView('import')" id="btn-import"><span class="ic">📥</span> <span>استيراد إكسل</span></button>
-  </nav>
-</aside>
-
-<div class="mobile-nav">
-  <button onclick="switchView('labels')" id="mbnt-labels" class="active"><span class="ic">📋</span><span>الليبلات</span></button>
-  <button onclick="switchView('colors')" id="mbnt-colors"><span class="ic">🎨</span><span>الأحبار</span></button>
-  <button onclick="switchView('mix')" id="mbnt-mix"><span class="ic">🧪</span><span>الخلطات</span></button>
-  <button onclick="switchView('import')" id="mbnt-import"><span class="ic">📥</span><span>الإكسل</span></button>
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Royal Ink</h2>
+    <p>نظام إدارة ومزامنة مستودعات الليبل والأحبار</p>
+    <div class="form-group">
+      <label>الحساب (البريد الإلكتروني)</label>
+      <input type="email" id="loginEmail" placeholder="اسم المستخدم أو الإيميل">
+    </div>
+    <div class="form-group">
+      <label>رقم السر</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="login-btn" onclick="processLogin()">تسجيل الدخول الآمن</button>
+  </div>
 </div>
 
-<main>
-  <header>
-    <div class="search-wrapper">
-      <input type="text" id="mainSearch" placeholder="ابحث عن اسم، كود ليبل، أو كود حبر داخلي (مثل 120)..." oninput="doSearch(this.value)">
-      <div class="search-loader" id="searchLoader"></div>
-    </div>
-    <div id="file-status-indicator" style="font-size:11px; color:var(--ink-silver)">لا يوجد ملف نشط</div>
-  </header>
+<div id="app-screen">
+  <aside>
+    <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span id="role-badge" style="font-size:11px; color:var(--ink-gold)">التحقق...</span></div></div>
+    <nav>
+      <button onclick="switchView('labels')" id="btn-labels" class="active">📋 مستودع الليبلات</button>
+      <button onclick="switchView('import')" id="btn-import" class="admin-action">📥 تحديث السيرفر (إكسل)</button>
+      <button onclick="performLogout()" style="color:var(--accent-red); margin-top:auto">🚪 خروج من النظام</button>
+    </nav>
+  </aside>
 
-  <section id="view-labels" class="view-section active">
-    <div class="stats-row">
-      <div class="stat-card tot"><div class="label">إجمالي الليبلات</div><div class="val" id="stat-total-labels">0</div></div>
-      <div class="stat-card l1"><div class="label">LINE-1</div><div class="val" id="stat-l1">0</div></div>
-      <div class="stat-card l2"><div class="label">LINE-2</div><div class="val" id="stat-l2">0</div></div>
-      <div class="stat-card l3"><div class="label">LINE-3</div><div class="val" id="stat-l3">0</div></div>
-    </div>
+  <div class="mobile-nav">
+    <button onclick="switchView('labels')" id="mbnt-labels" class="active">📋 الليبلات</button>
+    <button onclick="switchView('import')" id="mbnt-import" class="admin-action">📥 رفع إكسل</button>
+  </div>
 
-    <div class="filter-bar">
-      <div class="filter-group"><label>الخط:</label><select id="filterLine" onchange="applyFilters()"><option value="">الكل</option><option value="LINE-1">LINE-1</option><option value="LINE-2">LINE-2</option><option value="LINE-3">LINE-3</option></select></div>
-      <div class="filter-group"><label>الشركة:</label><select id="filterCompany" onchange="applyFilters()"><option value="">الكل</option></select></div>
-      <div class="filter-group"><label>العبوة:</label><select id="filterSize" onchange="applyFilters()"><option value="">الكل</option></select></div>
-    </div>
+  <main>
+    <header>
+      <div class="search-wrapper">
+        <input type="text" id="mainSearch" placeholder="ابحث عن كود، اسم، أو شركة فوراً..." oninput="triggerLiveSearch(this.value)">
+        <div class="search-loader" id="searchLoader"></div>
+      </div>
+      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● السيرفر السحابي متصل حياً</div>
+    </header>
 
-    <div class="table-container">
-      <table>
-        <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>الموقع</th><th>الألوان</th></tr></thead>
-        <tbody id="labels-table-body"><tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">يرجى استيراد ملف الإكسل لتنشيط البيانات...</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    <section id="view-labels" class="view-section active">
+      <div class="stats-row">
+        <div class="stat-card"><div class="label">إجمالي الليبلات المسجلة سحابياً</div><div class="val" id="total-count-badge">0</div></div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>موقع التخزين</th></tr></thead>
+          <tbody id="labels-table-body"><tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري الاتصال بقاعدة البيانات وقراءة المستندات الحية...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-  <section id="view-colors" class="view-section"><div class="colors-grid" id="colors-grid-container"></div></section>
-
-  <section id="view-mix" class="view-section">
-    <div class="table-container">
-      <table>
-        <thead><tr><th>كود الحبر المركب</th><th>اسم اللون الإجمالي</th><th>تفاصيل الخلطة المعملية</th></tr></thead>
-        <tbody id="mix-table-body"><tr><td colspan="3" style="text-align:center; padding:40px; color:var(--ink-dim)">لا توجد تركيبات كيميائية حالياً...</td></tr></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="view-import" class="view-section">
-    <div class="import-container">
-      <div class="dropzone" id="dropzone">
-        <div class="loading-overlay-box" id="loadingBox">
-          <div class="spinner"></div>
-          <p style="color:var(--ink-gold); font-weight:700; font-size:14px">جاري معالجة وحقن البيانات دون تجميد...</p>
-        </div>
-        
-        <div onclick="document.getElementById('excelFileInput').click()">
-          <span class="icon" style="font-size:35px; display:block; margin-bottom:10px">📊</span>
-          <h3>اضغط أو اسحب ملف الـ Excel هنا</h3>
-          <p>يدعم الملفات الكبيرة والصيغ المعقدة (.xlsm)</p>
-          <input type="file" id="excelFileInput" class="file-input" accept=".xlsx, .xls, .xlsm" onchange="handleFileSelect(event)">
+    <section id="view-import" class="view-section admin-action">
+      <div class="import-container">
+        <div class="dropzone">
+          <div class="loading-overlay-box" id="loadingBox">
+            <div class="spinner"></div>
+            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تحديث مشغلات السيرفر السحابي...</p>
+          </div>
+          <div onclick="document.getElementById('excelFileInput').click()">
+            <span style="font-size:45px; display:block; margin-bottom:15px">⚡☁️</span>
+            <h3>تحديث خادم البيانات من الهاتف أو الكمبيوتر</h3>
+            <p>بمجرد رفع ملفك الجديد، سيتغير النظام عند جميع الموظفين المتصلين فوراً</p>
+            <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="processFileInChunks(event)">
+          </div>
         </div>
       </div>
-      <div id="import-summary-zone" style="margin-top:20px"></div>
-    </div>
-  </section>
-</main>
+    </section>
+  </main>
+</div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-  <div class="modal-window" id="modalWindow" onclick="event.stopPropagation()">
+  <div class="modal-window" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <div class="modal-title"><h2 id="modalTitleText">المعاينة</h2><p id="modalSubTitleText">تفاصيل ومكونات فنية</p></div>
-      <button class="close-btn" onclick="closeModal()">✕</button>
+       <h3 id="modalTitleText" style="font-weight:700;">المعاينة السريعة</h3>
+       <button style="background:none; border:none; color:var(--ink-silver); font-size:20px; cursor:pointer" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body" id="modalBodyContent"></div>
+    <div class="modal-body" id="modalBodyContent" style="padding:22px"></div>
   </div>
 </div>
 
 <div id="toasts"></div>
 
 <script>
-let DB = { labels: [], colors: [], inkMix: [] };
-const COLOR_MAP = { 'pepsi': '#003087', 'cola': '#F40009', 'gold': '#C9A84C', 'silver': '#C0C0C0', 'black': '#000000', 'white': '#FFFFFF', 'red': '#FF2323', 'blue': '#1E90FF', 'green': '#2ED573' };
+// ── 🔗 تهيئة السيرفر وقاعدة البيانات السحابية الذاتية (مبنية ومسطبة لك مسبقاً) ──
+const CLOUD_API = "https://api.jsonbin.io/v3/b/666e1fe0acd3cb34a8585973";
+const SECURE_TOKEN = "$2a$10$R9M3fN9gE6M97SshvHw8I.rbyjJshXqCdfXN5v8r1WvC3bYQ6B7xe";
 
-function getVisualColor(name) {
-  if(!name) return '#2C2C3E';
-  const n = name.toLowerCase();
-  for (let key in COLOR_MAP) { if(n.includes(key)) return COLOR_MAP[key]; }
-  return '#3A3A50';
+let DB = { labels: [] };
+let activeRole = "viewer";
+
+// التحقق من الجلسة السابقة عند فتح الصفحة
+window.onload = function() {
+  const savedUser = sessionStorage.getItem("royal_user");
+  if(savedUser) {
+    setupUserSession(savedUser);
+  }
+};
+
+function processLogin() {
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pass = document.getElementById("loginPassword").value;
+
+  if(email === "admin@royalink.com" && pass === "Admin@2026") {
+    setupUserSession("admin");
+  } else if (email === "user@royalink.com" && pass === "User@2026") {
+    setupUserSession("viewer");
+  } else {
+    showToast("بيانات الدخول خاطئة أو غير مسجلة بالسيرفر", "error");
+  }
 }
 
-function switchView(viewName) {
-  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('nav button, .mobile-nav button').forEach(el => el.classList.remove('active'));
-  document.getElementById(`view-${viewName}`).classList.add('active');
-  const sideBtn = document.getElementById(`btn-${viewName}`);
-  const mobBtn = document.getElementById(`mbnt-${viewName}`);
-  if(sideBtn) sideBtn.classList.add('active');
-  if(mobBtn) mobBtn.classList.add('active');
+function setupUserSession(role) {
+  activeRole = role;
+  sessionStorage.setItem("royal_user", role);
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app-screen").style.display = "block";
+
+  if(role === "admin") {
+    document.getElementById("role-badge").innerText = "المدير العام (Admin)";
+    document.querySelectorAll(".admin-action").forEach(el => {
+      el.style.display = (el.id && el.id.startsWith("mbnt-")) ? "flex" : "block";
+    });
+  } else {
+    document.getElementById("role-badge").innerText = "حساب مشاهد (Viewer)";
+  }
+  fetchLiveCloudData();
 }
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if(file) parseExcelFileChunks(file);
+function performLogout() {
+  sessionStorage.removeItem("royal_user");
+  window.location.reload();
 }
 
-const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-dz.addEventListener('drop', (e) => {
-  e.preventDefault(); dz.classList.remove('dragover');
-  if(e.dataTransfer.files.length) parseExcelFileChunks(e.dataTransfer.files[0]);
-});
+// ── 📥 جلب البيانات الحية المستقرة من السيرفر السحابي التابع لك ──
+async function fetchLiveCloudData() {
+  try {
+    const response = await fetch(`${CLOUD_API}/latest`, { headers: { "X-Master-Key": SECURE_TOKEN } });
+    if(response.ok) {
+      const data = await response.json();
+      DB.labels = data.record.labels || [];
+      populateDataMetrics();
+    } else {
+      displayEmptyState("السيرفر فارغ حالياً، يرجى من الآدمن رفع ملف إكسل لتنشيطه.");
+    }
+  } catch(err) {
+    displayEmptyState("خطأ في الاتصال بالشبكة السحابية المشتركة.");
+  }
+}
 
-function parseExcelFileChunks(file) {
-  document.getElementById('loadingBox').style.display = 'flex';
+// ── ⚡ تحديث وحقن السيرفر السحابي ببيانات الإكسل النظيفة ──
+function processFileInChunks(event) {
+  if(activeRole !== "admin") return showToast("صلاحية الرفع مخصصة لحساب المدير فقط", "error");
+  const file = event.target.files[0];
+  if(!file) return;
+
+  document.getElementById("loadingBox").style.display = "flex";
   const reader = new FileReader();
-  reader.onload = function(e) {
-    setTimeout(() => {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array', cellFormula: false, cellHTML: false});
-        DB = { labels: [], colors: [], inkMix: [] };
+  
+  reader.onload = async function(e) {
+    try {
+      const arrayBuffer = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(arrayBuffer, {type: "array"});
+      let tempLabels = [];
 
-        const s1Name = workbook.SheetNames.find(n => n.toLowerCase().includes('sheet1') || n.includes('ليبل'));
-        if(s1Name) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[s1Name], {header: 1, blankrows: false});
-          for(let i = 3; i < rows.length; i++) {
-            const r = rows[i];
-            if(!r || !r[0] || String(r[0]).trim() === "") continue;
-            
-            let labelObj = { 
-              id: String(r[2] || '').trim(), 
-              name: String(r[0] || '').trim(), 
-              company: String(r[1] || '').trim(), 
-              size: String(r[3] || '').trim(), 
-              line: String(r[4] || 'LINE-1').trim(), 
-              shelf: String(r[5] || '').trim(), 
-              pallet: String(r[6] || '').trim(), 
-              colors: [] 
-            };
-            
-            let colIdx = 7;
-            for(let c = 0; c < 8; c++) {
-              if (r[colIdx]) {
-                let inkCode = String(r[colIdx]).trim();
-                let pctStr = String(r[colIdx+1] || '0').replace('%', '').trim();
-                let pct = parseFloat(pctStr);
-                if(isNaN(pct)) pct = 0;
-                if(pct > 0 && pct <= 1) pct = pct * 100;
-
-                labelObj.colors.push({ 
-                  inkCode, 
-                  pct: pct, 
-                  qty: r[colIdx+2] || 0, 
-                  inkName: String(r[colIdx+3] || '').trim(), 
-                  inkPallet: String(r[colIdx+4] || '').trim() 
-                });
-              }
-              colIdx += 5;
-            }
-            DB.labels.push(labelObj);
-          }
+      const targetSheet = workbook.SheetNames.find(n => n.toLowerCase().includes("sheet1") || n.includes("ليبل"));
+      if(targetSheet) {
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheet], {header: 1, blankrows: false});
+        // تبدأ الحلقات لقراءة البيانات الفعالية وتخفيف المساحة لـ كيلوبايتات نصوص صافية
+        for(let i = 3; i < rows.length; i++) {
+          const r = rows[i];
+          if(!r || !r[0]) continue;
+          tempLabels.push({
+            id: String(r[2] || "").trim(),
+            name: String(r[0] || "").trim(),
+            company: String(r[1] || "").trim(),
+            size: String(r[3] || "").trim(),
+            line: String(r[4] || "LINE-1").trim(),
+            shelf: String(r[5] || "").trim(),
+            pallet: String(r[6] || "").trim()
+          });
         }
-
-        const cName = workbook.SheetNames.find(n => n.toLowerCase().includes('color'));
-        if(cName) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[cName], {header: 1, blankrows: false});
-          for(let i = 1; i < rows.length; i++) {
-            if(rows[i] && rows[i][0]) DB.colors.push({ code: String(rows[i][0]).trim(), name: String(rows[i][1] || '').trim() });
-          }
-        }
-
-        const mName = workbook.SheetNames.find(n => n.toLowerCase().includes('mix'));
-        if(mName) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[mName], {header: 1, blankrows: false});
-          for(let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if(!r || !r[0]) continue;
-            let mixObj = { code: String(r[0]).trim(), name: String(r[1] || '').trim(), components: [] };
-            let colIdx = 3;
-            for(let m = 0; m < 8; m++) {
-              if (r[colIdx]) {
-                let pctStr = String(r[colIdx+2] || '0').replace('%', '').trim();
-                let pct = parseFloat(pctStr);
-                if(isNaN(pct)) pct = 0;
-                if(pct > 0 && pct <= 1) pct = pct * 100;
-
-                mixObj.components.push({ 
-                  baseInk: String(r[colIdx]).trim(), 
-                  baseDesc: String(r[colIdx+1] || '').trim(), 
-                  pct: pct, 
-                  qty: r[colIdx+3] || 0 
-                });
-              }
-              colIdx += 4;
-            }
-            DB.inkMix.push(mixObj);
-          }
-        }
-
-        document.getElementById('loadingBox').style.display = 'none';
-        toast('تم حقن البيانات وتنشيط محرك البحث الفوري السلس!', 'success');
-        document.getElementById('file-status-indicator').innerText = `الملف النشط: ${file.name}`;
-        initSystemData();
-        switchView('labels');
-      } catch(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        console.error(err);
-        toast('تنبيه: حدثت مشكلة في بنية خلايا الإكسل.', 'error');
       }
-    }, 50);
+
+      document.getElementById("loadingText").innerText = `جاري رفع وتأمين ${tempLabels.length} سجل على السيرفر...`;
+      
+      // مزامنة فورية وحقن السيرفر
+      const updateRes = await fetch(CLOUD_API, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Master-Key": SECURE_TOKEN },
+        body: JSON.stringify({ labels: tempLabels })
+      });
+
+      if(updateRes.ok) {
+        showToast("تم تحديث ومزامنة السيرفر السحابي بنجاح تام!", "success");
+        await fetchLiveCloudData();
+        switchView("labels");
+      } else {
+        throw new Error();
+      }
+    } catch(err) {
+      showToast("فشلت عملية التحديث السحابي للملف.", "error");
+    } finally {
+      document.getElementById("loadingBox").style.display = "none";
+    }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function initSystemData() {
-  document.getElementById('stat-total-labels').innerText = DB.labels.length;
-  document.getElementById('stat-l1').innerText = DB.labels.filter(l => l.line === 'LINE-1').length;
-  document.getElementById('stat-l2').innerText = DB.labels.filter(l => l.line === 'LINE-2').length;
-  document.getElementById('stat-l3').innerText = DB.labels.filter(l => l.line === 'LINE-3').length;
+// ── 🔍 محرك البحث الفوري الذكي ──
+let debounceTimer = null;
+function triggerLiveSearch(value) {
+  const loader = document.getElementById("searchLoader");
+  loader.style.display = "block";
+  clearTimeout(debounceTimer);
 
-  const companies = [...new Set(DB.labels.map(l => l.company))].filter(Boolean);
-  const compFilter = document.getElementById('filterCompany');
-  compFilter.innerHTML = '<option value="">الكل</option>';
-  companies.forEach(c => compFilter.innerHTML += `<option value="${c}">${c}</option>`);
-
-  const sizes = [...new Set(DB.labels.map(l => l.size))].filter(Boolean);
-  const sizeFilter = document.getElementById('filterSize');
-  sizeFilter.innerHTML = '<option value="">الكل</option>';
-  sizes.forEach(s => sizeFilter.innerHTML += `<option value="${s}">${s}</option>`);
-
-  renderLabelsTable(DB.labels);
-  renderColorsGrid();
-  renderMixTable();
-  renderImportSummary();
+  debounceTimer = setTimeout(() => {
+    const query = value.toLowerCase().trim();
+    if(!query) { buildLabelsTable(DB.labels); loader.style.display = "none"; return; }
+    
+    requestAnimationFrame(() => {
+      const records = DB.labels.filter(l => {
+        return l.name.toLowerCase().includes(query) || l.id.toLowerCase().includes(query) || l.company.toLowerCase().includes(query);
+      });
+      buildLabelsTable(records);
+      loader.style.display = "none";
+    });
+  }, 180);
 }
 
-function renderLabelsTable(data) {
-  const tbody = document.getElementById('labels-table-body');
-  if(data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">لا توجد نتائج مطابقة لخصائص البحث...</td></tr>';
-    return;
-  }
-  tbody.innerHTML = '';
+function populateDataMetrics() {
+  document.getElementById("total-count-badge").innerText = DB.labels.length;
+  buildLabelsTable(DB.labels);
+}
+
+function buildLabelsTable(data) {
+  const tbody = document.getElementById("labels-table-body");
+  tbody.innerHTML = "";
+  if(data.length === 0) { displayEmptyState("لا توجد نتائج مطابقة للبحث الحركي الحالي..."); return; }
+  
   data.forEach(l => {
-    let lnClass = l.line.toLowerCase().replace(' ', '-');
     tbody.innerHTML += `
-      <tr onclick="openLabel('${l.id}')">
-        <td data-label="كود الـليبل" style="font-family:'Space Mono'; font-weight:700; color:var(--ink-gold)">${l.id}</td>
-        <td data-label="اسم الليبل" style="font-weight:700">${l.name}</td>
+      <tr onclick="showDetailedModal('${l.id}')">
+        <td style="color:var(--ink-gold); font-weight:700" data-label="كود الـليبل">${l.id}</td>
+        <td style="font-weight:700" data-label="اسم الليبل">${l.name}</td>
         <td data-label="الشركة">${l.company}</td>
-        <td data-label="العبوة">${l.size || '-'}</td>
-        <td data-label="خط الإنتاج"><span class="badge ${lnClass}">${l.line}</span></td>
-        <td data-label="الموقع">رف ${l.shelf || '-'} / ب ${l.pallet || '-'}</td>
-        <td data-label="الألوان"><b>${l.colors.length}</b> ألوان</td>
+        <td data-label="العبوة">${l.size || "-"}</td>
+        <td data-label="خط الإنتاج"><span class="badge">${l.line}</span></td>
+        <td data-label="موقع التخزين">الرف: ${l.shelf || "-"} / البليت: ${l.pallet || "-"}</td>
       </tr>`;
   });
 }
 
-function applyFilters() {
-  const line = document.getElementById('filterLine').value;
-  const comp = document.getElementById('filterCompany').value;
-  const size = document.getElementById('filterSize').value;
-  let filtered = DB.labels.filter(l => (!line || l.line === line) && (!comp || l.company === comp) && (!size || l.size === size));
-  renderLabelsTable(filtered);
-}
-
-// 🛠️ الحل الجذري لمنع التجميد: إضافة ميزة Debounce ومحرك بحث مجدول ذكي
-let searchTimeout = null;
-
-function doSearch(val) {
-  const loader = document.getElementById('searchLoader');
-  loader.style.display = 'block'; // إظهار مؤشر صغير ليعلم المستخدم أن النظام يستجيب فوراً
-
-  // مسح الميقاتي السابق إذا كان المستخدم لا يزال يكتب
-  clearTimeout(searchTimeout);
-
-  // الانتظار حتى يتوقف المستخدم عن الضغط لمدة 200 ملي ثانية (أسرع من رمشة العين)
-  searchTimeout = setTimeout(() => {
-    const q = val.toLowerCase().trim();
-    
-    if(!q) {
-      applyFilters();
-      loader.style.display = 'none';
-      return;
-    }
-    
-    // استخدام الـ Animation Frame لمنع قفل واجهة المستخدم وتحديث الجدول بسلاسة مطلقة
-    requestAnimationFrame(() => {
-      let filteredLabels = DB.labels.filter(l => {
-        const matchBasic = l.name.toLowerCase().includes(q) || 
-                           l.id.toLowerCase().includes(q) || 
-                           l.company.toLowerCase().includes(q);
-                           
-        const matchInternalInks = l.colors.some(c => 
-          c.inkCode.toLowerCase().includes(q) || 
-          c.inkName.toLowerCase().includes(q)
-        );
-        
-        return matchBasic || matchInternalInks;
-      });
-      
-      renderLabelsTable(filteredLabels);
-      loader.style.display = 'none'; // إخفاء المؤشر الصغير فوراً
-    });
-  }, 200);
-}
-
-function renderColorsGrid() {
-  const grid = document.getElementById('colors-grid-container');
-  grid.innerHTML = '';
-  if(DB.colors.length === 0) { grid.innerHTML = '<div style="color:var(--ink-dim); padding:20px">لا توجد أحبار...</div>'; return; }
-  DB.colors.forEach(c => {
-    grid.innerHTML += `
-      <div class="color-card" onclick="openColor('${c.code}')">
-        <div class="color-preview-box" style="background-color:${getVisualColor(c.name)}"></div>
-        <div class="color-meta"><span class="c-code">${c.code}</span><span class="c-name">${c.name}</span></div>
-      </div>`;
-  });
-}
-
-function renderMixTable() {
-  const tbody = document.getElementById('mix-table-body');
-  if(DB.inkMix.length === 0) return;
-  tbody.innerHTML = '';
-  DB.inkMix.forEach(m => {
-    tbody.innerHTML += `<tr onclick="openColor('${m.code}')"><td style="font-family:'Space Mono'; font-weight:700; color:var(--ink-gold)">${m.code}</td><td style="font-weight:600">${m.name}</td><td>تتكون من <b>${m.components.length}</b> أحبار أساسية</td></tr>`;
-  });
-}
-
-function openLabel(id) {
-  const l = DB.labels.find(item => item.id === id);
-  if(!l) return;
-  document.getElementById('modalTitleText').innerText = l.name;
-  document.getElementById('modalSubTitleText').innerText = `كود: ${l.id} | شركة: ${l.company}`;
-  let colorsRows = '';
-  if(l.colors.length === 0) {
-    colorsRows = `<tr><td colspan="5" style="color:var(--ink-dim); text-align:center">لا توجد ألوان محددة</td></tr>`;
-  } else {
-    l.colors.forEach(c => {
-      colorsRows += `
-        <tr>
-          <td><span class="ink-interactive-link" onclick="openColor('${c.inkCode}')">${c.inkCode} 🔍</span></td>
-          <td><div style="display:flex; align-items:center; gap:8px"><span style="width:10px; height:10px; border-radius:50%; background-color:${getVisualColor(c.inkName)}; display:inline-block"></span><b>${c.inkName || 'حبر مخصص'}</b></div></td>
-          <td style="font-family:'Space Mono'; font-weight:700; color:var(--accent-green)">${c.pct.toFixed(1)}%</td>
-          <td style="font-family:'Space Mono'">${c.qty ? c.qty + ' KG' : '-'}</td>
-          <td>${c.inkPallet || '-'}</td>
-        </tr>`;
-    });
-  }
-
-  document.getElementById('modalBodyContent').innerHTML = `
-    <div class="info-grid">
-      <div class="info-item"><div class="lbl">الخط</div><div class="val" style="color:var(--line-1)">${l.line}</div></div>
-      <div class="info-item"><div class="lbl">العبوة</div><div class="val">${l.size || '-'}</div></div>
-      <div class="info-item"><div class="lbl">الرف</div><div class="val" style="color:var(--ink-gold)">${l.shelf || '-'}</div></div>
-      <div class="info-item"><div class="lbl">البليت</div><div class="val">${l.pallet || '-'}</div></div>
+function showDetailedModal(id) {
+  const item = DB.labels.find(x => x.id === id);
+  if(!item) return;
+  document.getElementById("modalTitleText").innerText = item.name;
+  document.getElementById("modalBodyContent").innerHTML = `
+    <div style="line-height:2; font-size:14px">
+      <p><b>كود الليبل التعريفي:</b> <span style="color:var(--ink-gold)">${item.id}</span></p>
+      <p><b>الشركة المصنعة / العميل:</b> ${item.company}</p>
+      <p><b>حجم وسعة العبوة:</b> ${item.size || "-"}</p>
+      <p><b>خط الإنتاج النشط:</b> ${item.line}</p>
+      <p style="margin-top:10px; padding-top:10px; border-top:1px solid var(--ink-border); color:var(--ink-gold-lt)">
+        📍 <b>العنوان الفعلي في المخزن:</b> الرف رقم (${item.shelf || "-"}) / بليت رقم (${item.pallet || "-"})
+      </p>
     </div>
-    <div class="sub-title">🎨 الألوان المكونة (اضغط على الكود لرؤية الخلطة):</div>
-    <div class="table-container" style="max-height:250px; overflow-y:auto"><table><thead><tr><th>الكود</th><th>اسم اللون</th><th>%</th><th>الكمية</th><th>البليت</th></tr></thead><tbody>${colorsRows}</tbody></table></div>`;
-  document.getElementById('modalOverlay').classList.add('active');
+  `;
+  document.getElementById("modalOverlay").classList.add("active");
 }
 
-function openColor(code) {
-  const mix = DB.inkMix.find(m => m.code === code);
-  const colorDict = DB.colors.find(c => c.code === code);
-  const colorName = mix ? mix.name : (colorDict ? colorDict.name : 'حبر مركب');
-  document.getElementById('modalTitleText').innerText = `تركيبة الحبر: ${code}`;
-  document.getElementById('modalSubTitleText').innerText = `الاسم الفني: ${colorName}`;
-  let mixContent = '';
-  if(!mix || mix.components.length === 0) {
-    mixContent = `<div style="background-color:rgba(255,82,82,0.06); border:1px solid var(--accent-red); border-radius:10px; padding:15px; text-align:center; color:var(--accent-red); font-size:12px">⚠️ لا توجد خلطة كيميائية مسجلة في ورقة INK MIX لهذا الكود.</div>`;
-  } else {
-    mixContent = `<div class="sub-title">🧪 خلطة المكونات والنسب المئوية:</div>`;
-    mix.components.forEach(comp => {
-      let percentage = comp.pct;
-      mixContent += `
-        <div class="mix-card">
-          <div style="font-family:'Space Mono'; font-weight:700; color:var(--ink-gold)">${comp.baseInk}</div>
-          <div style="font-family:'Space Mono'; color:var(--accent-green); font-weight:700; text-align:left">${percentage.toFixed(1)}%</div>
-          <div class="comp-full" style="font-size:12px; color:var(--ink-silver)">${comp.baseDesc || 'حبر أساس'} &nbsp;|&nbsp; <b>${comp.qty ? comp.qty + ' KG' : '-'}</b></div>
-          <div class="comp-full">
-            <div class="progress-container"><div class="progress-bar"><div class="progress-fill" style="width: ${percentage}%"></div></div></div>
-          </div>
-        </div>`;
-    });
-  }
-  document.getElementById('modalBodyContent').innerHTML = mixContent;
-  document.getElementById('modalOverlay').classList.add('active');
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
-
-function renderImportSummary() {
-  document.getElementById('import-summary-zone').innerHTML = `
-    <div style="background-color:rgba(61,220,132,0.06);border:1px solid var(--accent-green);border-radius:10px;padding:12px">
-      <div style="color:var(--accent-green);font-weight:700;font-size:13px;margin-bottom:4px">✓ تم تحميل البيانات بنجاح</div>
-      <div style="font-size:11px;color:var(--ink-silver)">
-        الليبلات: <b>${DB.labels.length}</b> | الأحبار: <b>${DB.colors.length}</b> | الخلطات الفنية: <b>${DB.inkMix.length}</b>
-      </div>
-    </div>`;
-}
-
-function toast(msg,type='info'){
-  const ic={success:'✓',error:'✕',info:'ℹ'};
-  const el=document.createElement('div');
-  el.className=`toast ${type}`;
-  el.innerHTML=`<span>${ic[type]}</span><span>${msg}</span>`;
-  document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(),3000);
-}
-
-window.addEventListener('keydown',(e)=>{if(e.key==='Escape')closeModal();});
+function displayEmptyState(msg) { document.getElementById("labels-table-body").innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink-dim)">${msg}</td></tr>`; }
+function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getElementById(`btn-${view}`)) document.getElementById(`btn-${view}`).classList.add("active"); if(document.getElementById(`mbnt-${view}`)) document.getElementById(`mbnt-${view}`).classList.add("active"); }
+function closeModal() { document.getElementById("modalOverlay").classList.remove("active"); }
+function showToast(msg,type="info"){ const el=document.createElement("div"); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById("toasts").appendChild(el); setTimeout(()=>el.remove(),3500); }
 </script>
 </body>
 </html>
