@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink — النظام السحابي المتكامل بكامل التفاصيل</title>
+<title>Royal Ink — النظام السحابي فائق السرعة والأداء</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
@@ -52,7 +52,6 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 .view-section { display: none; }
 .view-section.active { display: block; }
 
-/* ── تصميم كروت العرض الاحترافية والشاملة (تطابق الهوية والصور) ── */
 .labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
 .label-card { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 14px; padding: 20px; position: relative; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
 .label-card:hover { transform: translateY(-2px); border-color: var(--ink-gold); }
@@ -64,6 +63,12 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 .detail-value { color: var(--ink-white); font-weight: 700; text-align: left; }
 
 .badge-line { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background-color: rgba(201,168,76,0.15); color: var(--ink-gold); }
+
+/* ── أزرار التنقل والتحكم الفائق بالسرعة ── */
+.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding: 10px; }
+.page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; transition: 0.2s; }
+.page-btn:hover:not(:disabled) { border-color: var(--ink-gold); color: var(--ink-gold); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .import-container { max-width: 550px; margin: 20px auto; }
 .dropzone { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 14px; padding: 50px 20px; text-align: center; cursor: pointer; position: relative; }
@@ -77,7 +82,7 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 .modal-header { background-color: var(--ink-deep); padding: 18px 20px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
 
 #toasts { position: fixed; bottom: 80px; left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-.toast { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.toast { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; }
 .toast.success { border-right: 4px solid var(--accent-green); }
 .toast.error { border-right: 4px solid var(--accent-red); }
 
@@ -94,10 +99,10 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 <div id="login-screen">
   <div class="login-box">
     <h2>Royal Ink</h2>
-    <p>نظام مستودع الليبلات السحابي المتكامل بكامل التفاصيل</p>
+    <p>النظام السحابي المتكامل فائق الأداء والسرعة</p>
     <div class="form-group">
       <label>الحساب الإلكتروني</label>
-      <input type="email" id="loginEmail" placeholder="اسم المستخدم أو الإيميل">
+      <input type="email" id="loginEmail" placeholder="admin@royalink.com">
     </div>
     <div class="form-group">
       <label>رمز المرور</label>
@@ -125,20 +130,23 @@ header { display: flex; justify-content: space-between; align-items: center; mar
   <main>
     <header>
       <div class="search-wrapper">
-        <input type="text" id="mainSearch" placeholder="ابحث عن كود، اسم، شركة، أو لون فوراً..." oninput="triggerLiveSearch(this.value)">
+        <input type="text" id="mainSearch" placeholder="ابحث فوراً بجميع الحقول والتفاصيل..." oninput="triggerLiveSearch(this.value)">
         <div class="search-loader" id="searchLoader"></div>
       </div>
-      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● قاعدة البيانات الشاملة نشطة</div>
+      <div id="connection-status" style="font-size:12px; color:var(--accent-green)">● محرك الأداء الفائق مستقر</div>
     </header>
 
     <section id="view-labels" class="view-section active">
       <div style="margin-bottom: 15px; font-size: 13px; color: var(--ink-silver);">
-        عدد السجلات المتوفرة: <span id="total-count-badge" style="color: var(--ink-gold); font-weight: bold;">0</span> ليبل متاح.
+        إجمالي السجلات: <span id="total-count-badge" style="color: var(--ink-gold); font-weight: bold;">0</span> سجل | المعروض حالياً: <span id="view-range-badge" style="color: var(--accent-green);">0</span>
       </div>
       
-      <!-- ── حاوية الكروت لعرض كافة البيانات المتاحة ── -->
-      <div class="labels-grid" id="labels-cards-container">
-         <!-- جاري جلب البيانات... -->
+      <div class="labels-grid" id="labels-cards-container"></div>
+
+      <div class="pagination-controls" id="paginationWrapper">
+        <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">السابق ➔</button>
+        <span id="pageInfoText" style="font-size: 13px; font-weight: bold;">صفحة 1 من 1</span>
+        <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">⬅ التالي</button>
       </div>
     </section>
 
@@ -147,12 +155,12 @@ header { display: flex; justify-content: space-between; align-items: center; mar
         <div class="dropzone">
           <div class="loading-overlay-box" id="loadingBox">
             <div class="spinner"></div>
-            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تحليل ملف التفاصيل الكاملة...</p>
+            <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري تحليل وحفظ ملف التفاصيل بالكامل...</p>
           </div>
           <div onclick="document.getElementById('excelFileInput').click()">
             <span style="font-size:45px; display:block; margin-bottom:15px">📦☁️</span>
-            <h3>رفع وتحديث قاعدة البيانات المفتوحة</h3>
-            <p>اضغط لاختيار ملف الإكسل. سيقوم النظام بقراءة وتضمين كافة الأعمدة والتفاصيل والألوان ديناميكياً.</p>
+            <h3>تحديث سريع للملفات الضخمة</h3>
+            <p>اضغط لاختيار ملف الإكسل لتجهيزه الفوري للعرض السريع</p>
             <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="processFileDynamically(event)">
           </div>
         </div>
@@ -161,7 +169,6 @@ header { display: flex; justify-content: space-between; align-items: center; mar
   </main>
 </div>
 
-<!-- ميزة المعاينة المنبثقة الفاخرة المأخوذة من صورة 1000135639.jpg -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
   <div class="modal-window" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -176,7 +183,10 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 
 <script>
 const PROJECT_BOX_ID = "royal_ink_full_details_v3";
-let DB = { labels: [] };
+let ALL_RECORDS = [];
+let FILTERED_RECORDS = [];
+let currentPage = 1;
+const recordsPerPage = 20; // 💡 عرض 20 كرت فقط في الصفحة لتسريع الدخول الصاروخي
 let activeRole = "viewer";
 
 window.onload = function() {
@@ -222,14 +232,15 @@ function performLogout() {
 function fetchLocalStoredData() {
   const localData = localStorage.getItem(PROJECT_BOX_ID);
   if(localData) {
-    DB.labels = JSON.parse(localData);
+    ALL_RECORDS = JSON.parse(localData);
+    FILTERED_RECORDS = [...ALL_RECORDS];
+    currentPage = 1;
     updateInterface();
   } else {
-    displayEmptyState("يرجى رفع ملف الإكسل لتحديث السيرفر للمرة الأولى.");
+    displayEmptyState("يرجى رفع ملف الإكسل لتنشيط النظام لأول مرة.");
   }
 }
 
-// ── ⚡ محرك القراءة الديناميكي والشامل لجميع الأعمدة والتفاصيل بدون استثناء ──
 function processFileDynamically(event) {
   if(activeRole !== "admin") return showToast("هذه الصلاحية مخصصة للمدير فقط", "error");
   const file = event.target.files[0];
@@ -242,30 +253,25 @@ function processFileDynamically(event) {
     try {
       const arrayBuffer = new Uint8Array(e.target.result);
       const workbook = XLSX.read(arrayBuffer, {type: "array"});
-      
       const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      
-      // تحويل الصفحة إلى مصفوفة من الكائنات تحتوي على ترويسة كل عمود بشكل كامل وديناميكي
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+      const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
 
-      if(jsonData.length === 0) {
-        throw new Error("الملف فارغ أو يحتوي على ترويسات غير صالحة");
-      }
+      if(jsonData.length === 0) throw new Error("الملف فارغ");
 
-      // حفظ المصفوفة كاملة بجميع حقولها (ألوان، بليت، أحجام، وكل عمود إضافي) دون أي حذف
       localStorage.setItem(PROJECT_BOX_ID, JSON.stringify(jsonData));
       
       setTimeout(() => {
-        showToast("تم تحديث السيرفر بكافة تفاصيل وحقول الإكسل بنجاح!", "success");
-        DB.labels = jsonData;
+        showToast("تم تحديث وحفظ كافة البيانات بنجاح فائق!", "success");
+        ALL_RECORDS = jsonData;
+        FILTERED_RECORDS = [...ALL_RECORDS];
+        currentPage = 1;
         updateInterface();
         switchView("labels");
         document.getElementById("loadingBox").style.display = "none";
-      }, 1500);
+      }, 1000);
 
     } catch(err) {
-      showToast("خطأ أثناء قراءة الحقول: تأكد من بنية ترويسة ملف الإكسل.", "error");
+      showToast("حدث خطأ أثناء قراءة الملف", "error");
       document.getElementById("loadingBox").style.display = "none";
     }
   };
@@ -280,102 +286,97 @@ function triggerLiveSearch(value) {
 
   debounceTimer = setTimeout(() => {
     const query = value.toLowerCase().trim();
-    if(!query) { renderCards(DB.labels); loader.style.display = "none"; return; }
-    
-    // البحث بداخل كافة القيم النصية لكل حقول الكائن بشكل شامل
-    const filtered = DB.labels.filter(item => {
-      return Object.values(item).some(val => String(val).toLowerCase().includes(query));
-    });
-    
-    renderCards(filtered);
+    if(!query) {
+      FILTERED_RECORDS = [...ALL_RECORDS];
+    } else {
+      FILTERED_RECORDS = ALL_RECORDS.filter(item => {
+        return Object.values(item).some(val => String(val).toLowerCase().includes(query));
+      });
+    }
+    currentPage = 1;
+    updateInterface();
     loader.style.display = "none";
-  }, 150);
+  }, 200);
 }
 
 function updateInterface() {
-  document.getElementById("total-count-badge").innerText = DB.labels.length;
-  renderCards(DB.labels);
+  document.getElementById("total-count-badge").innerText = ALL_RECORDS.length;
+  renderPageCards();
 }
 
-// ── 🎨 بناء البطاقات وعرض الحقول بشكل ديناميكي كامل (يطابق صورة 1000135638.jpg) ──
-function renderCards(data) {
+// ── محرك العرض السريع والمقيد بـ 20 كرت فقط في المرة لقضاء تام على البطء ──
+function renderPageCards() {
   const container = document.getElementById("labels-cards-container");
   container.innerHTML = "";
   
-  if(data.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">لا توجد نتائج تطابق البحث الحالي...</div>`;
+  const totalRecords = FILTERED_RECORDS.length;
+  const totalPages = Math.ceil(totalRecords / recordsPerPage) || 1;
+  
+  if(currentPage > totalPages) currentPage = totalPages;
+  
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+  
+  document.getElementById("view-range-badge").innerText = totalRecords > 0 ? `${startIndex + 1} إلى ${endIndex}` : "0";
+  document.getElementById("pageInfoText").innerText = `صفحة ${currentPage} من ${totalPages}`;
+  
+  document.getElementById("prevPageBtn").disabled = (currentPage === 1);
+  document.getElementById("nextPageBtn").disabled = (currentPage === totalPages);
+
+  if(totalRecords === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">لا توجد نتائج مطابقة...</div>`;
+    document.getElementById("paginationWrapper").style.display = "none";
     return;
   }
   
-  data.forEach((item, index) => {
-    // استخراج المفاتيح والترويسات من الكائن تلقائياً لدعم أي ملف إكسل بالكامل
+  document.getElementById("paginationWrapper").style.display = "flex";
+  
+  // عرض النطاق المحدد فقط لسرعة صاروخية
+  for (let i = startIndex; i < endIndex; i++) {
+    const item = FILTERED_RECORDS[i];
     const keys = Object.keys(item);
     
-    // تحديد الحقول الأساسية بشكل ذكي للواجهة الخارجية للكرت
     const labelCode = item["كود الليبل"] || item["رقم الكود"] || item["كود الـليبل"] || item[keys[0]] || "-";
     const labelName = item["اسم الليبل"] || item[keys[1]] || "-";
     const companyName = item["الشركة"] || item["اسم الشركة"] || item[keys[2]] || "-";
     const itemSize = item["العبوة"] || item["قياس العلبة"] || item[keys[3]] || "-";
     const productionLine = item["خط الإنتاج"] || item["خط الانتاج"] || item[keys[4]] || "LINE-1";
     
-    // تجميع باقي الحقول المتنوعة (مثل: اللون، نوع البليت، الرف... إلخ) لعرضها داخل الكرت تلقائياً
-    let extraDetailsHTML = "";
+    let extraHTML = "";
     keys.forEach(k => {
-      if(!["كود الليبل", "رقم الكود", "كود الـليبل", "اسم الليبل", "الشركة", "اسم الشركة", "العبوة", "قياس العلبة"].includes(k) && item[k]) {
-        extraDetailsHTML += `
-          <div class="detail-row">
-            <span class="detail-label">${k}:</span>
-            <span class="detail-value">${item[k]}</span>
-          </div>`;
+      if(!["كود الليبل","رقم الكود","كود الـليبل","اسم الليبل","الشركة","اسم الشركة","العبوة","قياس العلبة","خط الإنتاج","خط الانتاج"].includes(k) && item[k]) {
+        extraHTML += `<div class="detail-row"><span class="detail-label">${k}:</span><span class="detail-value">${item[k]}</span></div>`;
       }
     });
 
     container.innerHTML += `
-      <div class="label-card" onclick="openDetailedModalByIndex(${index})">
+      <div class="label-card" onclick="openDetailedModalGlobalIndex(${i})">
         <div class="card-header-info">
           <span class="card-title">${labelName}</span>
           <span class="card-code">${labelCode}</span>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">الشركة:</span>
-          <span class="detail-value">${companyName}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">العبوة:</span>
-          <span class="detail-value">${itemSize}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">خط الإنتاج:</span>
-          <span class="badge-line">${productionLine}</span>
-        </div>
-        ${extraDetailsHTML}
+        <div class="detail-row"><span class="detail-label">الشركة:</span><span class="detail-value">${companyName}</span></div>
+        <div class="detail-row"><span class="detail-label">العبوة:</span><span class="detail-value">${itemSize}</span></div>
+        <div class="detail-row"><span class="detail-label">خط الإنتاج:</span><span class="badge-line">${productionLine}</span></div>
+        ${extraHTML}
       </div>`;
-  });
+  }
 }
 
-// نافذة المعاينة الفاخرة عند الضغط على الكرت (تطابق تماماً صورة 1000135639.jpg)
-function openDetailedModalByIndex(index) {
-  const item = DB.labels[index];
+function changePage(direction) {
+  currentPage += direction;
+  renderPageCards();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openDetailedModalGlobalIndex(globalIndex) {
+  const item = FILTERED_RECORDS[globalIndex];
   if(!item) return;
   
   const keys = Object.keys(item);
-  const labelName = item["اسم الليبل"] || item[keys[1]] || "معاينة التفاصيل";
-  
-  document.getElementById("modalTitleText").innerText = labelName;
+  document.getElementById("modalTitleText").innerText = item["اسم الليبل"] || "تفاصيل السجل";
   
   let modalBody = `<div style="line-height: 2.2; font-size: 14px;">`;
   keys.forEach(k => {
-    let valueColor = "";
-    if(k.includes("كود") || k.includes("رقم")) valueColor = `style="color: var(--ink-gold); font-weight: bold;"`;
-    if(k.includes("عنوان") || k.includes("موقع") || k.includes("مخزن")) valueColor = `style="color: var(--ink-gold-lt);"`;
-    
-    modalBody += `<p><b style="color: var(--ink-silver)">${k}:</b> <span ${valueColor}>${item[k] || "-"}</span></p>`;
-  });
-  modalBody += `</div>`;
-  
-  document.getElementById("modalBodyContent").innerHTML = modalBody;
-  document.getElementById("modalOverlay").classList.add("active");
-}
-
-function displayEmptyState(msg) { document.getElementById("labels-cards-container").innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">${msg}</div>`; }
-function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getE
+    let style = "";
+    if(k.includes("كود") || k.includes("ر
