@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Ink — نظام إدارة الليبلات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --ink-black:   #0D0D0F;
+    --ink-deep:    #131318;
+    --ink-panel:   #1A1A22;
+    --ink-card:    #20202C;
+    --ink-border:  #2C2C3E;
+    --ink-gold:    #C9A84C;
+    --ink-gold-lt: #E8C97A;
+    --ink-gold-dk: #8B6F2E;
+    --ink-silver:  #9898B0;
+    --ink-dim:     #5A5A72;
+    --ink-white:   #F0EEF8;
+    --line-1: #4ECDC4;
+    --line-2: #FF6B9D;
+    --line-3: #7B68EE;
+    --accent-green: #3DDC84;
+    --accent-red:   #FF5252;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--ink-border);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px; height: 60px;
+  }
+  .logo-mark {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--ink-gold), var(--ink-gold-dk));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px; font-weight: 700; color: var(--ink-black);
+    letter-spacing: -1px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: var(--ink-white); }
+  .logo-sub  { font-size: 10px; color: var(--ink-silver); font-weight: 300; }
+
+  .topbar-search {
+    flex: 1; max-width: 500px; position: relative;
+  }
+  .topbar-search input {
+    width: 100%; padding: 8px 16px 8px 40px;
+    background: var(--ink-panel); border: 1px solid var(--ink-border);
+    border-radius: 8px; color: var(--ink-white);
+    font-family: 'Cairo', sans-serif; font-size: 14px;
+    outline: none; transition: border-color .2s;
+  }
+  .topbar-search input:focus { border-color: var(--ink-gold); }
+  .topbar-search .search-icon {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-silver); font-size: 14px; pointer-events: none;
+  }
+
+  .topbar-actions { margin-right: auto; display: flex; align-items: center; gap: 10px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 7px; font-size: 13px;
+    font-family: 'Cairo', sans-serif; font-weight: 600;
+    cursor: pointer; border: none; transition: all .2s; white-space: nowrap;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--ink-gold), var(--ink-gold-dk));
+    color: var(--ink-black);
+  }
+  .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .btn-ghost {
+    background: var(--ink-panel); border: 1px solid var(--ink-border);
+    color: var(--ink-silver);
+  }
+  .btn-ghost:hover { border-color: var(--ink-gold); color: var(--ink-gold); }
+  .btn-danger { background: var(--accent-red); color: #fff; }
+  .btn-danger:hover { filter: brightness(1.1); }
+
+  /* ─── LAYOUT ─── */
+  .layout {
+    display: flex; padding-top: 60px; min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--ink-deep);
+    border-left: 1px solid var(--ink-border);
+    padding: 20px 0;
+    position: sticky; top: 60px;
+    height: calc(100vh - 60px); overflow-y: auto;
+  }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--ink-dim); padding: 0 18px 8px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 18px; cursor: pointer;
+    color: var(--ink-silver); font-size: 13px;
+    transition: all .15s; border-right: 2px solid transparent;
+  }
+  .sidebar-item:hover { background: var(--ink-panel); color: var(--ink-white); }
+  .sidebar-item.active {
+    background: rgba(201,168,76,0.08);
+    color: var(--ink-gold);
+    border-right-color: var(--ink-gold);
+  }
+  .sidebar-item .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .badge {
+    margin-right: auto; background: var(--ink-border);
+    color: var(--ink-silver); font-size: 10px; padding: 1px 6px;
+    border-radius: 10px; font-weight: 600;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .main { flex: 1; padding: 28px; overflow: hidden; }
+
+  /* ─── STAT CARDS ─── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--ink-card); border: 1px solid var(--ink-border);
+    border-radius: 12px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 3px; height: 100%; background: var(--accent-color, var(--ink-gold));
+  }
+  .stat-label { font-size: 11px; color: var(--ink-silver); font-weight: 600; letter-spacing: .5px; }
+  .stat-value { font-size: 28px; font-weight: 900; color: var(--ink-white); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--ink-dim); }
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar {
+    display: flex; gap: 10px; align-items: center;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--ink-border);
+    background: var(--ink-card); color: var(--ink-silver);
+    font-size: 12px; font-family: 'Cairo', sans-serif;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--ink-gold); color: var(--ink-gold-lt); }
+  .filter-chip.active {
+    background: rgba(201,168,76,0.15); border-color: var(--ink-gold);
+    color: var(--ink-gold-lt); font-weight: 700;
+  }
+  .filter-chip.line-1 { --chip-color: var(--line-1); }
+  .filter-chip.line-2 { --chip-color: var(--line-2); }
+  .filter-chip.line-3 { --chip-color: var(--line-3); }
+  .filter-chip.line-1.active { background: rgba(78,205,196,0.12); border-color: var(--line-1); color: var(--line-1); }
+  .filter-chip.line-2.active { background: rgba(255,107,157,0.12); border-color: var(--line-2); color: var(--line-2); }
+  .filter-chip.line-3.active { background: rgba(123,104,238,0.12); border-color: var(--line-3); color: var(--line-3); }
+
+  select.filter-select {
+    padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--ink-border);
+    background: var(--ink-card); color: var(--ink-silver);
+    font-family: 'Cairo', sans-serif; font-size: 12px;
+    outline: none; cursor: pointer;
+  }
+  select.filter-select:focus { border-color: var(--ink-gold); }
+
+  /* ─── TABLE ─── */
+  .table-wrap {
+    background: var(--ink-card); border: 1px solid var(--ink-border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 1px solid var(--ink-border);
+  }
+  .table-title { font-size: 14px; font-weight: 700; color: var(--ink-white); }
+  .results-count { font-size: 12px; color: var(--ink-silver); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: var(--ink-panel); padding: 10px 12px;
+    text-align: right; color: var(--ink-silver);
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    border-bottom: 1px solid var(--ink-border);
+    white-space: nowrap; position: sticky; top: 0;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(44,44,62,0.5);
+    transition: background .1s; cursor: pointer;
+  }
+  tbody tr:hover { background: rgba(201,168,76,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+  td { padding: 10px 12px; color: var(--ink-white); vertical-align: middle; }
+  td.muted { color: var(--ink-silver); font-size: 11px; }
+  td.code {
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    color: var(--ink-gold);
+  }
+
+  .line-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;
+  }
+  .line-badge.L1 { background: rgba(78,205,196,0.12); color: var(--line-1); }
+  .line-badge.L2 { background: rgba(255,107,157,0.12); color: var(--line-2); }
+  .line-badge.L3 { background: rgba(123,104,238,0.12); color: var(--line-3); }
+
+  .color-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+  .color-pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 3px; font-size: 10px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    font-family: 'Space Mono', monospace;
+  }
+  .color-swatch {
+    width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    padding: 60px 20px; text-align: center; color: var(--ink-dim);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+  .empty-text { font-size: 14px; }
+  .empty-sub { font-size: 12px; margin-top: 6px; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--ink-card); border: 1px solid var(--ink-border);
+    border-radius: 16px; max-width: 700px; width: 92%;
+    max-height: 85vh; overflow-y: auto; padding: 0;
+    animation: slideUp .2s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-head {
+    padding: 20px 24px; border-bottom: 1px solid var(--ink-border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-subtitle { font-size: 12px; color: var(--ink-silver); margin-top: 3px; }
+  .modal-close {
+    background: none; border: none; color: var(--ink-silver);
+    font-size: 20px; cursor: pointer; padding: 2px; line-height: 1;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--ink-white); }
+  .modal-body { padding: 20px 24px; }
+  .modal-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink-gold); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .info-item { background: var(--ink-panel); border-radius: 8px; padding: 12px 14px; }
+  .info-item-label { font-size: 10px; color: var(--ink-dim); font-weight: 600; letter-spacing: .5px; margin-bottom: 4px; }
+  .info-item-value { font-size: 14px; color: var(--ink-white); font-weight: 600; }
+  .info-item-value.mono { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink-gold); }
+
+  .colors-table { width: 100%; border-collapse: collapse; }
+  .colors-table th {
+    font-size: 10px; color: var(--ink-dim); font-weight: 700; letter-spacing: .5px;
+    padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--ink-border);
+  }
+  .colors-table td { padding: 8px 8px; font-size: 12px; border-bottom: 1px solid rgba(44,44,62,0.4); }
+  .colors-table tr:last-child td { border-bottom: none; }
+  .plate-num {
+    display: inline-flex; width: 22px; height: 22px;
+    align-items: center; justify-content: center;
+    background: var(--ink-border); border-radius: 4px;
+    font-size: 11px; font-weight: 700; color: var(--ink-silver);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ─── IMPORT PANEL ─── */
+  .import-zone {
+    border: 2px dashed var(--ink-border); border-radius: 12px;
+    padding: 40px; text-align: center; cursor: pointer;
+    transition: all .2s; position: relative;
+  }
+  .import-zone:hover, .import-zone.drag-over {
+    border-color: var(--ink-gold); background: rgba(201,168,76,0.04);
+  }
+  .import-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .import-icon { font-size: 36px; margin-bottom: 12px; }
+  .import-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .import-sub { font-size: 12px; color: var(--ink-silver); }
+
+  .progress-bar-wrap {
+    background: var(--ink-panel); border-radius: 4px; height: 6px;
+    overflow: hidden; margin: 12px 0;
+  }
+  .progress-bar { height: 100%; background: var(--ink-gold); transition: width .3s; width: 0%; }
+
+  /* ─── TABS ─── */
+  .tabs { display: flex; gap: 2px; margin-bottom: 20px; }
+  .tab {
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--ink-silver);
+    transition: all .15s; border: 1px solid transparent;
+  }
+  .tab.active {
+    background: rgba(201,168,76,0.1); border-color: var(--ink-gold);
+    color: var(--ink-gold);
+  }
+  .tab:hover:not(.active) { color: var(--ink-white); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ─── INK MIX TABLE ─── */
+  .pct-bar {
+    display: flex; align-items: center; gap: 8px; margin-top: 2px;
+  }
+  .pct-fill {
+    height: 4px; border-radius: 2px; background: var(--ink-gold);
+    flex-shrink: 0;
+  }
+  .pct-label { font-size: 10px; color: var(--ink-dim); }
+
+  /* ─── TOAST ─── */
+  .toast-container {
+    position: fixed; bottom: 24px; left: 24px;
+    display: flex; flex-direction: column; gap: 8px; z-index: 999;
+  }
+  .toast {
+    background: var(--ink-panel); border: 1px solid var(--ink-border);
+    border-radius: 10px; padding: 12px 18px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    animation: toastIn .25s ease; max-width: 320px;
+  }
+  @keyframes toastIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+  }
+  .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
+  .toast.error   { border-color: var(--accent-red);   color: var(--accent-red); }
+  .toast.info    { border-color: var(--ink-gold);     color: var(--ink-gold); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .topbar-search { max-width: 200px; }
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-dim); }
+
+  /* header glow */
+  .glow-gold { text-shadow: 0 0 24px rgba(201,168,76,0.5); }
+
+  .section-hidden { display: none; }
+
+  /* ─── INK COLORS PAGE ─── */
+  .colors-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .color-card {
+    background: var(--ink-card); border: 1px solid var(--ink-border);
+    border-radius: 10px; overflow: hidden; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .color-card:hover { border-color: var(--ink-gold); }
+  .color-preview { height: 56px; }
+  .color-card-body { padding: 10px 12px; }
+  .color-card-code { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-gold); }
+  .color-card-name { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+  /* ─── LOADING SPINNER ─── */
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--ink-border);
+    border-top-color: var(--ink-gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ───────── TOPBAR ───────── -->
+<header class="topbar">
+  <div class="logo-mark">
+    <div class="logo-icon">RI</div>
+    <div>
+      <div class="logo-text">Royal Ink</div>
+      <div class="logo-sub">نظام إدارة الإنتاج</div>
+    </div>
+  </div>
+
+  <div class="topbar-search">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="globalSearch" placeholder="ابحث عن ليبل، شركة، كود..." oninput="onSearch()">
+  </div>
+
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="showSection('import')">⬆ استيراد Excel</button>
+    <button class="btn btn-primary" onclick="exportData()">⬇ تصدير</button>
+  </div>
+</header>
+
+<!-- ───────── LAYOUT ───────── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">القوائم الرئيسية</div>
+      <div class="sidebar-item active" onclick="showSection('labels')" id="nav-labels">
+        <div class="dot" style="background:var(--ink-gold)"></div>
+        الليبلات
+        <span class="badge" id="badge-labels">—</span>
+      </div>
+      <div class="sidebar-item" onclick="showSection('colors')" id="nav-colors">
+        <div class="dot" style="background:var(--line-1)"></div>
+        أحبار الألوان
+        <span class="badge" id="badge-colors">—</span>
+      </div>
+      <div class="sidebar-item" onclick="showSection('inkmix')" id="nav-inkmix">
+        <div class="dot" style="background:var(--line-2)"></div>
+        تركيبة الأحبار
+        <span class="badge" id="badge-inkmix">—</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">التصفية السريعة</div>
+      <div class="sidebar-item" onclick="filterLine('ALL')" id="filter-ALL">
+        <div class="dot" style="background:var(--ink-dim)"></div>
+        كل الخطوط
+      </div>
+      <div class="sidebar-item" onclick="filterLine('LINE-1')" id="filter-LINE-1">
+        <div class="dot" style="background:var(--line-1)"></div>
+        LINE-1
+      </div>
+      <div class="sidebar-item" onclick="filterLine('LINE-2')" id="filter-LINE-2">
+        <div class="dot" style="background:var(--line-2)"></div>
+        LINE-2
+      </div>
+      <div class="sidebar-item" onclick="filterLine('LINE-3')" id="filter-LINE-3">
+        <div class="dot" style="background:var(--line-3)"></div>
+        LINE-3
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">الإجراءات</div>
+      <div class="sidebar-item" onclick="showSection('import')">
+        <div class="dot" style="background:var(--accent-green)"></div>
+        مزامنة / استيراد
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ─── LABELS SECTION ─── -->
+    <section id="section-labels">
+      <div class="stats-row" id="statsRow"></div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <span style="font-size:12px;color:var(--ink-silver);font-weight:600;">الخط:</span>
+        <span class="filter-chip active" onclick="filterLine('ALL')" id="chip-ALL">الكل</span>
+        <span class="filter-chip line-1" onclick="filterLine('LINE-1')" id="chip-LINE-1">LINE-1</span>
+        <span class="filter-chip line-2" onclick="filterLine('LINE-2')" id="chip-LINE-2">LINE-2</span>
+        <span class="filter-chip line-3" onclick="filterLine('LINE-3')" id="chip-LINE-3">LINE-3</span>
+
+        <span style="font-size:12px;color:var(--ink-silver);font-weight:600;margin-right:8px;">القياس:</span>
+        <select class="filter-select" id="sizeFilter" onchange="applyFilters()">
+          <option value="">كل القياسات</option>
+          <option>185-ML</option><option>250-ML</option>
+          <option>300-ML</option><option>330-ML</option>
+        </select>
+
+        <span style="font-size:12px;color:var(--ink-silver);font-weight:600;margin-right:8px;">الشركة:</span>
+        <select class="filter-select" id="companyFilter" onchange="applyFilters()">
+          <option value="">كل الشركات</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <span class="table-title">جدول الليبلات</span>
+          <span class="results-count" id="resultsCount">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم الليبل</th>
+                <th>الشركة</th>
+                <th>الكود</th>
+                <th>القياس</th>
+                <th>الخط</th>
+                <th>رقم الرف</th>
+                <th>نوع البليت</th>
+                <th>الألوان</th>
+              </tr>
+            </thead>
+            <tbody id="labelsBody">
+              <tr><td colspan="9">
+                <div class="empty-state">
+                  <div class="empty-icon">📊</div>
+                  <div class="empty-text">لا توجد بيانات بعد</div>
+                  <div class="empty-sub">قم باستيراد ملف Excel لتحميل البيانات</div>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── COLORS SECTION ─── -->
+    <section id="section-colors" class="section-hidden">
+      <div class="filter-bar">
+        <input type="text" id="colorSearch" placeholder="ابحث عن لون أو كود..."
+          style="padding:8px 14px;background:var(--ink-card);border:1px solid var(--ink-border);border-radius:8px;color:var(--ink-white);font-family:'Cairo',sans-serif;font-size:13px;outline:none;width:260px;"
+          oninput="renderColors()">
+      </div>
+      <div class="colors-grid" id="colorsGrid">
+        <div class="empty-state">
+          <div class="empty-icon">🎨</div>
+          <div class="empty-text">لا توجد بيانات ألوان</div>
+          <div class="empty-sub">استورد ملف Excel أولاً</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── INK MIX SECTION ─── -->
+    <section id="section-inkmix" class="section-hidden">
+      <div class="filter-bar">
+        <input type="text" id="inkSearch" placeholder="ابحث عن كود أو اسم لون..."
+          style="padding:8px 14px;background:var(--ink-card);border:1px solid var(--ink-border);border-radius:8px;color:var(--ink-white);font-family:'Cairo',sans-serif;font-size:13px;outline:none;width:260px;"
+          oninput="renderInkMix()">
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <span class="table-title">تركيبات الأحبار (INK MIX)</span>
+          <span class="results-count" id="inkCount">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>كود</th>
+                <th>اسم اللون</th>
+                <th>المكونات (حتى 8 مكونات)</th>
+                <th>الإجمالي %</th>
+                <th>الكمية KG</th>
+              </tr>
+            </thead>
+            <tbody id="inkBody">
+              <tr><td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-text">لا توجد بيانات</div>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── IMPORT SECTION ─── -->
+    <section id="section-import" class="section-hidden">
+      <div style="max-width:560px;margin:0 auto;">
+        <div style="margin-bottom:24px;">
+          <div style="font-size:22px;font-weight:900;color:var(--ink-white);margin-bottom:6px;">
+            مزامنة البيانات
+          </div>
+          <div style="font-size:13px;color:var(--ink-silver);">
+            قم باستيراد ملف Excel (.xlsm أو .xlsx) لتحديث جميع البيانات تلقائياً.
+            سيتم استبدال البيانات القديمة بالبيانات الجديدة.
+          </div>
+        </div>
+
+        <div class="import-zone" id="importZone">
+          <input type="file" id="excelFile" accept=".xlsx,.xlsm,.xls" onchange="importExcel(this)">
+          <div class="import-icon">📂</div>
+          <div class="import-title">اسحب الملف هنا أو انقر للاختيار</div>
+          <div class="import-sub">يدعم ملفات .xlsm و .xlsx و .xls</div>
+        </div>
+
+        <div id="importProgress" style="display:none;margin-top:16px;">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div style="font-size:12px;color:var(--ink-silver);text-align:center;" id="progressText">جاري المعالجة...</div>
+        </div>
+
+        <div id="importSummary" style="display:none;margin-top:20px;"></div>
+
+        <div style="margin-top:28px;padding:16px;background:var(--ink-panel);border-radius:10px;border:1px solid var(--ink-border);">
+          <div style="font-size:12px;font-weight:700;color:var(--ink-gold);margin-bottom:10px;">معلومات عن الملف المتوقع</div>
+          <div style="font-size:12px;color:var(--ink-silver);line-height:1.8;">
+            📋 <strong>SHEET1</strong> — الليبلات الرئيسية (الأعمدة: اسم الليبل، اسم الشركة، الكود، ...)<br>
+            🎨 <strong>colors</strong> — قاموس الأحبار (رمز الحبر، اسم اللون)<br>
+            🧪 <strong>INK MIX</strong> — تركيبات الأحبار المركبة
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ───────── DETAIL MODAL ───────── -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalTitle">—</div>
+        <div class="modal-subtitle" id="modalSubtitle">—</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost" id="modalPrintBtn" style="font-size:12px;padding:6px 12px" onclick="if(window._currentLabelId) printLabel(window._currentLabelId)">🖨 طباعة</button>
+        <button class="modal-close" onclick="document.getElementById('detailModal').classList.remove('open')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ───────── TOAST ───────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+const DB = {
+  labels: [],
+  colors: [],
+  inkMix: []
+};
+
+let activeSection = 'labels';
+let activeLineFilter = 'ALL';
+let filteredLabels = [];
+
+// Color name → CSS color mapping (best effort)
+const COLOR_MAP = {
+  WHITE:   '#FFFFFF', BLACK: '#1A1A1A', RED: '#E53935',
+  BLUE: '#1E88E5', 'DRK BLUE': '#0D47A1', 'LT BLUE': '#90CAF9',
+  GREEN: '#43A047', 'MED GREEN': '#388E3C', 'DRK GREEN': '#1B5E20',
+  'LT GREEN': '#A5D6A7', YELLOW: '#FDD835', ORANGE: '#FB8C00',
+  'DRK ORANGE': '#E65100', PINK: '#F48FB1', VIOLET: '#7B1FA2',
+  'DRK VIOLET': '#4A148C', GOLD: '#D4A017', GRAY: '#9E9E9E',
+  'DRK RED': '#B71C1C', BROWN: '#4E342E', PURPLE: '#6A1B9A',
+  CYAN: '#00ACC1', TURQUOISE: '#00897B', SILVER: '#BDBDBD',
+  'PROSS ORANGE': '#FF6D00', 'PRCS ORANGE': '#FF6D00',
+};
+
+function getColorCss(name) {
+  if (!name) return '#444';
+  const u = name.toUpperCase().trim();
+  for (const [k,v] of Object.entries(COLOR_MAP)) {
+    if (u.includes(k)) return v;
+  }
+  return '#555';
+}
+
+// ══════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════
+function showSection(sec) {
+  document.querySelectorAll('section[id^="section-"]').forEach(s => s.classList.add('section-hidden'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + sec).classList.remove('section-hidden');
+  const navEl = document.getElementById('nav-' + sec);
+  if (navEl) navEl.classList.add('active');
+  activeSection = sec;
+  if (sec === 'colors') renderColors();
+  if (sec === 'inkmix') renderInkMix();
+}
+
+// ══════════════════════════════════════════════════════════
+// EXCEL IMPORT
+// ══════════════════════════════════════════════════════════
+function importExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('importProgress').style.display = 'block';
+  document.getElementById('importSummary').style.display = 'none';
+  setProgress(10, 'قراءة الملف...');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      setProgress(30, 'تحليل البيانات...');
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+
+      setProgress(50, 'استخراج الليبلات...');
+      parseLabels(wb);
+      setProgress(65, 'استخراج الألوان...');
+      parseColors(wb);
+      setProgress(80, 'استخراج تركيبات الأحبار...');
+      parseInkMix(wb);
+
+      setProgress(100, 'اكتملت العملية ✓');
+      renderStats();
+      renderLabelsTable();
+      renderCompanyFilter();
+      updateBadges();
+      showImportSummary();
+      setTimeout(() => {
+        document.getElementById('importProgress').style.display = 'none';
+        showSection('labels');
+      }, 1200);
+      toast('تم استيراد البيانات بنجاح!', 'success');
+    } catch(err) {
+      setProgress(0, 'خطأ في القراءة');
+      toast('حدث خطأ: ' + err.message, 'error');
+      console.error(err);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = text;
+}
+
+function parseLabels(wb) {
+  const sheetName = wb.SheetNames.find(n => n.toUpperCase() === 'SHEET1') || wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  DB.labels = [];
+
+  // Find header row (contains "اسم الليبل")
+  let headerIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    if (rows[i].some(c => String(c).includes('اسم الليبل') || String(c).includes('اسم الشركة'))) {
+      headerIdx = i; break;
+    }
+  }
+  if (headerIdx === -1) { headerIdx = 1; } // fallback
+
+  const headers = rows[headerIdx];
+  // Map header indices
+  const col = {};
+  headers.forEach((h, i) => {
+    const s = String(h).trim();
+    if (s.includes('اسم الليبل')) col.labelName = i;
+    else if (s.includes('اسم الشركة')) col.company = i;
+    else if (s.includes('رقم الكود')) col.code = i;
+    else if (s.includes('قياس العلبة')) col.size = i;
+    else if (s.includes('اسم الخط')) col.line = i;
+    else if (s.includes('رقم الرف')) col.rack = i;
+    else if (s.includes('نوع البليت')) col.pltType = i;
+  });
+
+  // Parse color columns (repeated pattern: INK_CODE, %, QTY, NOTES, PLATE_NUM)
+  // Columns after pltType follow pattern of 5-col groups
+  const colorStartCol = Math.max(...Object.values(col)) + 1;
+
+  for (let r = headerIdx + 1; r < rows.length; r++) {
+    const row = rows[r];
+    const labelName = String(row[col.labelName] || '').trim();
+    if (!labelName) continue;
+
+    const label = {
+      id: r,
+      labelName,
+      company: String(row[col.company] || '').trim(),
+      code: String(row[col.code] || '').trim(),
+      size: String(row[col.size] || '').trim(),
+      line: String(row[col.line] || '').trim(),
+      rack: String(row[col.rack] || '').trim(),
+      pltType: String(row[col.pltType] || '').trim(),
+      colors: []
+    };
+
+    // Parse up to 8 color groups — each group: INK_CODE, %, QTY, NOTES, PLATE_NO
+    for (let g = 0; g < 8; g++) {
+      const base = colorStartCol + g * 5;
+      if (base >= row.length) break;
+      const inkCode = String(row[base] || '').trim();
+      const pct     = row[base + 1];
+      const qty     = row[base + 2];
+      const notes   = String(row[base + 3] || '').trim();
+      const plate   = String(row[base + 4] || '').trim();
+      if (!inkCode) continue;
+      label.colors.push({ inkCode, pct, qty, notes, plate });
+    }
+
+    DB.labels.push(label);
+  }
+}
+
+function parseColors(wb) {
+  const sheetName = wb.SheetNames.find(n => n.toLowerCase() === 'colors');
+  if (!sheetName) return;
+  const ws = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  DB.colors = [];
+  let start = 1;
+  for (let i = 0; i < Math.min(rows.length, 5); i++) {
+    if (rows[i].some(c => String(c).includes('الأحبار') || String(c).includes('أسماء'))) { start = i + 1; break; }
+  }
+  for (let r = start; r < rows.length; r++) {
+    const code = String(rows[r][0] || '').trim();
+    const name = String(rows[r][1] || '').trim();
+    if (code && name) DB.colors.push({ code, name });
+  }
+}
+
+function parseInkMix(wb) {
+  const sheetName = wb.SheetNames.find(n => n.toUpperCase().includes('INK MIX'));
+  if (!sheetName) return;
+  const ws = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  DB.inkMix = [];
+  let start = 2;
+  for (let r = start; r < rows.length; r++) {
+    const code = String(rows[r][0] || '').trim();
+    const colorName = String(rows[r][1] || '').trim();
+    if (!code || !colorName) continue;
+    const components = [];
+    // Columns: 3,4,5,6 | 7,8,9,10 | 11,12,13,14 | ...
+    for (let g = 0; g < 8; g++) {
+      const base = 3 + g * 4;
+      const inkBase = String(rows[r][base] || '').trim();
+      const desc    = String(rows[r][base+1] || '').trim();
+      const pct     = parseFloat(rows[r][base+2]) || 0;
+      const qty     = parseFloat(rows[r][base+3]) || 0;
+      if (!inkBase || pct === 0) continue;
+      components.push({ inkBase, desc, pct, qty });
+    }
+    const totalPct = parseFloat(rows[r][rows[r].length - 3]) || 0;
+    const totalQty = parseFloat(rows[r][rows[r].length - 2]) || 0;
+    DB.inkMix.push({ code, colorName, components, totalPct, totalQty });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER STATS
+// ══════════════════════════════════════════════════════════
+function renderStats() {
+  const companies = new Set(DB.labels.map(l => l.company)).size;
+  const l1 = DB.labels.filter(l => l.line === 'LINE-1').length;
+  const l2 = DB.labels.filter(l => l.line === 'LINE-2').length;
+  const l3 = DB.labels.filter(l => l.line === 'LINE-3').length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card" style="--accent-color:var(--ink-gold)">
+      <div class="stat-label">إجمالي الليبلات</div>
+      <div class="stat-value">${DB.labels.length}</div>
+      <div class="stat-sub">${companies} شركة</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--line-1)">
+      <div class="stat-label">LINE-1</div>
+      <div class="stat-value">${l1}</div>
+      <div class="stat-sub">ليبل</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--line-2)">
+      <div class="stat-label">LINE-2</div>
+      <div class="stat-value">${l2}</div>
+      <div class="stat-sub">ليبل</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--line-3)">
+      <div class="stat-label">LINE-3</div>
+      <div class="stat-value">${l3}</div>
+      <div class="stat-sub">ليبل</div>
+    </div>
+  `;
+}
+
+function updateBadges() {
+  document.getElementById('badge-labels').textContent = DB.labels.length;
+  document.getElementById('badge-colors').textContent = DB.colors.length;
+  document.getElementById('badge-inkmix').textContent = DB.inkMix.length;
+}
+
+function renderCompanyFilter() {
+  const companies = [...new Set(DB.labels.map(l => l.company))].filter(Boolean).sort();
+  const sel = document.getElementById('companyFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">كل الشركات</option>' +
+    companies.map(c => `<option${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// LABELS TABLE
+// ══════════════════════════════════════════════════════════
+function applyFilters() {
+  const search = document.getElementById('globalSearch').value.toLowerCase().trim();
+  const line   = activeLineFilter;
+  const size   = document.getElementById('sizeFilter').value;
+  const company= document.getElementById('companyFilter').value;
+
+  filteredLabels = DB.labels.filter(l => {
+    if (line !== 'ALL' && l.line !== line) return false;
+    if (size && l.size !== size) return false;
+    if (company && l.company !== company) return false;
+    if (search) {
+      const hay = [l.labelName, l.company, l.code, l.rack, l.line].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  renderLabelsTable();
+}
+
+function onSearch() { applyFilters(); }
+
+function filterLine(line) {
+  activeLineFilter = line;
+  ['ALL','LINE-1','LINE-2','LINE-3'].forEach(l => {
+    const chip = document.getElementById('chip-' + l);
+    const nav  = document.getElementById('filter-' + l);
+    if (chip) chip.classList.toggle('active', l === line);
+    if (nav)  nav.classList.toggle('active', l === line);
+  });
+  applyFilters();
+}
+
+function renderLabelsTable() {
+  const source = filteredLabels.length || DB.labels.length ? filteredLabels : [];
+  const body = document.getElementById('labelsBody');
+  document.getElementById('resultsCount').textContent = `${source.length} نتيجة`;
+
+  if (source.length === 0) {
+    body.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+      <div class="empty-icon">${DB.labels.length ? '🔍' : '📊'}</div>
+      <div class="empty-text">${DB.labels.length ? 'لا توجد نتائج مطابقة' : 'لا توجد بيانات بعد'}</div>
+      <div class="empty-sub">${DB.labels.length ? 'جرب تعديل الفلاتر' : 'استورد ملف Excel للبدء'}</div>
+    </div></td></tr>`;
+    return;
+  }
+
+  body.innerHTML = source.map((l, i) => {
+    const lineClass = l.line === 'LINE-1' ? 'L1' : l.line === 'LINE-2' ? 'L2' : 'L3';
+    const pills = l.colors.slice(0,5).map(c => {
+      const css = getColorCss(c.notes || c.inkCode);
+      return `<span class="color-pill">
+        <span class="color-swatch" style="background:${css}"></span>
+        ${escHtml(c.inkCode)}
+      </span>`;
+    }).join('') + (l.colors.length > 5 ? `<span class="color-pill">+${l.colors.length-5}</span>` : '');
+
+    return `<tr onclick="openLabelDetail(${l.id})">
+      <td class="muted">${i+1}</td>
+      <td style="font-weight:600">${escHtml(l.labelName)}</td>
+      <td class="muted">${escHtml(l.company)}</td>
+      <td class="code">${escHtml(l.code)}</td>
+      <td class="muted">${escHtml(l.size)}</td>
+      <td><span class="line-badge ${lineClass}">${escHtml(l.line)}</span></td>
+      <td class="muted" style="font-family:'Space Mono',monospace;font-size:11px">${escHtml(l.rack)}</td>
+      <td class="muted">${escHtml(l.pltType)}</td>
+      <td><div class="color-pills">${pills}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// COLORS SECTION
+// ══════════════════════════════════════════════════════════
+function renderColors() {
+  const search = (document.getElementById('colorSearch').value || '').toLowerCase();
+  const src = DB.colors.filter(c => !search ||
+    c.code.toLowerCase().includes(search) || c.name.toLowerCase().includes(search));
+
+  const grid = document.getElementById('colorsGrid');
+  if (src.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">🎨</div>
+      <div class="empty-text">${DB.colors.length ? 'لا نتائج' : 'لا توجد بيانات ألوان'}</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = src.map(c => {
+    const css = getColorCss(c.name);
+    return `<div class="color-card" onclick="openColorDetail('${escHtml(c.code)}')">
+      <div class="color-preview" style="background:${css}"></div>
+      <div class="color-card-body">
+        <div class="color-card-code">${escHtml(c.code)}</div>
+        <div class="color-card-name">${escHtml(c.name)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// INK MIX SECTION
+// ══════════════════════════════════════════════════════════
+function renderInkMix() {
+  const search = (document.getElementById('inkSearch').value || '').toLowerCase();
+  const src = DB.inkMix.filter(m => !search ||
+    m.code.toLowerCase().includes(search) || m.colorName.toLowerCase().includes(search));
+
+  document.getElementById('inkCount').textContent = src.length + ' تركيبة';
+  const body = document.getElementById('inkBody');
+
+  if (src.length === 0) {
+    body.innerHTML = `<tr><td colspan="5"><div class="empty-state">
+      <div class="empty-text">${DB.inkMix.length ? 'لا نتائج' : 'لا توجد بيانات تركيبات'}</div>
+    </div></td></tr>`;
+    return;
+  }
+
+  body.innerHTML = src.map(m => {
+    const comps = m.components.map(c => {
+      const pct = c.pct || 0;
+      const barW = Math.min(pct, 100);
+      return `<div style="margin-bottom:6px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-gold);width:90px;flex-shrink:0">${escHtml(c.inkBase)}</span>
+          <span style="font-size:11px;color:var(--ink-silver)">${escHtml(c.desc)}</span>
+          <span style="margin-right:auto;font-size:11px;font-weight:700">${pct}%</span>
+        </div>
+        <div class="pct-bar">
+          <div class="pct-fill" style="width:${barW*1.5}px;max-width:150px"></div>
+          <span class="pct-label">${c.qty} KG</span>
+        </div>
+      </div>`;
+    }).join('');
+    return `<tr>
+      <td class="code">${escHtml(m.code)}</td>
+      <td style="font-weight:600">${escHtml(m.colorName)}</td>
+      <td>${comps}</td>
+      <td style="font-weight:700;color:var(--ink-gold-lt)">${m.totalPct}%</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${m.totalQty} KG</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════════════════════
+function openLabelDetail(id) {
+  const label = DB.labels.find(l => l.id === id);
+  if (!label) return;
+
+  const lineClass = label.line === 'LINE-1' ? 'L1' : label.line === 'LINE-2' ? 'L2' : 'L3';
+
+  document.getElementById('modalTitle').textContent = label.labelName;
+  document.getElementById('modalSubtitle').innerHTML =
+    `<span class="line-badge ${lineClass}">${label.line}</span> &nbsp; ${label.company}`;
+
+  // Look up color names from DB.colors
+  const colorLookup = {};
+  DB.colors.forEach(c => colorLookup[c.code] = c.name);
+
+  const colorsTable = label.colors.length === 0
+    ? '<div style="color:var(--ink-dim);font-size:12px;">لا توجد بيانات ألوان</div>'
+    : `<table class="colors-table">
+      <thead><tr>
+        <th>#</th><th>كود الحبر</th><th>اسم اللون</th><th>النسبة %</th><th>الكمية</th><th>رقم البليت</th><th>ملاحظات</th>
+      </tr></thead>
+      <tbody>
+      ${label.colors.map((c,i) => {
+        const css = getColorCss(colorLookup[c.inkCode] || c.notes || c.inkCode);
+        return `<tr>
+          <td><span class="plate-num">${i+1}</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-gold)">${escHtml(c.inkCode)}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:12px;height:12px;border-radius:3px;background:${css};flex-shrink:0"></div>
+              ${escHtml(colorLookup[c.inkCode] || '—')}
+            </div>
+          </td>
+          <td>${c.pct !== undefined && c.pct !== '' ? c.pct + '%' : '—'}</td>
+          <td>${c.qty !== undefined && c.qty !== '' ? c.qty : '—'}</td>
+          <td style="font-family:'Space Mono',monospace;font-size:11px">${escHtml(c.plate)}</td>
+          <td style="font-size:11px;color:var(--ink-silver)">${escHtml(c.notes)}</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table>`;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-section-title">معلومات أساسية</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-item-label">كود الليبل</div>
+        <div class="info-item-value mono">${escHtml(label.code)}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-item-label">قياس العلبة</div>
+        <div class="info-item-value">${escHtml(label.size)}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-item-label">رقم الرف</div>
+        <div class="info-item-value mono">${escHtml(label.rack)}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-item-label">نوع البليت</div>
+        <div class="info-item-value">${escHtml(label.pltType)}</div>
+      </div>
+    </div>
+    <div class="modal-section-title" style="margin-top:20px">الألوان والأحبار (${label.colors.length} لون)</div>
+    ${colorsTable}
+  `;
+
+  window._currentLabelId = id;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function openColorDetail(code) {
+  const color = DB.colors.find(c => c.code === code);
+  if (!color) return;
+  const mix = DB.inkMix.find(m => m.code === code);
+  const css = getColorCss(color.name);
+  const usedIn = DB.labels.filter(l => l.colors.some(c => c.inkCode === code));
+
+  document.getElementById('modalTitle').textContent = color.name;
+  document.getElementById('modalSubtitle').textContent = color.code;
+
+  let mixSection = '';
+  if (mix) {
+    mixSection = `
+      <div class="modal-section-title" style="margin-top:20px">تركيبة الحبر</div>
+      ${mix.components.map(c => `
+        <div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-border)">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-gold);width:100px">${escHtml(c.inkBase)}</span>
+          <span style="color:var(--ink-silver);font-size:12px;flex:1">${escHtml(c.desc)}</span>
+          <span style="font-weight:700">${c.pct}%</span>
+          <span style="color:var(--ink-dim);font-size:11px">${c.qty} KG</span>
+        </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:10px 0;font-weight:700;color:var(--ink-gold)">
+        <span>الإجمالي</span><span>${mix.totalPct}% / ${mix.totalQty} KG</span>
+      </div>`;
+  }
+
+  const usedSection = usedIn.length > 0 ? `
+    <div class="modal-section-title" style="margin-top:20px">يُستخدم في (${usedIn.length} ليبل)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${usedIn.slice(0,20).map(l =>
+        `<span style="padding:4px 10px;background:var(--ink-panel);border-radius:6px;font-size:11px;border:1px solid var(--ink-border)">${escHtml(l.labelName)}</span>`
+      ).join('')}
+      ${usedIn.length > 20 ? `<span style="padding:4px 10px;color:var(--ink-dim);font-size:11px">+${usedIn.length-20} أخرى</span>` : ''}
+    </div>` : '';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div style="width:100%;height:80px;border-radius:10px;background:${css};margin-bottom:20px"></div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-item-label">كود الحبر</div>
+        <div class="info-item-value mono">${escHtml(color.code)}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-item-label">اسم اللون</div>
+        <div class="info-item-value">${escHtml(color.name)}</div>
+      </div>
+    </div>
+    ${mixSection}
+    ${usedSection}
+  `;
+  window._currentLabelId = null;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('detailModal'))
+    document.getElementById('detailModal').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════════════
+// IMPORT SUMMARY
+// ══════════════════════════════════════════════════════════
+function showImportSummary() {
+  const el = document.getElementById('importSummary');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="background:rgba(61,220,132,0.06);border:1px solid var(--accent-green);border-radius:10px;padding:16px 20px">
+      <div style="color:var(--accent-green);font-weight:700;margin-bottom:10px">✓ تم الاستيراد بنجاح</div>
+      <div style="font-size:12px;color:var(--ink-silver);line-height:2">
+        📋 ليبلات مستوردة: <strong style="color:var(--ink-white)">${DB.labels.length}</strong><br>
+        🎨 أحبار: <strong style="color:var(--ink-white)">${DB.colors.length}</strong><br>
+        🧪 تركيبات أحبار: <strong style="color:var(--ink-white)">${DB.inkMix.length}</strong><br>
+        🏢 شركات: <strong style="color:var(--ink-white)">${new Set(DB.labels.map(l=>l.company)).size}</strong>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════
+function exportData() {
+  if (DB.labels.length === 0) { toast('لا توجد بيانات للتصدير', 'error'); return; }
+
+  const rows = [
+    ['اسم الليبل','الشركة','الكود','القياس','الخط','الرف','نوع البليت',
+     'اللون1','نسبة1','اللون2','نسبة2','اللون3','نسبة3','اللون4','نسبة4',
+     'اللون5','نسبة5','اللون6','نسبة6','اللون7','نسبة7','اللون8','نسبة8'],
+    ...DB.labels.map(l => {
+      const base = [l.labelName,l.company,l.code,l.size,l.line,l.rack,l.pltType];
+      for (let i=0;i<8;i++) {
+        const c = l.colors[i];
+        base.push(c ? c.inkCode : '', c ? (c.pct || '') : '');
+      }
+      return base;
+    })
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Labels');
+
+  // Colors
+  if (DB.colors.length) {
+    const cws = XLSX.utils.aoa_to_sheet([['كود الحبر','اسم اللون'],...DB.colors.map(c=>[c.code,c.name])]);
+    XLSX.utils.book_append_sheet(wb, cws, 'Colors');
+  }
+
+  XLSX.writeFile(wb, 'RoyalInk_Export.xlsx');
+  toast('تم تصدير البيانات بنجاح!', 'success');
+}
+
+// ══════════════════════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════════════════════
+const zone = document.getElementById('importZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) importExcel({ files: [file] });
+});
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg, type='info') {
+  const icons = { success:'✓', error:'✕', info:'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════
+// PRINT LABEL
+// ══════════════════════════════════════════════════════════
+function printLabel(id) {
+  const label = DB.labels.find(l => l.id === id);
+  if (!label) return;
+  const colorLookup = {};
+  DB.colors.forEach(c => colorLookup[c.code] = c.name);
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl">
+  <head><meta charset="UTF-8"><title>${label.labelName}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:20px;direction:rtl}
+    h2{margin:0 0 4px}
+    .meta{color:#666;font-size:13px;margin-bottom:16px}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #ccc;padding:8px 10px;text-align:right;font-size:12px}
+    th{background:#f5f5f5;font-weight:700}
+    .hdr{display:flex;justify-content:space-between;margin-bottom:12px}
+    .hdr-box{border:1px solid #ccc;padding:8px 14px;border-radius:4px;font-size:12px}
+    @media print{body{padding:10px}}
+  </style></head><body>
+  <div class="hdr">
+    <div><h2>${label.labelName}</h2><div class="meta">${label.company} — ${label.code}</div></div>
+    <div style="text-align:left">
+      <div class="hdr-box">الخط: <strong>${label.line}</strong></div>
+      <div class="hdr-box" style="margin-top:4px">الرف: <strong>${label.rack}</strong></div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>كود الحبر</th><th>اسم اللون</th><th>النسبة %</th><th>الكمية</th><th>رقم البليت</th><th>ملاحظات</th></tr></thead>
+    <tbody>
+    ${label.colors.map((c,i)=>`<tr>
+      <td>${i+1}</td>
+      <td>${c.inkCode}</td>
+      <td>${colorLookup[c.inkCode]||'—'}</td>
+      <td>${c.pct!==undefined&&c.pct!==''?c.pct+'%':'—'}</td>
+      <td>${c.qty!==undefined&&c.qty!==''?c.qty:'—'}</td>
+      <td>${c.plate||'—'}</td>
+      <td>${c.notes||''}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+  <div style="margin-top:12px;font-size:11px;color:#999">
+    القياس: ${label.size} &nbsp;|&nbsp; نوع البليت: ${label.pltType} &nbsp;|&nbsp; طُبع: ${new Date().toLocaleDateString('ar-IQ')}
+  </div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ══════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('detailModal').classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// SIDEBAR IMPORT NAV
+// ══════════════════════════════════════════════════════════
+// patch showSection to handle import nav highlight
+const _origShow = showSection;
+// already defined above — just add 'import' item
+document.querySelectorAll('.sidebar-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+
+// Init
+filterLine('ALL');
+applyFilters();
+</script>
+</body>
+</html>
