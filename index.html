@@ -100,12 +100,12 @@ header { display: flex; justify-content: space-between; align-items: center; mar
     <h2>Royal Ink</h2>
     <p>النظام السحابي المتكامل فائق الأداء والسرعة</p>
     <div class="form-group">
-      <label>الحساب الإلكتروني</label>
-      <input type="email" id="loginEmail" placeholder="waseem.kareem79@gmail.com">
+      <label>الحساب الإلكتروني للمسؤول</label>
+      <input type="email" id="loginEmail" placeholder="waseem.kareem79@gmail.com" autocomplete="off">
     </div>
     <div class="form-group">
       <label>رمز المرور</label>
-      <input type="password" id="loginPassword" placeholder="••••••••">
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off">
     </div>
     <button class="login-btn" onclick="processLogin()">تسجيل الدخول الآمن</button>
   </div>
@@ -194,16 +194,17 @@ window.onload = function() {
 };
 
 function processLogin() {
-  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const pass = document.getElementById("loginPassword").value;
+  // تصفية المدخلات برمجياً لقطع أي مسافات زائدة كتبها المستخدم بالخطأ
+  const email = document.getElementById("loginEmail").value.replace(/\s+/g, '').toLowerCase().trim();
+  const pass = document.getElementById("loginPassword").value.replace(/\s+/g, '').trim();
 
-  // 💡 تحديث الحساب الجديد وكلمة السر المحدثة هنا
+  // الحساب المعتمد الخالي تماماً من المشاكل والمسافات
   if(email === "waseem.kareem79@gmail.com" && pass === "5420826") {
     setupUserSession("admin");
   } else if (email === "user@royalink.com" && pass === "User@2026") {
     setupUserSession("viewer");
   } else {
-    showToast("بيانات الدخول غير صحيحة", "error");
+    showToast("بيانات الدخول غير صحيحة، يرجى التحقق من الأرقام", "error");
   }
 }
 
@@ -378,4 +379,19 @@ function openDetailedModalGlobalIndex(globalIndex) {
   keys.forEach(k => {
     let style = "";
     if(k.includes("كود") || k.includes("رقم")) style = `style="color: var(--ink-gold); font-weight: bold;"`;
-    if(k.includes("عنوان") || k.includes("موقع") || k.includes("مخزن")) style = `style="co
+    if(k.includes("عنوان") || k.includes("موقع") || k.includes("مخزن")) style = `style="color: var(--ink-gold-lt);"`;
+    modalBody += `<p><b style="color: var(--ink-silver)">${k}:</b> <span ${style}>${item[k] || "-"}</span></p>`;
+  });
+  modalBody += `</div>`;
+  
+  document.getElementById("modalBodyContent").innerHTML = modalBody;
+  document.getElementById("modalOverlay").classList.add("active");
+}
+
+function displayEmptyState(msg) { document.getElementById("labels-cards-container").innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink-dim)">${msg}</div>`; document.getElementById("paginationWrapper").style.display = "none"; }
+function switchView(view) { document.querySelectorAll(".view-section").forEach(e => e.classList.remove("active")); document.querySelectorAll("nav button, .mobile-nav button").forEach(b => b.classList.remove("active")); document.getElementById(`view-${view}`).classList.add("active"); if(document.getElementById(`btn-${view}`)) document.getElementById(`btn-${view}`).classList.add("active"); if(document.getElementById(`mbnt-${view}`)) document.getElementById(`mbnt-${view}`).classList.add("active"); }
+function closeModal() { document.getElementById("modalOverlay").classList.remove("active"); }
+function showToast(msg,type="info"){ const el=document.createElement("div"); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById("toasts").appendChild(el); setTimeout(()=>el.remove(),3500); }
+</script>
+</body>
+</html>
