@@ -58,7 +58,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 .color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
 .formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.5; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
 
-/* التبويبات السفلية الثابتة في الهاتف للتنقل الحر السريع */
+/* التبويبات السفلية للتحرك المباشر الحر */
 .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 100; display: grid; grid-template-columns: 1fr 1fr; align-items: center; justify-items: center; }
 .bottom-nav-bar button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
 .bottom-nav-bar button.active { color: var(--ink-gold); }
@@ -107,10 +107,10 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 
     <section id="sec-import" class="view-section">
       <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
-        <span style="font-size:45px; display:block; margin-bottom:12px">📥</span>
+        <span style="font-size:45px; display:block; margin-bottom:12px">📤</span>
         <h3>رفع وتحديث السيرفر المحلي</h3>
         <p style="font-size:13px; color:var(--ink-silver); margin-top:5px">اختر ملف الإكسل لتصفية وربط الألوان والخلطات تلقائياً بدون تكرار</p>
-        <input type="file" id="hiddenFileInput" style="display:none" accept=".xlsx, .xls" onchange="readExcelFileCleanly(event)">
+        <input type="file" id="hiddenFileInput" style="display:none" accept="*" onchange="readExcelFileCleanly(event)">
       </div>
     </section>
   </main>
@@ -156,11 +156,8 @@ function fetchStoredDatabase() {
   }
 }
 
-// الفلترة والتنقية القصوى والمنظمة للتخلص من الحقول الفارغة والتكرار التخريبي
 function processAndCleanRecords() {
   const aggregationMap = new Map();
-
-  // الكلمات الممنوع ظهورها كبيانات حقيقية داخل الكروت
   const blacklistedKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "empty", "رقم الكود", "كود", "code"];
 
   SYSTEM_RECORDS.forEach(row => {
@@ -170,12 +167,10 @@ function processAndCleanRecords() {
     let codeNum = (row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-").toString().trim();
     let lineName = (row["خط الإنتاج"] || row["خط الانتاج"] || "الخط الرئيسي").toString().trim();
 
-    // تجاهل السطور التخريبية أو السطور التي تكرر عناوين الجدول
     if (!label || blacklistedKeywords.some(keyword => label.toLowerCase().includes(keyword))) return;
     if (blacklistedKeywords.some(keyword => company.toLowerCase().includes(keyword))) return;
     if (label.includes("EMPTY__")) return;
 
-    // دمج السجلات المتطابقة لتكوين كرت موحد فريد
     const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
 
     if (!aggregationMap.has(uniqueIdentityKey)) {
@@ -189,7 +184,6 @@ function processAndCleanRecords() {
       });
     }
 
-    // جلب اللون والخلطة التابعة لنفس السجل
     let color = (row["اللون"] || row["اسم اللون"] || row["Color"] || "").toString().trim();
     let formula = (row["الخلطة"] || row["خلطة اللون"] || row["Formula"] || "").toString().trim();
 
@@ -246,7 +240,6 @@ function renderViewUiCards() {
   }
 }
 
-// إظهار نافذة منبثقة من الأسفل تحتوي على خلطة وألوان الليبل المحدد فقط
 function showColorsModalPanel(index) {
   const currentObj = DISPLAY_LABELS[index];
   if (!currentObj) return;
@@ -288,7 +281,6 @@ function runLiveFilter(searchVal) {
   renderViewUiCards();
 }
 
-// قراءة ومزامنة الإكسل بشكل فوري ومباشر دون شروط أمنية
 function readExcelFileCleanly(event) {
   const selectedFile = event.target.files[0];
   if (!selectedFile) return;
@@ -310,7 +302,7 @@ function readExcelFileCleanly(event) {
       SYSTEM_RECORDS = parsedJson;
       processAndCleanRecords();
       pushToastNotification("تمت المزامنة بنجاح! السجلات جاهزة للعرض الآن.", "success");
-      changeActiveTab("labels");
+      changeActiveTab('labels');
     } catch (err) {
       pushToastNotification("حدث خطأ أثناء معالجة ملف الإكسل المرفوع.", "error");
     }
