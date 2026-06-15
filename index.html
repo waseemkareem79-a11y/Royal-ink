@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام رويال إنك - الفلترة الفورية والأكواد الكاملة</title>
+    <title>نظام رويال إنك - الحفظ الدائم والفلترة الفورية</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
         
-        /* تأثير مميز للزر النشط */
+        /* تأثير الزر النشط عند الفلترة */
         .btn-active {
             background-color: #1d4ed8 !important;
             color: #ffffff !important;
@@ -25,16 +25,16 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-wide flex items-center gap-2 text-amber-400">
-                    <span>👑</span> رويال إنك - المعاينة والفلترة الفورية
+                    <span>👑</span> رويال إنك - قاعدة البيانات المحفوظة تلقائياً
                 </h1>
-                <p class="text-slate-300 text-xs md:text-sm mt-1">اضغط على أي خط أو قياس لتظهر النتائج والشركات فوراً وبشكل لحظي</p>
+                <p class="text-slate-300 text-xs md:text-sm mt-1">يحتفظ النظام بالبيانات بشكل دائم حتى بعد إغلاق الموقع، وتتحدث تلقائياً عند رفع أي ملف جديد</p>
             </div>
             
             <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
                 <input type="file" id="excel-file-input" accept=".xlsx, .xls, .xlsm" class="hidden" onchange="loadAndProcessExcel(event)">
                 <button onclick="document.getElementById('excel-file-input').click()" 
                         class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 transition transform active:scale-95 cursor-pointer text-sm">
-                    🔄 مزامنة وتحديث من ملف الإكسل
+                    🔄 مزامنة وتحديث ملف الإكسل
                 </button>
             </div>
         </div>
@@ -67,7 +67,6 @@
                 <button onclick="filterBySize('330', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">330</button>
                 <button onclick="clearAllFilters()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition cursor-pointer mr-2">تصفير الفلاتر 🔄</button>
             </div>
-
         </div>
     </section>
 
@@ -76,13 +75,13 @@
         <div class="lg:col-span-2 flex flex-col gap-4">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
                 <h2 class="text-sm md:text-base font-bold text-slate-700 flex items-center gap-2">📦 الشركات والليبلات النشطة حالياً</h2>
-                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">يرجى رفع ملف رويال لبدء العمل</span>
+                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">تحقق من ذاكرة النظام...</span>
             </div>
 
             <div id="welcome-box" class="bg-white p-16 text-center text-slate-400 rounded-2xl border border-slate-200 shadow-sm">
                 <span class="text-6xl block mb-4">📥</span>
-                <h3 class="text-lg font-bold text-slate-700 mb-1">النظام جاهز وبانتظار الملف</h3>
-                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">قم بمزامنة ملف الإكسل المعتمد من الزر الأصفر بالأعلى لتظهر لك كل الشركات والليبلات والخطوط فورا.</p>
+                <h3 class="text-lg font-bold text-slate-700 mb-1">ذاكرة النظام فارغة حالياً</h3>
+                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">يرجى الضغط على <span class="text-blue-600 font-bold">"مزامنة وتحديث ملف الإكسل"</span> في الأعلى لتنزيل البيانات وحفظها في هذا المتصفح بشكل دائم.</p>
             </div>
 
             <div id="labels-live-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
@@ -114,30 +113,50 @@
     </div>
 
     <footer class="bg-slate-900 text-slate-500 text-center py-4 text-xs border-t border-slate-800 mt-auto">
-        لوحة تحكم رويال إنك المطورة - فلترة حية فورية ومطابقة أكواد الأحبار التفصيلية كاملة.
+        لوحة تحكم رويال إنك المطورة - تخزين محلي دائم (LocalStorage) ومزامنة متجددة تلقائياً.
     </footer>
 
     <script>
         let labelsData = [];       // مصفوفة المنتجات الأساسية
         let formulasData = {};     // قاموس الخلطات والأحبار الكاملة
         
-        // متغيرات الفلاتر النشطة حالياً لتشغيل الفورية اللحظية
+        // متغيرات الفلاتر النشطة حالياً
         let currentSelectedLine = null;
         let currentSelectedSize = null;
 
-        // دالة قراءة ومزامنة وتفكيك الإكسل حياً في ثانية واحدة وتحديث قاعدة البيانات
+        // عند فتح الموقع: التحقق فوراً مما إذا كانت هناك بيانات محفوظة سابقاً في المتصفح وعرضها فوراً
+        window.onload = function() {
+            const savedLabels = localStorage.getItem('royal_labels_data');
+            const savedFormulas = localStorage.getItem('royal_formulas_data');
+
+            if (savedLabels && savedFormulas) {
+                labelsData = JSON.parse(savedLabels);
+                formulasData = JSON.parse(savedFormulas);
+                
+                // إخفاء صندوق الترحيب وتفعيل العرض التلقائي فوراً
+                document.getElementById('welcome-box').style.display = 'none';
+                document.getElementById('labels-live-container').classList.remove('hidden');
+                
+                liveRender();
+                console.log("🎯 تم استرجاع البيانات المحفوظة بنجاح من ذاكرة المتصفح المحلية!");
+            } else {
+                document.getElementById('counter-meta').innerText = "بانتظار رفع ملف المزامنة الأول...";
+            }
+        };
+
+        // دالة قراءة ومعالجة ومزامنة الإكسل وحفظها دائمياً بالمتصفح تلقائياً
         function loadAndProcessExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('counter-meta').innerText = "جاري قراءة وتحديث البيانات فوراً...";
+            document.getElementById('counter-meta').innerText = "جاري قراءة وتحديث البيانات الفورية...";
             
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                // 1. معالجة وتخزين جدول خلطات الأحبار (INK MIX) أولاً لتسهيل المطابقة الكاملة للأكواد
+                // 1. معالجة وتخزين جدول خلطات الأحبار (INK MIX)
                 formulasData = {};
                 if (workbook.Sheets['INK MIX']) {
                     const sheet = workbook.Sheets['INK MIX'];
@@ -151,7 +170,6 @@
                         const inkName = row[1] ? String(row[1]).trim() : 'حبر ملون معتمد';
 
                         let ingredients = [];
-                        // سحب الخلطة المكونة الثمانية كاملة بالأوزان والوصف والنسبة
                         for (let bIdx = 3; bIdx < 35; bIdx += 4) {
                             if (row[bIdx]) {
                                 ingredients.push({
@@ -169,7 +187,7 @@
                     }
                 }
 
-                // 2. معالجة وتخزين جدول الليبلات والمنتجات والخطوط (SHEET1)
+                // 2. معالجة وتخزين جدول الليبلات والمنتجات (SHEET1)
                 labelsData = [];
                 if (workbook.Sheets['SHEET1']) {
                     const sheet = workbook.Sheets['SHEET1'];
@@ -180,7 +198,7 @@
                         if (!row || !row[0]) continue;
 
                         let colorCodes = [];
-                        const cols = [7, 12, 17, 22, 27, 32, 37, 42]; // أعمدة أكواد الأحبار
+                        const cols = [7, 12, 17, 22, 27, 32, 37, 42]; 
                         cols.forEach(idx => {
                             if (row[idx]) colorCodes.push(String(row[idx]).trim());
                         });
@@ -198,45 +216,46 @@
                     }
                 }
 
-                // فتح وتفعيل حاويات العرض وإخفاء شاشة الترحيب
+                // 🔥 الخطوة السحرية: حفظ البيانات المحدثة والمزامنة داخل ذاكرة المتصفح دائمياً
+                localStorage.setItem('royal_labels_data', JSON.stringify(labelsData));
+                localStorage.setItem('royal_formulas_data', JSON.stringify(formulasData));
+
+                // إخفاء صندوق الترحيب وتفعيل شبكة البيانات المحدثة
                 document.getElementById('welcome-box').style.display = 'none';
                 document.getElementById('labels-live-container').classList.remove('hidden');
                 
-                // التحديث والرسم الفوري على الشاشة
+                // الرندرة الفورية والشاملة
                 liveRender();
-                alert(`🎯 تمت المزامنة الفورية بنجاح!\nتم تحميل وفهرسة ${labelsData.length} منتج، ومطابقتها مع ${Object.keys(formulasData).length} كود لون كامل.`);
+                alert(`🎯 تم الحفظ والمزامنة الدائمة بنجاح!\nتمت أرشفة وحفظ ${labelsData.length} منتج و ${Object.keys(formulasData).length} كود لون فني داخل المتصفح تلقائياً.`);
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // دالة تصفية فورية ولحظية بمجرد الضغط على زر الخط (لاين 1، لاين 2، لاين 3)
+        // دالة الفلترة الفورية بمجرد كبس زر اللاين والخطوط
         function filterByLine(lineName, btnElement) {
-            // إزالة التحديد عن بقية أزرار الخطوط
             document.querySelectorAll('.line-btn').forEach(btn => btn.classList.remove('btn-active'));
-            
             if (currentSelectedLine === lineName) {
-                currentSelectedLine = null; // إلغاء الفلتر إذا ضغط عليه مرة ثانية
+                currentSelectedLine = null; 
             } else {
                 currentSelectedLine = lineName;
                 btnElement.classList.add('btn-active');
             }
-            liveRender(); // تحديث فوري فائق السرعة
+            liveRender(); 
         }
 
-        // دالة تصفية فورية ولحظية بمجرد الضغط على أزرار القياسات (185، 250، 300، 330)
+        // دالة الفلترة الفورية بمجرد كبس زر قياس العلبة
         function filterBySize(sizeName, btnElement) {
             document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('btn-active'));
-            
             if (currentSelectedSize === sizeName) {
                 currentSelectedSize = null;
             } else {
                 currentSelectedSize = sizeName;
                 btnElement.classList.add('btn-active');
             }
-            liveRender(); // تحديث فوري فائق السرعة
+            liveRender(); 
         }
 
-        // دالة تصفير كافة الفلاتر النشطة لإرجاع عرض كافة البيانات
+        // تصفير كافة الأزرار والفلاتر والبحث لتنظيف لوحة العرض
         function clearAllFilters() {
             currentSelectedLine = null;
             currentSelectedSize = null;
@@ -245,7 +264,7 @@
             liveRender();
         }
 
-        // تخمين ومعاينة بصرية تقريبية للألوان لتسهيل الفحص
+        // تخمين لوني تقريبي لسهولة التعرف البصري الفوري
         function getColorHex(colorName, colorCode) {
             const name = (colorName || '').toUpperCase();
             const code = (colorCode || '').toUpperCase();
@@ -262,7 +281,7 @@
             return '#cbd5e1';
         }
 
-        // محرك الرندرة والفلترة الفوري والذكي المشترك (يعمل بأجزاء من الثانية)
+        // محرك البحث والفلترة الفوري والذكي الهجين
         function liveRender() {
             const container = document.getElementById('labels-live-container');
             const query = document.getElementById('system-search').value.trim().toLowerCase();
@@ -270,7 +289,6 @@
 
             if (labelsData.length === 0) return;
 
-            // إجراء تصفية فورية هجينة بناءً على الأزرار المضغوطة وخانة البحث الشامل
             let filtered = labelsData.filter(item => {
                 if (currentSelectedLine && !item.line.includes(currentSelectedLine)) return false;
                 if (currentSelectedSize && !item.size.includes(currentSelectedSize)) return false;
@@ -289,13 +307,12 @@
 
             document.getElementById('counter-meta').innerText = `المعروض حالياً: ${filtered.length} سجل مطابق`;
 
-            // بناء وعرض الكروت فوراً على الشاشة
+            // رسم بطاقات الليبل والمنتجات مع كوداتها كاملة ومقروءة
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200/70 hover:shadow-md hover:border-blue-400 transition cursor-pointer flex flex-col justify-between";
                 card.onclick = () => showLabelDetailsInSidebar(item);
 
-                // بناء كتل الأكواد والأسماء الكاملة للألوان لتظهر داخل الكرت بوضوح تام (ليست مجرد رموز!)
                 let colorsListHtml = '';
                 item.colors.forEach(c => {
                     const formula = formulasData[c];
@@ -336,13 +353,13 @@
             });
         }
 
-        // دالة فحص واستعراض نسب تركيب الحبر الفنية كاملة بالأوزان (عند الضغط على كود اللون)
+        // فحص واستعراض نسب تركيب الحبر الفنية كاملة ومقروءة بالأوزان
         window.viewFullInkFormula = function(colorCode) {
             const formula = formulasData[colorCode];
             let html = '';
 
             if (!formula) {
-                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في جدول خلطات الأحبار الحالي.</div>`;
+                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في جدول خلطات الأحبار الفني الحالي.</div>`;
             } else {
                 let tableRows = '';
                 formula.ingredients.forEach(ing => {
@@ -355,7 +372,6 @@
                     `;
                 });
 
-                // العثور على المنتجات الأخرى المشتركة في هذا اللون
                 const sharedList = labelsData.filter(l => l.colors.includes(colorCode));
                 let sharedHtml = sharedList.slice(0, 5).map(m => `<span class="bg-indigo-50 text-indigo-800 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-bold">${m.name}</span>`).join(' ');
 
@@ -380,20 +396,18 @@
                 `;
             }
 
-            // تحديث لوحة العرض الجانبية (للكمبيوتر والتابلت)
             document.getElementById('panel-empty').style.display = 'none';
             const sidebar = document.getElementById('panel-content');
             sidebar.style.display = 'block';
             sidebar.innerHTML = `<div class="bg-slate-950 text-amber-400 p-2.5 rounded-xl mb-4 text-center text-xs font-bold border border-slate-800 shadow">🔬 فحص نسب وتركيب خلطة اللون</div>${html}`;
 
-            // فتح وتفعيل المنبثق التلقائي (للهواتف الذكية لسهولة القراءة الميدانية)
             document.getElementById('modal-body').innerHTML = html;
             const modal = document.getElementById('formula-modal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => document.getElementById('modal-box').classList.remove('scale-95', 'opacity-0'), 50);
         }
 
-        // دالة استعراض وفحص بطاقة الليبل الشاملة في اللوحة الجانبية
+        // تفاصيل كرت الليبل الكامل في اللوحة الجانبية الكبيرة
         function showLabelDetailsInSidebar(item) {
             let innerColorsRows = '';
             item.colors.forEach(c => {
@@ -439,7 +453,7 @@
             }
         }
 
-        // إغلاق المنبثق بنعومة وسلاسة
+        // إغلاق المنبثق بنعومة
         window.closeModal = function() {
             document.getElementById('modal-box').classList.add('scale-95', 'opacity-0');
             setTimeout(() => document.getElementById('formula-modal').classList.add('hidden'), 150);
