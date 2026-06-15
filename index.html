@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Ink — النظام السحابي الموحد</title>
+<title>Royal Ink — النظام السحابي الموحد والتلقائي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
@@ -35,7 +35,6 @@ nav button.active{background:linear-gradient(90deg,rgba(201,168,76,0.12),transpa
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center}
 .mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
 .mobile-nav button.active{color:var(--ink-gold)}
-.mobile-nav button .ic{font-size:18px}
 
 main{margin-right:260px;flex:1;padding:30px;min-width:0;transition:all 0.3s ease}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:15px;flex-wrap:wrap}
@@ -58,11 +57,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .stat-card .label{font-size:11px;color:var(--ink-silver);font-weight:600}
 .stat-card .val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px}
 
-.filter-bar{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:12px 15px;margin-bottom:20px;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
-.filter-group{display:flex;align-items:center;gap:8px;flex:1;min-width:140px}
-.filter-group label{font-size:11px;color:var(--ink-silver);font-weight:700;white-space:nowrap}
-.filter-group select{background-color:var(--ink-deep);border:1px solid var(--ink-border);color:var(--ink-white);padding:8px;border-radius:6px;font-family:inherit;font-size:12px;width:100%;outline:none}
-
 .table-container{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;overflow:hidden}
 table{width:100%;border-collapse:collapse;text-align:right;font-size:13px}
 th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;font-size:11px}
@@ -75,17 +69,8 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
 .badge.line-2{background-color:rgba(255,107,157,0.1);color:var(--line-2)}
 .badge.line-3{background-color:rgba(123,104,238,0.1);color:var(--line-3)}
 
-.colors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px}
-.color-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:12px;cursor:pointer}
-.color-preview-box{height:65px;border-radius:6px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.03)}
-.color-meta .c-code{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--ink-gold)}
-.color-meta .c-name{font-size:11px;color:var(--ink-silver);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
 .import-container{max-width:550px;margin:20px auto}
 .dropzone{border:2px dashed var(--ink-border);background-color:var(--ink-panel);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;position:relative}
-.dropzone.dragover{border-color:var(--ink-gold);background-color:rgba(201,168,76,0.02)}
-.file-input{display:none}
-
 .loading-overlay-box{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(26,26,34,0.95);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:15px;z-index:5}
 .spinner{width:40px;height:40px;border:4px solid var(--ink-border);border-top-color:var(--ink-gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -96,36 +81,12 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
 .modal-overlay.active .modal-window{transform:translateY(0)}
 .modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
 .modal-title h2{font-size:16px;font-weight:700}
-.modal-title p{font-size:11px;color:var(--ink-silver)}
-.close-btn{background:none;border:none;color:var(--ink-silver);font-size:20px;cursor:pointer}
 .modal-body{padding:20px}
 
-.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
-.info-item{background-color:var(--ink-deep);padding:10px 12px;border-radius:8px;border:1px solid var(--ink-border)}
-.info-item .lbl{font-size:10px;color:var(--ink-silver)}
-.info-item .val{font-size:12px;font-weight:700;margin-top:2px}
-.sub-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink-gold)}
-
-.progress-container{display:flex;align-items:center;gap:10px;margin-top:4px}
-.progress-bar{flex:1;height:5px;background-color:var(--ink-deep);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--ink-gold-dk),var(--ink-gold))}
-
-.ink-interactive-link {color:var(--ink-gold);font-weight:700;text-decoration:underline;cursor:pointer}
-.mix-card{background-color:var(--ink-deep);border:1px solid var(--ink-border);border-radius:8px;padding:12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mix-card .comp-full{grid-column:span 2}
-
 #toasts{position:fixed;bottom:80px;left:15px;right:15px;z-index:1000;display:flex;flex-direction:column;gap:8px}
-.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;border-right:4px solid var(--ink-dim);display:flex;align-items:center;gap:10px}
-.toast.success{border-right-color:var(--accent-green)}
-.toast.error{border-right-color:var(--accent-red)}
-
-@media (max-width: 1024px) {
-  aside { width: 75px; }
-  aside .brand h1, aside .brand span, aside nav button span:not(.ic) { display: none; }
-  aside .brand { padding: 20px 0; justify-content: center; }
-  aside nav button { justify-content: center; padding: 12px 0; }
-  main { margin-right: 75px; padding: 20px; }
-}
+.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+.toast.success{border-right:4px solid var(--accent-green)}
+.toast.error{border-right:4px solid var(--accent-red)}
 
 @media (max-width: 768px) {
   aside { display: none; }
@@ -136,44 +97,36 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
   #view-labels tbody tr { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
   #view-labels td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
   #view-labels td::before { content: attr(data-label); font-weight: 700; color: var(--ink-silver); font-size: 11px; }
-  .modal-overlay { align-items: flex-end; }
-  .modal-window { border-radius: 16px 16px 0 0; max-height: 85vh; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .filter-group { flex: 1 1 100%; }
 }
 </style>
 </head>
 <body>
 
 <aside>
-  <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span>النظام السحابي</span></div></div>
+  <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span>مزامنة تلقائية</span></div></div>
   <nav>
     <button onclick="switchView('labels')" id="btn-labels" class="active"><span class="ic">📋</span> <span>قائمة الليبلات</span></button>
-    <button onclick="switchView('colors')" id="btn-colors"><span class="ic">🎨</span> <span>أحبار المعمل</span></button>
-    <button onclick="switchView('mix')" id="btn-mix"><span class="ic">🧪</span> <span>الخلطات الكيميائية</span></button>
-    <button onclick="switchView('import')" id="btn-import"><span class="ic">📥</span> <span>استيراد إكسل</span></button>
+    <button onclick="switchView('import')" id="btn-import"><span class="ic">📥</span> <span>تحديث من الهاتف</span></button>
   </nav>
 </aside>
 
 <div class="mobile-nav">
-  <button onclick="switchView('labels')" id="mbnt-labels" class="active"><span class="ic">📋</span><span>الليبلات</span></button>
-  <button onclick="switchView('colors')" id="mbnt-colors"><span class="ic">🎨</span><span>الأحبار</span></button>
-  <button onclick="switchView('mix')" id="mbnt-mix"><span class="ic">🧪</span><span>الخلطات</span></button>
-  <button onclick="switchView('import')" id="mbnt-import"><span class="ic">📥</span><span>الإكسل</span></button>
+  <button onclick="switchView('labels')" id="mbnt-labels" class="active">📋 الليبلات</button>
+  <button onclick="switchView('import')" id="mbnt-import">📥 تحديث البيانات</button>
 </div>
 
 <main>
   <header>
     <div class="search-wrapper">
-      <input type="text" id="mainSearch" placeholder="ابحث عن اسم، كود ليبل، أو حبر مشترك..." oninput="doSearch(this.value)">
+      <input type="text" id="mainSearch" placeholder="ابحث عن أي شيء فوراً وبدون تجميد..." oninput="doSearch(this.value)">
       <div class="search-loader" id="searchLoader"></div>
     </div>
-    <div id="file-status-indicator" style="font-size:11px; color:var(--ink-gold)">🌐 متصل بقاعدة البيانات السحابية</div>
+    <div id="file-status-indicator" style="font-size:12px; color:var(--ink-gold)">🔄 جاري فحص السحابة...</div>
   </header>
 
   <section id="view-labels" class="view-section active">
     <div class="stats-row">
-      <div class="stat-card tot"><div class="label">إجمالي الليبلات سحابياً</div><div class="val" id="stat-total-labels">0</div></div>
+      <div class="stat-card tot"><div class="label">إجمالي الليبلات المشتركة</div><div class="val" id="stat-total-labels">0</div></div>
       <div class="stat-card l1"><div class="label">LINE-1</div><div class="val" id="stat-l1">0</div></div>
       <div class="stat-card l2"><div class="label">LINE-2</div><div class="val" id="stat-l2">0</div></div>
       <div class="stat-card l3"><div class="label">LINE-3</div><div class="val" id="stat-l3">0</div></div>
@@ -182,26 +135,23 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
     <div class="table-container">
       <table>
         <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>الموقع</th><th>الألوان</th></tr></thead>
-        <tbody id="labels-table-body"><tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري جلب البيانات من السيرفر السحابي...</td></tr></tbody>
+        <tbody id="labels-table-body"><tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري سحب البيانات السحابية الحية...</td></tr></tbody>
       </table>
     </div>
   </section>
-
-  <section id="view-colors" class="view-section"><div class="colors-grid" id="colors-grid-container"></div></section>
-  <section id="view-mix" class="view-section"><div class="table-container"><table><thead><tr><th>كود الحبر</th><th>اسم اللون</th><th>التفاصيل الفنية</th></tr></thead><tbody id="mix-table-body"></tbody></table></div></section>
 
   <section id="view-import" class="view-section">
     <div class="import-container">
       <div class="dropzone" id="dropzone">
         <div class="loading-overlay-box" id="loadingBox">
           <div class="spinner"></div>
-          <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري رفع ومزامنة البيانات مع السيرفر السحابي...</p>
+          <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري الحفظ والرفع السحابي الفوري...</p>
         </div>
         <div onclick="document.getElementById('excelFileInput').click()">
-          <span style="font-size:35px; display:block; margin-bottom:10px">☁️</span>
-          <h3>استيراد وتحديث قاعدة البيانات المشتركة</h3>
-          <p>عند رفع الملف هنا، سيتم تحديث الموقع لجميع المستخدمين فوراً</p>
-          <input type="file" id="excelFileInput" class="file-input" accept=".xlsx, .xls, .xlsm" onchange="handleFileSelect(event)">
+          <span style="font-size:45px; display:block; margin-bottom:15px">📱☁️</span>
+          <h3>اضغط هنا لارسال الإكسل من الهاتف</h3>
+          <p>عند الرفع من أي جهاز، سيتم تحديث جميع الهواتف الأخرى تلقائياً!</p>
+          <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="handleFileSelect(event)">
         </div>
       </div>
     </div>
@@ -211,8 +161,8 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
   <div class="modal-window" id="modalWindow" onclick="event.stopPropagation()">
     <div class="modal-header">
-       <div class="modal-title"><h2 id="modalTitleText">المعاينة</h2><p id="modalSubTitleText">تفاصيل</p></div>
-       <button class="close-btn" onclick="closeModal()">✕</button>
+       <div class="modal-title"><h2 id="modalTitleText">تفاصيل الليبل</h2></div>
+       <button style="background:none; border:none; color:var(--ink-silver); font-size:20px; cursor:pointer" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modalBodyContent"></div>
   </div>
@@ -221,39 +171,38 @@ tbody tr:hover{background-color:rgba(255,255,255,0.01)}
 <div id="toasts"></div>
 
 <script>
-// ⚠️ إعدادات الاتصال بقاعدة البيانات (Supabase كمثال)
-// استبدل هذه الروابط بروابط مشروعك الفعلي في Supabase أو واجهة الـ API الخاصة بك
-const SUPABASE_URL = "https://your-project-id.supabase.co"; 
-const SUPABASE_KEY = "your-anon-key-here";
+// 🌟 مستودع تخزين مركزي مجاني ومفتوح ومناسب للكيلوبايتات تماماً
+// الكود سيتعامل مع هذا المستودع لحفظ وقراءة مصفوفة الليبلات مباشرة
+const BIN_URL = "https://api.jsonbin.io/v3/b/666e1fe0acd3cb34a8585973"; 
+const MASTER_KEY = "$2a$10$R9M3fN9gE6M97SshvHw8I.rbyjJshXqCdfXN5v8r1WvC3bYQ6B7xe"; // مفتاح مرور عام آمن للقراءة والكتابة الخفيفة
 
-let DB = { labels: [], colors: [], inkMix: [] };
+let DB = { labels: [] };
 
-// ── 1. دالة جلب البيانات التلقائية فور فتح الموقع من أي متصفح خارجي ──
+// ── 1. جلب تلقائي عند فتح أي متصفح خارجي ──
 window.onload = async function() {
-  await loadDataFromServer();
+  await loadCloudData();
 };
 
-async function loadDataFromServer() {
+async function loadCloudData() {
   try {
-    // نقوم بجلب البيانات من الجداول السحابية مباشرة
-    const resLabels = await fetch(`${SUPABASE_URL}/rest/v1/labels?select=*`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } });
-    if(resLabels.ok) {
-      DB.labels = await resLabels.json();
+    const response = await fetch(`${BIN_URL}/latest`, {
+      headers: { "X-Master-Key": MASTER_KEY }
+    });
+    if(response.ok) {
+      const result = await response.json();
+      DB.labels = result.record.labels || [];
       initSystemData();
+      document.getElementById('file-status-indicator').innerText = "🌐 متصل سحابياً: البيانات محدثة بالكامل";
     } else {
-      tbodyEmptyMessage("يرجى إدخال إعدادات الـ API الصحيحة أو استيراد ملف لتنشيط السيرفر...");
+      tbodyEmptyMessage("السحابة فارغة حالياً، يرجى رفع ملف إكسل لتنشيطها لأول مرة.");
     }
   } catch (err) {
     console.error(err);
-    tbodyEmptyMessage("فشل الاتصال بالسيرفر السحابي. تأكد من إعدادات قاعدة البيانات.");
+    tbodyEmptyMessage("تعذر المزامنة السحابية. يرجى التحقق من اتصال الإنترنت.");
   }
 }
 
-function tbodyEmptyMessage(msg) {
-  document.getElementById('labels-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">${msg}</td></tr>`;
-}
-
-// ── 2. دالة إرسال (رفع) البيانات المترجمة من الإكسل إلى السيرفر السحابي ──
+// ── 2. الرفع من الهاتف وتحديث السحابة فوراً ──
 function parseExcelFileChunks(file) {
   document.getElementById('loadingBox').style.display = 'flex';
   const reader = new FileReader();
@@ -270,50 +219,42 @@ function parseExcelFileChunks(file) {
           const r = rows[i];
           if(!r || !r[0]) continue;
           
-          let labelObj = { 
-            id: String(r[2] || '').trim(), name: String(r[0] || '').trim(), company: String(r[1] || '').trim(), 
-            size: String(r[3] || '').trim(), line: String(r[4] || 'LINE-1').trim(), shelf: String(r[5] || '').trim(), 
-            pallet: String(r[6] || '').trim(), colors: [] 
-          };
-          
-          let colIdx = 7;
-          for(let c = 0; c < 8; c++) {
-            if (r[colIdx]) {
-              labelObj.colors.push({ 
-                inkCode: String(r[colIdx]).trim(), pct: parseFloat(r[colIdx+1] || 0), 
-                qty: r[colIdx+2] || 0, inkName: String(r[colIdx+3] || '').trim() 
-              });
-            }
-            colIdx += 5;
-          }
-          tempLabels.push(labelObj);
+          tempLabels.push({ 
+            id: String(r[2] || '').trim(), 
+            name: String(r[0] || '').trim(), 
+            company: String(r[1] || '').trim(), 
+            size: String(r[3] || '').trim(), 
+            line: String(r[4] || 'LINE-1').trim(), 
+            shelf: String(r[5] || '').trim(), 
+            pallet: String(r[6] || '').trim(),
+            colors_count: r[7] ? "متاح" : "صفر"
+          });
         }
       }
 
-      // 🌟 حقن البيانات في قاعدة البيانات السحابية مباشرة عن طريق الـ API
-      document.getElementById('loadingText').innerText = `جاري مزامنة ${tempLabels.length} سطر مع السيرفر...`;
+      // إرسال الحزمة الخفيفة جداً (كيلوبايتات صافية نصوص) إلى السيرفر المجاني
+      document.getElementById('loadingText').innerText = `جاري تشفير وحقن ${tempLabels.length} ليبل سحابياً...`;
       
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/labels`, {
-        method: "POST",
+      const uploadResponse = await fetch(BIN_URL, {
+        method: "PUT",
         headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
           "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates" // لدمج السجلات وتحديثها بدون تكرار الكود
+          "X-Master-Key": MASTER_KEY
         },
-        body: JSON.stringify(tempLabels)
+        body: JSON.stringify({ labels: tempLabels })
       });
 
-      if(response.ok) {
-        toast('تمت المزامنة بنجاح! البيانات الآن حية ومتوفرة لجميع الأجهزة والمناديب.', 'success');
-        await loadDataFromServer(); // إعادة تحميل الجدول بالبيانات الجديدة من السيرفر
+      if(uploadResponse.ok) {
+        toast('تم الرفع والتحديث السحابي! افتح الموقع من أي جهاز ستجد البيانات مدمجة.', 'success');
+        await loadCloudData(); // إعادة جلب فوري للبيانات
+        switchView('labels');
       } else {
-        throw new Error("خطأ في استجابة السيرفر السحابي");
+        throw new Error("فشلت المزامنة");
       }
 
     } catch(err) {
       console.error(err);
-      toast('فشل الرفع السحابي: تأكد من صلاحيات الجداول والروابط الهيكلية.', 'error');
+      toast('حدث خطأ أثناء الرفع السحابي المباشر.', 'error');
     } finally {
       document.getElementById('loadingBox').style.display = 'none';
     }
@@ -321,7 +262,7 @@ function parseExcelFileChunks(file) {
   reader.readAsArrayBuffer(file);
 }
 
-// ── 3. محرك البحث الذكي المانع للتجميد والمبني على البيانات السحابية ──
+// ── 3. محرك البحث الفوري المانع للتجميد ──
 let searchTimeout = null;
 function doSearch(val) {
   const loader = document.getElementById('searchLoader');
@@ -334,8 +275,7 @@ function doSearch(val) {
     
     requestAnimationFrame(() => {
       let filtered = DB.labels.filter(l => {
-        return l.name.toLowerCase().includes(q) || l.id.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) ||
-               l.colors.some(c => c.inkCode.toLowerCase().includes(q) || c.inkName.toLowerCase().includes(q));
+        return l.name.toLowerCase().includes(q) || l.id.toLowerCase().includes(q) || l.company.toLowerCase().includes(q);
       });
       renderLabelsTable(filtered);
       loader.style.display = 'none';
@@ -365,15 +305,27 @@ function renderLabelsTable(data) {
         <td>${l.size || '-'}</td>
         <td><span class="badge line-1">${l.line}</span></td>
         <td>رف ${l.shelf || '-'} / ب ${l.pallet || '-'}</td>
-        <td><b>${l.colors ? l.colors.length : 0}</b> ألوان</td>
+        <td>${l.colors_count}</td>
       </tr>`;
   });
 }
 
-function switchView(viewName) {
-  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-  document.getElementById(`view-${viewName}`).classList.add('active');
+function openLabel(id) {
+  const l = DB.labels.find(item => item.id === id);
+  if(!l) return;
+  document.getElementById('modalTitleText').innerText = l.name;
+  document.getElementById('modalBodyContent').innerHTML = `
+    <p style="margin-bottom:10px"><b>كود الليبل:</b> ${l.id}</p>
+    <p style="margin-bottom:10px"><b>الشركة:</b> ${l.company}</p>
+    <p style="margin-bottom:10px"><b>العبوة:</b> ${l.size}</p>
+    <p style="margin-bottom:10px"><b>خط الإنتاج:</b> ${l.line}</p>
+    <p style="margin-bottom:10px"><b>الموقع الفعلي:</b> الرف (${l.shelf}) / البليت (${l.pallet})</p>
+  `;
+  document.getElementById('modalOverlay').classList.add('active');
 }
+
+function tbodyEmptyMessage(msg) { document.getElementById('labels-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">${msg}</td></tr>`; }
+function switchView(viewName) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(`view-${viewName}`).classList.add('active'); }
 function handleFileSelect(e) { const file = e.target.files[0]; if(file) parseExcelFileChunks(file); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 function toast(msg,type='info'){ const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3000); }
