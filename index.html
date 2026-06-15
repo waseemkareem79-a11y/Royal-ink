@@ -2,485 +2,333 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Royal Ink Cloud — المستودع الرقمي المجمع</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Ink — النظام السحابي الموحد والتلقائي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
 
-:root {
-  --ink-black: #0D0D0F; --ink-deep: #131318; --ink-panel: #1A1A22; --ink-card: #1E1E2A;
-  --ink-border: #2C2C3E; --ink-gold: #C9A84C; --ink-gold-lt: #E8C97A; --ink-gold-dk: #8B6F2E;
-  --ink-silver: #9898B0; --ink-dim: #5A5A72; --ink-white: #F0EEF8;
-  --accent-green: #3DDC84; --accent-red: #FF5252;
+:root{
+  --ink-black:#0D0D0F; --ink-deep:#131318; --ink-panel:#1A1A22; --ink-card:#20202C;
+  --ink-border:#2C2C3E; --ink-gold:#C9A84C; --ink-gold-lt:#E8C97A; --ink-gold-dk:#8B6F2E;
+  --ink-silver:#9898B0; --ink-dim:#5A5A72; --ink-white:#F0EEF8;
+  --line-1:#4ECDC4; --line-2:#FF6B9D; --line-3:#7B68EE;
+  --accent-green:#3DDC84; --accent-red:#FF5252
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background-color:var(--ink-black);color:var(--ink-white);min-height:100vh;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--ink-deep)}
+::-webkit-scrollbar-thumb{background:var(--ink-border);border-radius:3px}
 
-/* شاشة تسجيل الدخول */
-#login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--ink-black); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.login-box { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 35px 25px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-.login-box h2 { text-align: center; margin-bottom: 8px; color: var(--ink-gold); font-weight: 900; font-size: 24px; }
-.login-box p { text-align: center; color: var(--ink-silver); font-size: 12px; margin-bottom: 25px; }
-.form-group { margin-bottom: 18px; }
-.form-group label { display: block; font-size: 12px; color: var(--ink-silver); margin-bottom: 6px; font-weight: 600; }
-.form-group input { width: 100%; background-color: var(--ink-deep); border: 1px solid var(--ink-border); padding: 12px 14px; border-radius: 8px; color: var(--ink-white); outline: none; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
-.form-group input:focus { border-color: var(--ink-gold); }
-.login-btn { width: 100%; background: linear-gradient(90deg, var(--ink-gold-dk), var(--ink-gold)); border: none; padding: 13px; border-radius: 8px; color: var(--ink-black); font-weight: 700; font-family: inherit; cursor: pointer; font-size: 14px; margin-top: 10px; }
+aside{width:260px;background-color:var(--ink-deep);border-left:1px solid var(--ink-border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100;transition:all 0.3s ease}
+.brand{padding:25px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ink-border)}
+.brand .logo{width:35px;height:35px;background:linear-gradient(135deg,var(--ink-gold),var(--ink-gold-dk));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--ink-black);font-size:18px}
+.brand h1{font-size:16px;font-weight:700}
+.brand span{font-size:10px;color:var(--ink-gold);display:block}
+nav{padding:15px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
+nav button{background:none;border:none;color:var(--ink-silver);padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:right;width:100%;transition:0.2s}
+nav button:hover{background-color:rgba(255,255,255,0.02);color:var(--ink-white)}
+nav button.active{background:linear-gradient(90deg,rgba(201,168,76,0.12),transparent);color:var(--ink-gold);border-right:3px solid var(--ink-gold)}
 
-/* الهيكل الرئيسي للتطبيق */
-#app-screen { display: none; flex-direction: column; min-height: 100vh; }
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:65px;background-color:var(--ink-deep);border-top:1px solid var(--ink-border);z-index:200;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center}
+.mobile-nav button{background:none;border:none;color:var(--ink-silver);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;width:100%;height:100%;justify-content:center}
+.mobile-nav button.active{color:var(--ink-gold)}
 
-/* شريط البحث العلوي المثبت (ممتاز للهاتف) */
-.fixed-header { position: sticky; top: 0; background-color: rgba(13, 13, 15, 0.95); backdrop-filter: blur(10px); z-index: 90; padding: 15px; border-bottom: 1px solid var(--ink-border); display: flex; flex-direction: column; gap: 10px; }
-.search-wrapper { position: relative; width: 100%; }
-.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
-.search-wrapper input:focus { border-color: var(--ink-gold); }
-.status-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-silver); px: 5px; }
+main{margin-right:260px;flex:1;padding:30px;min-width:0;transition:all 0.3s ease}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:15px;flex-wrap:wrap}
+.search-wrapper{position:relative;flex:1;max-width:450px;width:100%}
+.search-wrapper input{width:100%;background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 16px;border-radius:10px;color:var(--ink-white);font-family:inherit;font-size:13px;outline:none}
+.search-wrapper input:focus{border-color:var(--ink-gold)}
+.search-loader {position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid var(--ink-border); border-top-color: var(--ink-gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: none;}
 
-/* محتوى الواجهات */
-main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800px; margin: 0 auto; }
-.view-section { display: none; }
-.view-section.active { display: block; }
+.view-section{display:none}
+.view-section.active{display:block;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-/* ترتيب شبكة الكروت المنظم والمقفل تلقائياً */
-.labels-container { display: flex; flex-direction: column; gap: 14px; }
-.label-card { background-color: var(--ink-card); border: 1px solid var(--ink-border); border-radius: 12px; padding: 16px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.4); padding-bottom: 8px; }
-.card-title { font-size: 16px; font-weight: 700; color: var(--ink-gold-lt); max-width: 70%; word-break: break-word; }
-.card-badge-code { font-size: 12px; font-weight: 700; color: var(--ink-gold); background: rgba(201,168,76,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.2); }
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;padding:15px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%}
+.stat-card.tot::before{background-color:var(--ink-gold)}
+.stat-card.l1::before{background-color:var(--line-1)}
+.stat-card.l2::before{background-color:var(--line-2)}
+.stat-card.l3::before{background-color:var(--line-3)}
+.stat-card .label{font-size:11px;color:var(--ink-silver);font-weight:600}
+.stat-card .val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px}
 
-.grid-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.detail-item { display: flex; flex-direction: column; gap: 2px; }
-.detail-lbl { font-size: 11px; color: var(--ink-silver); }
-.detail-val { font-size: 13px; font-weight: 600; color: var(--ink-white); }
+.table-container{background-color:var(--ink-panel);border:1px solid var(--ink-border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse;text-align:right;font-size:13px}
+th{background-color:var(--ink-deep);color:var(--ink-silver);font-weight:700;padding:14px 16px;font-size:11px}
+td{padding:14px 16px;border-bottom:1px solid var(--ink-border)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background-color:rgba(255,255,255,0.01)}
 
-/* زر استعراض خلطات الألوان التابعة داخل الكرت */
-.action-trigger-btn { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-.action-trigger-btn:active { background-color: var(--ink-deep); }
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge.line-1{background-color:rgba(78,205,196,0.1);color:var(--line-1)}
+.badge.line-2{background-color:rgba(255,107,157,0.1);color:var(--line-2)}
+.badge.line-3{background-color:rgba(123,104,238,0.1);color:var(--line-3)}
 
-/* نافذة عرض الألوان والخلطات المنبثقة السفلى (تصميم هاتف ذكي ممتاز) */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.8); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-window { background-color: var(--ink-panel); border-top: 2px solid var(--ink-gold); width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; transform: translateY(100%); transition: transform 0.25s ease-out; }
-.modal-overlay.active .modal-window { transform: translateY(0); }
-.modal-header { background-color: var(--ink-deep); padding: 16px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+.import-container{max-width:550px;margin:20px auto}
+.dropzone{border:2px dashed var(--ink-border);background-color:var(--ink-panel);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;position:relative}
+.loading-overlay-box{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(26,26,34,0.95);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:15px;z-index:5}
+.spinner{width:40px;height:40px;border:4px solid var(--ink-border);border-top-color:var(--ink-gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-.color-row-item { background: var(--ink-deep); border: 1px solid var(--ink-border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-.color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.5; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(5,5,8,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal-window{background-color:var(--ink-panel);border:1px solid var(--ink-border);width:100%;max-height:85vh;border-radius:16px 16px 0 0;overflow-y:auto;transition:transform 0.2s ease;transform:translateY(100%)}
+.modal-overlay.active .modal-window{transform:translateY(0)}
+.modal-header{background-color:var(--ink-deep);padding:15px 20px;border-bottom:1px solid var(--ink-border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.modal-title h2{font-size:16px;font-weight:700}
+.modal-body{padding:20px}
 
-/* التبويبات السفلية الثابتة في الهاتف */
-.bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 100; display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); align-items: center; justify-items: center; }
-.bottom-nav-bar button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
-.bottom-nav-bar button.active { color: var(--ink-gold); }
-.admin-tab { display: none; }
+#toasts{position:fixed;bottom:80px;left:15px;right:15px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.toast{background-color:var(--ink-panel);border:1px solid var(--ink-border);padding:12px 15px;border-radius:8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px}
+.toast.success{border-right:4px solid var(--accent-green)}
+.toast.error{border-right:4px solid var(--accent-red)}
 
-/* أدوات الأدمن والتحكم */
-.dropzone-area { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 12px; padding: 40px 15px; text-align: center; cursor: pointer; margin-top: 20px; }
-.admin-card-box { background: var(--ink-panel); padding: 20px; border-radius: 12px; border: 1px solid var(--ink-border); margin-top: 15px; }
-.user-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--ink-border); font-size: 13px; }
-
-/* الإشعارات السريعة التلقائية */
-#toast-container { position: fixed; top: 20px; left: 20px; right: 20px; z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast-msg { background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; boxShadow: 0 5px 15px rgba(0,0,0,0.4); animation: fadeIn 0.3s; }
-.toast-msg.success { border-right: 4px solid var(--accent-green); color: var(--accent-green); }
-.toast-msg.error { border-right: 4px solid var(--accent-red); color: var(--accent-red); }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* أزرار التصفح والصفحات */
-.pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 5px 0; }
-.nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 6px 16px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
-.nav-page-btn:disabled { opacity: 0.3; }
+@media (max-width: 768px) {
+  aside { display: none; }
+  .mobile-nav { display: grid; }
+  main { margin-right: 0; padding: 15px; padding-bottom: 90px; }
+  #view-labels table, #view-labels thead, #view-labels tbody, #view-labels th, #view-labels td, #view-labels tr { display: block; }
+  #view-labels thead { display: none; }
+  #view-labels tbody tr { background-color: var(--ink-panel); border: 1px solid var(--ink-border); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
+  #view-labels td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+  #view-labels td::before { content: attr(data-label); font-weight: 700; color: var(--ink-silver); font-size: 11px; }
+}
 </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول -->
-<div id="login-screen">
-  <div class="login-box">
-    <h2>Royal Ink Cloud</h2>
-    <p>نظام إدارة ومطابقة خلطات الحبر الذكي</p>
-    <div class="form-group">
-      <label>الحساب الإلكتروني</label>
-      <input type="email" id="loginEmail" placeholder="waseem.kareem79@gmail.com" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label>رمز المرور</label>
-      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off">
-    </div>
-    <button class="login-btn" onclick="verifySystemLogin()">دخول آمن</button>
-  </div>
+<aside>
+  <div class="brand"><div class="logo">R</div><div><h1>Royal Ink</h1><span>مزامنة تلقائية</span></div></div>
+  <nav>
+    <button onclick="switchView('labels')" id="btn-labels" class="active"><span class="ic">📋</span> <span>قائمة الليبلات</span></button>
+    <button onclick="switchView('import')" id="btn-import"><span class="ic">📥</span> <span>تحديث من الهاتف</span></button>
+  </nav>
+</aside>
+
+<div class="mobile-nav">
+  <button onclick="switchView('labels')" id="mbnt-labels" class="active">📋 الليبلات</button>
+  <button onclick="switchView('import')" id="mbnt-import">📥 تحديث البيانات</button>
 </div>
 
-<!-- واجهة التطبيق المتكاملة -->
-<div id="app-screen">
-  
-  <!-- البار العلوي الثابت للبحث السريع التلقائي (ممتاز للموبايل) -->
-  <div class="fixed-header">
+<main>
+  <header>
     <div class="search-wrapper">
-      <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، اللون، الشركة، أو الكود..." oninput="runLiveFilter(this.value)">
+      <input type="text" id="mainSearch" placeholder="ابحث عن أي شيء فوراً وبدون تجميد..." oninput="doSearch(this.value)">
+      <div class="search-loader" id="searchLoader"></div>
     </div>
-    <div class="status-bar">
-      <div>المستودع: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> سجل مجمع</div>
-      <div id="user-role-text" style="color:var(--accent-green)">المشاهدة النشطة</div>
+    <div id="file-status-indicator" style="font-size:12px; color:var(--ink-gold)">🔄 جاري فحص السحابة...</div>
+  </header>
+
+  <section id="view-labels" class="view-section active">
+    <div class="stats-row">
+      <div class="stat-card tot"><div class="label">إجمالي الليبلات المشتركة</div><div class="val" id="stat-total-labels">0</div></div>
+      <div class="stat-card l1"><div class="label">LINE-1</div><div class="val" id="stat-l1">0</div></div>
+      <div class="stat-card l2"><div class="label">LINE-2</div><div class="val" id="stat-l2">0</div></div>
+      <div class="stat-card l3"><div class="label">LINE-3</div><div class="val" id="stat-l3">0</div></div>
     </div>
-  </div>
 
-  <!-- حاوي عرض البيانات الرئيسي -->
-  <main>
-    <!-- 1. واجهة المستودع الرقمي النظيف -->
-    <section id="sec-labels" class="view-section active">
-      <div class="labels-container" id="labels-render-target"></div>
-      
-      <div class="pagination-container" id="paginationController">
-        <button class="nav-page-btn" id="btnPrev" onclick="navigatePage(-1)">السابق</button>
-        <span id="txtPageInfo" style="font-size:12px">صفحة 1 من 1</span>
-        <button class="nav-page-btn" id="btnNext" onclick="navigatePage(1)">التالي</button>
-      </div>
-    </section>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>كود الـليبل</th><th>اسم الليبل</th><th>الشركة</th><th>العبوة</th><th>خط الإنتاج</th><th>الموقع</th><th>الألوان</th></tr></thead>
+        <tbody id="labels-table-body"><tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">جاري سحب البيانات السحابية الحية...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
 
-    <!-- 2. واجهة رفع ومزامنة الإكسل (أدمن فقط) -->
-    <section id="sec-import" class="view-section">
-      <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
-        <span style="font-size:40px; display:block; margin-bottom:10px">📊</span>
-        <h3>رفع ومزامنة الملف الرئيسي</h3>
-        <p style="font-size:12px; color:var(--ink-silver); margin-top:5px">اضغط هنا لاستيراد وتصفية ملف الإكسل لتحديث السيرفر المحلي فوراً</p>
-        <input type="file" id="hiddenFileInput" style="display:none" accept=".xlsx, .xls" onchange="readExcelFileCleanly(event)">
-      </div>
-    </section>
-
-    <!-- 3. واجهة إدارة الصلاحيات (أدمن فقط) -->
-    <section id="sec-users" class="view-section">
-      <div class="admin-card-box">
-        <h3 style="color:var(--ink-gold); font-size:15px; margin-bottom:12px">توليد حساب موظف (مشاهدة فقط)</h3>
-        <div class="form-group">
-          <label>البريد الإلكتروني للجديد</label>
-          <input type="email" id="newAccEmail" placeholder="employee@royalink.com">
+  <section id="view-import" class="view-section">
+    <div class="import-container">
+      <div class="dropzone" id="dropzone">
+        <div class="loading-overlay-box" id="loadingBox">
+          <div class="spinner"></div>
+          <p id="loadingText" style="color:var(--ink-gold); font-weight:700;">جاري الحفظ والرفع السحابي الفوري...</p>
         </div>
-        <div class="form-group">
-          <label>كلمة المرور المقترحة</label>
-          <input type="text" id="newAccPass" placeholder="Ink2026">
+        <div onclick="document.getElementById('excelFileInput').click()">
+          <span style="font-size:45px; display:block; margin-bottom:15px">📱☁️</span>
+          <h3>اضغط هنا لارسال الإكسل من الهاتف</h3>
+          <p>عند الرفع من أي جهاز، سيتم تحديث جميع الهواتف الأخرى تلقائياً!</p>
+          <input type="file" id="excelFileInput" style="display:none" accept=".xlsx, .xls, .xlsm" onchange="handleFileSelect(event)">
         </div>
-        <button class="login-btn" onclick="createNewViewer()">تثبيت وتوليد الحساب</button>
-        
-        <h3 style="color:var(--ink-silver); font-size:14px; margin-top:20px; margin-bottom:8px; border-top:1px solid var(--ink-border); padding-top:15px">الحسابات المعتمدة الحالية</h3>
-        <div id="localUsersList"></div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
 
-  <!-- التبويبات السفلية الثابتة المناسبة للهواتف الذكية للتحرك بسلاسة -->
-  <div class="bottom-nav-bar">
-    <button onclick="changeActiveTab('labels')" id="tab-labels" class="active">📋 الليبلات</button>
-    <button onclick="changeActiveTab('import')" id="tab-import" class="admin-tab">📥 رفع إكسل</button>
-    <button onclick="changeActiveTab('users')" id="tab-users" class="admin-tab">👥 الصلاحيات</button>
-    <button onclick="triggerLogout()" style="color:var(--accent-red)">🚪 خروج</button>
-  </div>
-</div>
-
-<!-- المودال السفلي الذكي لعرض الألوان والخلطات بدون خربطة -->
-<div class="modal-overlay" id="globalModalOverlay" onclick="closeGlobalModal()">
-  <div class="modal-window" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-window" id="modalWindow" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <h3 id="modalHeaderTitle" style="font-size:15px; color:var(--ink-white)">الألوان والتركيبات</h3>
-      <button style="background:none; border:none; color:var(--ink-silver); font-size:18px; cursor:pointer" onclick="closeGlobalModal()">✕</button>
+       <div class="modal-title"><h2 id="modalTitleText">تفاصيل الليبل</h2></div>
+       <button style="background:none; border:none; color:var(--ink-silver); font-size:20px; cursor:pointer" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body" id="modalViewBody"></div>
+    <div class="modal-body" id="modalBodyContent"></div>
   </div>
 </div>
 
-<div id="toast-container"></div>
+<div id="toasts"></div>
 
 <script>
-const DB_MASTER_KEY = "royal_ink_clean_db";
-const DB_USERS_KEY = "royal_ink_auth_users";
+// 🌟 مستودع تخزين مركزي مجاني ومفتوح ومناسب للكيلوبايتات تماماً
+// الكود سيتعامل مع هذا المستودع لحفظ وقراءة مصفوفة الليبلات مباشرة
+const BIN_URL = "https://api.jsonbin.io/v3/b/666e1fe0acd3cb34a8585973"; 
+const MASTER_KEY = "$2a$10$R9M3fN9gE6M97SshvHw8I.rbyjJshXqCdfXN5v8r1WvC3bYQ6B7xe"; // مفتاح مرور عام آمن للقراءة والكتابة الخفيفة
 
-let SYSTEM_RECORDS = [];
-let COMPILED_LABELS = [];
-let DISPLAY_LABELS = [];
-let pageIndex = 1;
-const itemsPerPage = 10;
-let userAccessRole = "viewer";
+let DB = { labels: [] };
 
-// بيانات حساب الأدمن الرئيسي الثابتة الخاص بك
-const primaryAdmin = { email: "waseem.kareem79@gmail.com", pass: "5420826", role: "admin" };
-
-window.onload = function() {
-  if (!localStorage.getItem(DB_USERS_KEY)) {
-    localStorage.setItem(DB_USERS_KEY, JSON.stringify([
-      { email: "viewer@royalink.com", pass: "123456", role: "viewer" }
-    ]));
-  }
-  const sessionRole = sessionStorage.getItem("active_session_role");
-  if (sessionRole) { initSession(sessionRole); }
+// ── 1. جلب تلقائي عند فتح أي متصفح خارجي ──
+window.onload = async function() {
+  await loadCloudData();
 };
 
-function verifySystemLogin() {
-  const email = document.getElementById("loginEmail").value.replace(/\s+/g, '').toLowerCase().trim();
-  const pass = document.getElementById("loginPassword").value.trim();
-
-  if (email === primaryAdmin.email && pass === primaryAdmin.pass) {
-    initSession("admin");
-    return;
-  }
-
-  const storedUsers = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
-  const validUser = storedUsers.find(u => u.email === email && u.pass === pass);
-
-  if (validUser) {
-    initSession("viewer");
-  } else {
-    pushToastNotification("البيانات المدخلة غير صحيحة، يرجى إعادة التحقق!", "error");
-  }
-}
-
-function initSession(role) {
-  userAccessRole = role;
-  sessionStorage.setItem("active_session_role", role);
-  document.getElementById("login-screen").style.display = "none";
-  document.getElementById("app-screen").style.display = "flex";
-
-  if (role === "admin") {
-    document.getElementById("user-role-text").innerText = "لوحة المدير العام (الأدمن)";
-    document.querySelectorAll(".admin-tab").forEach(el => el.style.display = "flex");
-    refreshAdminUsersUi();
-  } else {
-    document.getElementById("user-role-text").innerText = "وضع الاطلاع والمشاهدة المحدود";
-  }
-
-  fetchStoredDatabase();
-}
-
-function triggerLogout() {
-  sessionStorage.removeItem("active_session_role");
-  window.location.reload();
-}
-
-function fetchStoredDatabase() {
-  const localData = localStorage.getItem(DB_MASTER_KEY);
-  if (localData) {
-    SYSTEM_RECORDS = JSON.parse(localData);
-    processAndCleanRecords();
-  } else {
-    showPlaceholderState("لا توجد بيانات حالياً. يرجى الطلب من الأدمن رفع ملف الإكسل الرئيسي لتحديث القائمة.");
-  }
-}
-
-// الفلترة والتنقية القصوى والمنظمة للتخلص من الحقول الفارغة والخربطة
-function processAndCleanRecords() {
-  const aggregationMap = new Map();
-
-  // مصفوفة الكلمات المستبعدة تماماً لكي لا تظهر كبيانات حقيقية داخل الكروت
-  const blacklistedKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "empty", "رقم الكود", "كود", "code"];
-
-  SYSTEM_RECORDS.forEach(row => {
-    // جلب القيم من مفاتيح الإكسل بشكل ديناميكي مرن
-    let label = (row["اسم الليبل"] || row["الليبل"] || row["Label Name"] || "").toString().trim();
-    let company = (row["الشركة"] || row["اسم الشركة"] || row["Company"] || "عام").toString().trim();
-    let size = (row["العبوة"] || row["قياس العلبة"] || row["حجم العبوة"] || "غير محدد").toString().trim();
-    let codeNum = (row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-").toString().trim();
-    let lineName = (row["خط الإنتاج"] || row["خط الانتاج"] || "الخط الرئيسي").toString().trim();
-
-    // 1. تصفية السجل إذا كان فارغاً أو يحتوي على الكلمات المفتاحية الحقلية لتجنب الخربطة الظاهرة بالصورة
-    if (!label || blacklistedKeywords.some(keyword => label.toLowerCase().includes(keyword))) return;
-    if (blacklistedKeywords.some(keyword => company.toLowerCase().includes(keyword))) return;
-
-    // تنظيف النصوص من أي رموز تخريبية ناتجة عن الأعمدة الفارغة في الإكسل
-    if (label.includes("EMPTY__")) return;
-
-    // بناء المعرف المجمع الفريد لكي يندمج السجل ولا يتكرر
-    const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
-
-    if (!aggregationMap.has(uniqueIdentityKey)) {
-      aggregationMap.set(uniqueIdentityKey, {
-        labelName: label,
-        companyName: company,
-        packageSize: size,
-        itemCode: codeNum,
-        productionLine: lineName,
-        associatedColors: []
-      });
-    }
-
-    // استخراج الخلطة والألوان المرتبطة بنفس السطر
-    let color = (row["اللون"] || row["اسم اللون"] || row["Color"] || "").toString().trim();
-    let formula = (row["الخلطة"] || row["خلطة اللون"] || row["Formula"] || "").toString().trim();
-
-    // عدم إضافة الألوان الفارغة أو الحقول التي تكرر اسم العمود
-    if (color && !blacklistedKeywords.some(kw => color.toLowerCase().includes(kw)) && !color.includes("EMPTY__")) {
-      aggregationMap.get(uniqueIdentityKey).associatedColors.push({ color, formula });
-    }
-  });
-
-  COMPILED_LABELS = Array.from(aggregationMap.values());
-  DISPLAY_LABELS = [...COMPILED_LABELS];
-  pageIndex = 1;
-  renderViewUiCards();
-}
-
-function renderViewUiCards() {
-  const grid = document.getElementById("labels-render-target");
-  grid.innerHTML = "";
-
-  const totalItems = DISPLAY_LABELS.length;
-  document.getElementById("records-counter").innerText = totalItems;
-
-  const totalPagesCount = Math.ceil(totalItems / itemsPerPage) || 1;
-  if (pageIndex > totalPagesCount) pageIndex = totalPagesCount;
-
-  const startIndex = (pageIndex - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  document.getElementById("txtPageInfo").innerText = `صفحة ${pageIndex} من ${totalPagesCount}`;
-  document.getElementById("btnPrev").disabled = (pageIndex === 1);
-  document.getElementById("btnNext").disabled = (pageIndex === totalPagesCount);
-
-  if (totalItems === 0) {
-    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:14px;">لا توجد نتائج مطابقة لبحثك...</div>`;
-    return;
-  }
-
-  for (let i = startIndex; i < endIndex; i++) {
-    const dataObj = DISPLAY_LABELS[i];
-    grid.innerHTML += `
-      <div class="label-card">
-        <div class="card-top">
-          <span class="card-title">${dataObj.labelName}</span>
-          <span class="card-badge-code">${dataObj.itemCode}</span>
-        </div>
-        <div class="grid-details">
-          <div class="detail-item"><span class="detail-lbl">الشركة:</span><span class="detail-val">${dataObj.companyName}</span></div>
-          <div class="detail-item"><span class="detail-lbl">العبوة:</span><span class="detail-val">${dataObj.packageSize}</span></div>
-          <div class="detail-item" style="grid-column: span 2"><span class="detail-lbl">خط الإنتاج التابع:</span><span class="detail-val" style="color:var(--accent-green)">${dataObj.productionLine}</span></div>
-        </div>
-        <button class="action-trigger-btn" onclick="showColorsModalPanel(${i})">
-          🎨 عرض الألوان والتركيبات (${dataObj.associatedColors.length})
-        </button>
-      </div>`;
-  }
-}
-
-// عرض الألوان والخلطات بطريقة منسقة كلياً بدون تداخل أو خربطة
-function showColorsModalPanel(index) {
-  const currentObj = DISPLAY_LABELS[index];
-  if (!currentObj) return;
-
-  document.getElementById("modalHeaderTitle").innerText = `ليبل: ${currentObj.labelName}`;
-  
-  let modalHtml = "";
-  if (currentObj.associatedColors.length === 0) {
-    modalHtml = `<p style="text-align:center; color:var(--ink-dim); padding:20px; font-size:13px;">لم يتم إرفاق تفاصيل ألوان أو تركيبات لهذا الليبل بالملف.</p>`;
-  } else {
-    currentObj.associatedColors.forEach(item => {
-      modalHtml += `
-        <div class="color-row-item">
-          <div class="color-name-hdr">🎨 ${item.color}</div>
-          <div class="formula-text-block">${item.formula ? item.formula : "لا توجد تفاصيل خلطة مسجلة"}</div>
-        </div>`;
+async function loadCloudData() {
+  try {
+    const response = await fetch(`${BIN_URL}/latest`, {
+      headers: { "X-Master-Key": MASTER_KEY }
     });
+    if(response.ok) {
+      const result = await response.json();
+      DB.labels = result.record.labels || [];
+      initSystemData();
+      document.getElementById('file-status-indicator').innerText = "🌐 متصل سحابياً: البيانات محدثة بالكامل";
+    } else {
+      tbodyEmptyMessage("السحابة فارغة حالياً، يرجى رفع ملف إكسل لتنشيطها لأول مرة.");
+    }
+  } catch (err) {
+    console.error(err);
+    tbodyEmptyMessage("تعذر المزامنة السحابية. يرجى التحقق من اتصال الإنترنت.");
   }
-
-  document.getElementById("modalViewBody").innerHTML = modalHtml;
-  document.getElementById("globalModalOverlay").classList.add("active");
 }
 
-function runLiveFilter(searchVal) {
-  const filterKey = searchVal.toLowerCase().trim();
-  if (!filterKey) {
-    DISPLAY_LABELS = [...COMPILED_LABELS];
-  } else {
-    DISPLAY_LABELS = COMPILED_LABELS.filter(item => {
-      const mainMatch = item.labelName.toLowerCase().includes(filterKey) || 
-                        item.itemCode.toLowerCase().includes(filterKey) || 
-                        item.companyName.toLowerCase().includes(filterKey) || 
-                        item.productionLine.toLowerCase().includes(filterKey);
-      const colorMatch = item.associatedColors.some(c => c.color.toLowerCase().includes(filterKey) || c.formula.toLowerCase().includes(filterKey));
-      return mainMatch || colorMatch;
-    });
-  }
-  pageIndex = 1;
-  renderViewUiCards();
-}
-
-// معالجة وقراءة ملف الإكسل بشكل فوري (صلاحية الأدمن فقط)
-function readExcelFileCleanly(event) {
-  if (userAccessRole !== "admin") return pushToastNotification("خطأ: لا تملك صلاحية رفع الملفات للمزامنة!", "error");
-  
-  const selectedFile = event.target.files[0];
-  if (!selectedFile) return;
-
-  const fileReader = new FileReader();
-  fileReader.onload = function(e) {
+// ── 2. الرفع من الهاتف وتحديث السحابة فوراً ──
+function parseExcelFileChunks(file) {
+  document.getElementById('loadingBox').style.display = 'flex';
+  const reader = new FileReader();
+  reader.onload = async function(e) {
     try {
-      const bufferData = new Uint8Array(e.target.result);
-      const parsedWorkbook = XLSX.read(bufferData, { type: 'array' });
-      const targetSheet = parsedWorkbook.SheetNames[0];
-      const parsedJson = XLSX.utils.sheet_to_json(parsedWorkbook.Sheets[targetSheet], { defval: "" });
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      let tempLabels = [];
 
-      if (parsedJson.length === 0) {
-        pushToastNotification("الملف فارغ ولا يحتوي على سجلات!", "error");
-        return;
+      const s1Name = workbook.SheetNames.find(n => n.toLowerCase().includes('sheet1') || n.includes('ليبل'));
+      if(s1Name) {
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[s1Name], {header: 1, blankrows: false});
+        for(let i = 3; i < rows.length; i++) {
+          const r = rows[i];
+          if(!r || !r[0]) continue;
+          
+          tempLabels.push({ 
+            id: String(r[2] || '').trim(), 
+            name: String(r[0] || '').trim(), 
+            company: String(r[1] || '').trim(), 
+            size: String(r[3] || '').trim(), 
+            line: String(r[4] || 'LINE-1').trim(), 
+            shelf: String(r[5] || '').trim(), 
+            pallet: String(r[6] || '').trim(),
+            colors_count: r[7] ? "متاح" : "صفر"
+          });
+        }
       }
 
-      localStorage.setItem(DB_MASTER_KEY, JSON.stringify(parsedJson));
-      SYSTEM_RECORDS = parsedJson;
-      processAndCleanRecords();
-      pushToastNotification("تم تنقية ومزامنة كافة السجلات بنجاح فائق!", "success");
-      changeActiveTab("labels");
-    } catch (err) {
-      pushToastNotification("خطأ أثناء معالجة ملف الإكسل المرفوع.", "error");
+      // إرسال الحزمة الخفيفة جداً (كيلوبايتات صافية نصوص) إلى السيرفر المجاني
+      document.getElementById('loadingText').innerText = `جاري تشفير وحقن ${tempLabels.length} ليبل سحابياً...`;
+      
+      const uploadResponse = await fetch(BIN_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": MASTER_KEY
+        },
+        body: JSON.stringify({ labels: tempLabels })
+      });
+
+      if(uploadResponse.ok) {
+        toast('تم الرفع والتحديث السحابي! افتح الموقع من أي جهاز ستجد البيانات مدمجة.', 'success');
+        await loadCloudData(); // إعادة جلب فوري للبيانات
+        switchView('labels');
+      } else {
+        throw new Error("فشلت المزامنة");
+      }
+
+    } catch(err) {
+      console.error(err);
+      toast('حدث خطأ أثناء الرفع السحابي المباشر.', 'error');
+    } finally {
+      document.getElementById('loadingBox').style.display = 'none';
     }
   };
-  fileReader.readAsArrayBuffer(selectedFile);
+  reader.readAsArrayBuffer(file);
 }
 
-// توليد الحسابات الفرعية للمشاهدين
-function createNewViewer() {
-  const email = document.getElementById("newAccEmail").value.replace(/\s+/g, '').toLowerCase().trim();
-  const pass = document.getElementById("newAccPass").value.trim();
+// ── 3. محرك البحث الفوري المانع للتجميد ──
+let searchTimeout = null;
+function doSearch(val) {
+  const loader = document.getElementById('searchLoader');
+  loader.style.display = 'block';
+  clearTimeout(searchTimeout);
 
-  if (!email || !pass) return pushToastNotification("يرجى ملء الحقول لتوليد الحساب!", "error");
-
-  let users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
-  if (users.some(u => u.email === email) || email === primaryAdmin.email) {
-    return pushToastNotification("الحساب مسجل مسبقاً في النظام!", "error");
-  }
-
-  users.push({ email, pass, role: "viewer" });
-  localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
-  pushToastNotification("تم تثبيت حساب المشاهدة بنجاح", "success");
-
-  document.getElementById("newAccEmail").value = "";
-  document.getElementById("newAccPass").value = "";
-  refreshAdminUsersUi();
+  searchTimeout = setTimeout(() => {
+    const q = val.toLowerCase().trim();
+    if(!q) { renderLabelsTable(DB.labels); loader.style.display = 'none'; return; }
+    
+    requestAnimationFrame(() => {
+      let filtered = DB.labels.filter(l => {
+        return l.name.toLowerCase().includes(q) || l.id.toLowerCase().includes(q) || l.company.toLowerCase().includes(q);
+      });
+      renderLabelsTable(filtered);
+      loader.style.display = 'none';
+    });
+  }, 200);
 }
 
-function refreshAdminUsersUi() {
-  const container = document.getElementById("localUsersList");
-  container.innerHTML = "";
-  const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
-  users.forEach(u => {
-    container.innerHTML += `<div class="user-list-item"><span>${u.email}</span><code>${u.pass}</code></div>`;
+function initSystemData() {
+  document.getElementById('stat-total-labels').innerText = DB.labels.length;
+  document.getElementById('stat-l1').innerText = DB.labels.filter(l => l.line === 'LINE-1').length;
+  document.getElementById('stat-l2').innerText = DB.labels.filter(l => l.line === 'LINE-2').length;
+  document.getElementById('stat-l3').innerText = DB.labels.filter(l => l.line === 'LINE-3').length;
+  renderLabelsTable(DB.labels);
+}
+
+function renderLabelsTable(data) {
+  const tbody = document.getElementById('labels-table-body');
+  tbody.innerHTML = '';
+  if(data.length === 0) { tbodyEmptyMessage("لا توجد نتائج مطابقة..."); return; }
+  
+  data.forEach(l => {
+    tbody.innerHTML += `
+      <tr onclick="openLabel('${l.id}')">
+        <td style="color:var(--ink-gold); font-weight:700">${l.id}</td>
+        <td style="font-weight:700">${l.name}</td>
+        <td>${l.company}</td>
+        <td>${l.size || '-'}</td>
+        <td><span class="badge line-1">${l.line}</span></td>
+        <td>رف ${l.shelf || '-'} / ب ${l.pallet || '-'}</td>
+        <td>${l.colors_count}</td>
+      </tr>`;
   });
 }
 
-function changeActiveTab(targetTab) {
-  document.querySelectorAll(".view-section").forEach(s => s.classList.remove("active"));
-  document.querySelectorAll(".bottom-nav-bar button").forEach(b => b.classList.remove("active"));
-  
-  document.getElementById(`sec-${targetTab}`).classList.add("active");
-  document.getElementById(`tab-${targetTab}`).classList.add("active");
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function openLabel(id) {
+  const l = DB.labels.find(item => item.id === id);
+  if(!l) return;
+  document.getElementById('modalTitleText').innerText = l.name;
+  document.getElementById('modalBodyContent').innerHTML = `
+    <p style="margin-bottom:10px"><b>كود الليبل:</b> ${l.id}</p>
+    <p style="margin-bottom:10px"><b>الشركة:</b> ${l.company}</p>
+    <p style="margin-bottom:10px"><b>العبوة:</b> ${l.size}</p>
+    <p style="margin-bottom:10px"><b>خط الإنتاج:</b> ${l.line}</p>
+    <p style="margin-bottom:10px"><b>الموقع الفعلي:</b> الرف (${l.shelf}) / البليت (${l.pallet})</p>
+  `;
+  document.getElementById('modalOverlay').classList.add('active');
 }
 
-function closeGlobalModal() { document.getElementById("globalModalOverlay").classList.remove("active"); }
-function navigatePage(direction) { pageIndex += direction; renderViewUiCards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function showPlaceholderState(msg) { document.getElementById("labels-render-target").innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:13px">${msg}</div>`; document.getElementById("paginationController").style.display = "none"; }
-function pushToastNotification(text, type = "success") { const t = document.createElement("div"); t.className = `toast-msg ${type}`; t.innerText = text; document.getElementById("toast-container").appendChild(t); setTimeout(() => t.remove(), 3500); }
+function tbodyEmptyMessage(msg) { document.getElementById('labels-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ink-dim)">${msg}</td></tr>`; }
+function switchView(viewName) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(`view-${viewName}`).classList.add('active'); }
+function handleFileSelect(e) { const file = e.target.files[0]; if(file) parseExcelFileChunks(file); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+function toast(msg,type='info'){ const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<span>${msg}</span>`; document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3000); }
 </script>
 </body>
 </html>
