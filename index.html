@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Royal Ink Cloud — المستودع الرقمي المباشر</title>
+<title>Royal Ink Cloud — المستودع الرقمي الذكي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
@@ -18,10 +18,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Cairo', sans-serif; background-color: var(--ink-black); color: var(--ink-white); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-/* شريط البحث العلوي المثبت (ممتاز للهاتف) */
+/* شريط البحث العلوي الذكي والمثبت */
 .fixed-header { position: sticky; top: 0; background-color: rgba(13, 13, 15, 0.95); backdrop-filter: blur(10px); z-index: 90; padding: 15px; border-bottom: 1px solid var(--ink-border); display: flex; flex-direction: column; gap: 10px; }
 .search-wrapper { position: relative; width: 100%; }
-.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 12px 16px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.search-wrapper input { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); padding: 14px 16px; border-radius: 10px; color: var(--ink-white); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
 .search-wrapper input:focus { border-color: var(--ink-gold); }
 .status-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-silver); padding: 0 5px; }
 
@@ -30,7 +30,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 .view-section { display: none; }
 .view-section.active { display: block; }
 
-/* ترتيب شبكة الكروت المنظم والمقفل تلقائياً */
+/* ترتيب شبكة كروت الليبلات المجمعة الذكية */
 .labels-container { display: flex; flex-direction: column; gap: 14px; }
 .label-card { background-color: var(--ink-card); border: 1px solid var(--ink-border); border-radius: 12px; padding: 16px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid rgba(44, 44, 62, 0.4); padding-bottom: 8px; }
@@ -43,27 +43,27 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 .detail-val { font-size: 13px; font-weight: 600; color: var(--ink-white); }
 
 /* زر استعراض خلطات الألوان التابعة داخل الكرت */
-.action-trigger-btn { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+.action-trigger-btn { width: 100%; background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 11px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
 .action-trigger-btn:active { background-color: var(--ink-deep); }
 
-/* نافذة عرض الألوان والخلطات المنبثقة السفلى (تصميم هاتف ذكي ممتاز) */
+/* نافذة عرض الألوان والخلطات المنبثقة السفلى للهواتف */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(5,5,8,0.8); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-window { background-color: var(--ink-panel); border-top: 2px solid var(--ink-gold); width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; transform: translateY(100%); transition: transform 0.25s ease-out; }
+.modal-window { background-color: var(--ink-panel); border-top: 2px solid var(--ink-gold); width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; transform: translateY(100%); transition: transform 0.25s ease-out; }
 .modal-overlay.active .modal-window { transform: translateY(0); }
 .modal-header { background-color: var(--ink-deep); padding: 16px; border-bottom: 1px solid var(--ink-border); display: flex; justify-content: space-between; align-items: center; }
 .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
 
-.color-row-item { background: var(--ink-deep); border: 1px solid var(--ink-border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-.color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.5; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
+.color-row-item { background: var(--ink-deep); border: 1px solid var(--ink-border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.color-name-hdr { font-size: 14px; font-weight: 700; color: var(--ink-white); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.formula-text-block { background: var(--ink-black); padding: 10px; border-radius: 6px; font-size: 12px; color: var(--ink-gold-lt); line-height: 1.6; border-right: 3px solid var(--ink-gold); white-space: pre-wrap; }
 
-/* التبويبات السفلية للتحرك المباشر الحر */
+/* التبويبات السفلية للتحرك المباشر الحر المريح */
 .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: var(--ink-deep); border-top: 1px solid var(--ink-border); z-index: 100; display: grid; grid-template-columns: 1fr 1fr; align-items: center; justify-items: center; }
 .bottom-nav-bar button { background: none; border: none; color: var(--ink-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; height: 100%; justify-content: center; }
 .bottom-nav-bar button.active { color: var(--ink-gold); }
 
-/* أدوات الرفع والمزامنة */
+/* أدوات الرفع والمزامنة الاحتياطية */
 .dropzone-area { border: 2px dashed var(--ink-border); background-color: var(--ink-panel); border-radius: 12px; padding: 50px 15px; text-align: center; cursor: pointer; margin-top: 20px; }
 
 /* الإشعارات السريعة التلقائية */
@@ -76,21 +76,21 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 
 /* أزرار التصفح والصفحات */
 .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 5px 0; }
-.nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 6px 16px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
+.nav-page-btn { background-color: var(--ink-panel); border: 1px solid var(--ink-border); color: var(--ink-white); padding: 8px 18px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; }
 .nav-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
-<div id="app-screen" style="display: flex;">
+<div id="app-screen" style="display: flex; flex-direction: column; width: 100%;">
   
   <div class="fixed-header">
     <div class="search-wrapper">
-      <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، اللون، الشركة، أو الكود..." oninput="runLiveFilter(this.value)">
+      <input type="text" id="mobileSearchInput" placeholder="ابحث باسم الليبل، الشركة، الكود، أو درجة اللون..." oninput="runLiveFilter(this.value)">
     </div>
     <div class="status-bar">
-      <div>المستودع الرقمي: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> ليبل مجمع</div>
-      <div style="color:var(--accent-green)">● متصل ومباشر</div>
+      <div>المستودع الذكي: <span id="records-counter" style="color:var(--ink-gold); font-weight:700">0</span> سجل مجمع</div>
+      <div style="color:var(--accent-green)">● تحديث مباشر وتلقائي</div>
     </div>
   </div>
 
@@ -100,7 +100,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
       
       <div class="pagination-container" id="paginationController">
         <button class="nav-page-btn" id="btnPrev" onclick="navigatePage(-1)">السابق</button>
-        <span id="txtPageInfo" style="font-size:12px">صفحة 1 من 1</span>
+        <span id="txtPageInfo" style="font-size:12px; font-weight: 600;">صفحة 1 من 1</span>
         <button class="nav-page-btn" id="btnNext" onclick="navigatePage(1)">التالي</button>
       </div>
     </section>
@@ -108,8 +108,8 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
     <section id="sec-import" class="view-section">
       <div class="dropzone-area" onclick="document.getElementById('hiddenFileInput').click()">
         <span style="font-size:45px; display:block; margin-bottom:12px">📥</span>
-        <h3>رفع وتحديث السيرفر المحلي</h3>
-        <p style="font-size:13px; color:var(--ink-silver); margin-top:5px">اختر ملف الإكسل لتصفية وربط الألوان والخلطات تلقائياً بدون تكرار</p>
+        <h3>تحديث قاعدة البيانات السحابية</h3>
+        <p style="font-size:13px; color:var(--ink-silver); margin-top:5px">يمكنك اختيار ملف الإكسل المحدث في أي وقت لإعادة بنائه فوراً</p>
         <input type="file" id="hiddenFileInput" style="display:none" accept="*" onchange="readExcelFileCleanly(event)">
       </div>
     </section>
@@ -117,7 +117,7 @@ main { flex: 1; padding: 15px; padding-bottom: 90px; width: 100%; max-width: 800
 
   <div class="bottom-nav-bar">
     <button onclick="changeActiveTab('labels')" id="tab-labels" class="active">📋 تصفح المستودع</button>
-    <button onclick="changeActiveTab('import')" id="tab-import">📤 رفع ملف Excel</button>
+    <button onclick="changeActiveTab('import')" id="tab-import">📤 رفع وتحديث قاعدة البيانات</button>
   </div>
 </div>
 
@@ -140,7 +140,7 @@ let SYSTEM_RECORDS = [];
 let COMPILED_LABELS = [];
 let DISPLAY_LABELS = [];
 let pageIndex = 1;
-const itemsPerPage = 10;
+const itemsPerPage = 12;
 
 window.onload = function() {
   fetchStoredDatabase();
@@ -152,75 +152,70 @@ function fetchStoredDatabase() {
     SYSTEM_RECORDS = JSON.parse(localData);
     processAndCleanRecords();
   } else {
-    showPlaceholderState("لا توجد بيانات حالياً في النظام. يرجى الانتقال لتبويبة (رفع ملف Excel) لتحديث القائمة لأول مرة.");
+    showPlaceholderState("مرحباً بك! يرجى الانتقال إلى قسم (رفع وتحديث قاعدة البيانات) واختيار ملف الإكسل لمرة واحدة، ليقوم التطبيق بحفظه وتثبيته في هاتفك للأبد وبشكل مباشر.");
   }
 }
 
-// 🧠 خوارزمية التصفية المتقدمة لفك وقراءة الأعمدة الأفقية الممتدة والمنبثقة من صورك
+// 🧠 المحرك الهندسي لتجميع وفرز الـ 58 عموداً أفقياً في ملف رويال إنك
 function processAndCleanRecords() {
   const aggregationMap = new Map();
-  
-  // الكلمات التي يجب استبعادها تماماً من القراءة والتجميع لمنع الكروت الوهمية
-  const ignoredKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "رقم الكود", "كود", "code", "قياس العلبة", "العبوة", "خط الإنتاج", "خط الانتاج"];
+  const ignoredKeywords = ["اسم الليبل", "الليبل", "label name", "اسم الشركة", "الشركة", "company", "رقم الكود", "كود", "code", "EMPTY__"];
 
   SYSTEM_RECORDS.forEach(row => {
-    // جلب المفاتيح الأساسية للسطر
-    let label = (row["اسم الليبل"] || row["الليبل"] || row["Label Name"] || "").toString().trim();
-    let company = (row["الشركة"] || row["اسم الشركة"] || row["Company"] || "عام").toString().trim();
-    let size = (row["العبوة"] || row["قياس العلبة"] || row["حجم العبوة"] || "-").toString().trim();
-    let codeNum = (row["كود الليبل"] || row["رقم الكود"] || row["الكود"] || "-").toString().trim();
-    let lineName = (row["خط الإنتاج"] || row["خط الانتاج"] || "الخط الرئيسي").toString().trim();
+    let label = (row["اسم الليبل"] || row["الليبل"] || "").toString().trim();
+    let company = (row["اسم الشركة"] || row["الشركة"] || "عام").toString().trim();
+    let codeNum = (row["رقم الكود"] || row["كود الليبل"] || "-").toString().trim();
+    let size = (row["قياس العلبة"] || row["العبوة"] || "-").toString().trim();
+    let lineName = (row["اسم الخط"] || row["خط الإنتاج"] || "-").toString().trim();
+    let shelfNum = (row["رقم الرف"] || "-").toString().trim();
+    let plateType = (row["نوع البليت"] || "-").toString().trim();
 
-    // 1. التحقق من سلامة الليبل الرئيسي واستبعاد العناوين المكررة أو الفارغة
-    if (!label || ignoredKeywords.some(keyword => label.toLowerCase() === keyword) || label.includes("EMPTY__")) return;
-    if (ignoredKeywords.some(keyword => company.toLowerCase() === keyword)) return;
+    if (!label || ignoredKeywords.some(kw => label.toLowerCase() === kw.toLowerCase()) || label.includes("EMPTY__")) return;
 
-    // تكوين هوية فريدة وموحدة لكل ليبل
+    // توليد المعرف الموحد للكرت المجمع
     const uniqueIdentityKey = `${label}_${codeNum}_${company}`.toLowerCase();
 
     if (!aggregationMap.has(uniqueIdentityKey)) {
       aggregationMap.set(uniqueIdentityKey, {
         labelName: label,
         companyName: company,
-        packageSize: size,
         itemCode: codeNum,
+        packageSize: size,
         productionLine: lineName,
+        shelfLocation: shelfNum,
+        plateKind: plateType,
         associatedColors: []
       });
     }
 
     const currentLabelObj = aggregationMap.get(uniqueIdentityKey);
 
-    // 2. الفحص الذكي لكافة الخلايا الأفقية في السطر لاستخراج الألوان والخلطات تلقائياً (من اللون الأول وحتى الأخير)
-    Object.keys(row).forEach(key => {
-      let cleanKey = key.toString().trim().toLowerCase();
-      
-      // استهداف الأعمدة التي تحتوي على كلمة لون أو اسم اللون، وتجاهل الـ EMPTY والـ العناوين الأساسية
-      if ((cleanKey.includes("لون") || cleanKey.includes("color")) && !cleanKey.includes("كود") && !cleanKey.includes("اسم الليبل")) {
-        let colorValue = row[key] ? row[key].toString().trim() : "";
-        
-        if (colorValue && !colorValue.includes("EMPTY__") && !ignoredKeywords.some(kw => colorValue.toLowerCase() === kw)) {
-          
-          // محاولة العثور على حقل الخلطة التابع والمجاور لهذا اللون هندسياً
-          let formulaValue = "";
-          let keyIndex = Object.keys(row).indexOf(key);
-          
-          // البحث عن العمود التالي مباشرة فإذا كان خلطة أو قيمة مرافقة نعتمدها
-          let nextKey = Object.keys(row)[keyIndex + 1];
-          if (nextKey && (nextKey.toLowerCase().includes("خلطة") || nextKey.toLowerCase().includes("formula") || nextKey.toLowerCase().includes("empty"))) {
-             let nextVal = row[nextKey] ? row[nextKey].toString().trim() : "";
-             if (nextVal && !nextVal.includes("EMPTY__")) {
-                formulaValue = nextVal;
-             }
-          }
-          
-          // منع التكرار للون داخل نفس الكرت
-          if (!currentLabelObj.associatedColors.some(c => c.color === colorValue)) {
-            currentLabelObj.associatedColors.push({
-              color: colorValue,
-              formula: formulaValue
-            });
-          }
+    // 🕵️‍♂️ تفكيك مصفوفة الأعمدة الثمانية للألوان والنسب الممتدة أفقياً
+    const colorIndices = ["الاول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن"];
+    const colorNamesMapping = ["اسم اللون الأول", "اسم اللون الثاني", "اسم اللون الثالث", "اسم اللون الرابع", "اسم اللون الخامس", "اسم اللون السادس", "اسم اللون السابع", "اسم اللون الثامن"];
+    
+    colorIndices.forEach((numText, index) => {
+      let colorKey = `اللون ${numText}`;
+      let ratioKey = `نسبة اللون ${numText}`;
+      let qtyKey = `الکمية المطلوبة للون ${numText}` || `الكمية المطلوبة للون ${numText}`;
+      let noteKey = `ملاحظات اللون ${numText}`;
+      let customNameKey = colorNamesMapping[index];
+
+      let colorVal = (row[colorKey] || "").toString().trim();
+      let ratioVal = (row[ratioKey] || "").toString().trim();
+      let qtyVal = (row[qtyKey] || row[`الكمية المطلوبة للون ${numText}`] || "").toString().trim();
+      let noteVal = (row[noteKey] || row[`ملاحظات اللون ${numText}`] || row[`ملاحظات اللون السايع`] || "").toString().trim();
+      let descName = (row[customNameKey] || "").toString().trim();
+
+      if (colorVal && !colorVal.includes("EMPTY__") && !ignoredKeywords.some(kw => colorVal === kw)) {
+        if (!currentLabelObj.associatedColors.some(c => c.code === colorVal)) {
+          currentLabelObj.associatedColors.push({
+            code: colorVal,
+            name: descName || `درجة ${numText}`,
+            ratio: ratioVal ? `${ratioVal}%` : "غير محددة",
+            quantity: qtyVal ? `${qtyVal} KG` : "-",
+            notes: noteVal && !noteVal.includes("EMPTY__") ? noteVal : "لا توجد"
+          });
         }
       }
     });
@@ -260,15 +255,16 @@ function renderViewUiCards() {
       <div class="label-card">
         <div class="card-top">
           <span class="card-title">${dataObj.labelName}</span>
-          <span class="card-badge-code">${dataObj.itemCode}</span>
+          <span class="card-badge-code">كود: ${dataObj.itemCode}</span>
         </div>
         <div class="grid-details">
           <div class="detail-item"><span class="detail-lbl">الشركة:</span><span class="detail-val">${dataObj.companyName}</span></div>
           <div class="detail-item"><span class="detail-lbl">العبوة:</span><span class="detail-val">${dataObj.packageSize}</span></div>
-          <div class="detail-item" style="grid-column: span 2"><span class="detail-lbl">خط الإنتاج التابع:</span><span class="detail-val" style="color:var(--accent-green)">${dataObj.productionLine}</span></div>
+          <div class="detail-item"><span class="detail-lbl">اسم الخط:</span><span class="detail-val" style="color:var(--accent-green)">${dataObj.productionLine}</span></div>
+          <div class="detail-item"><span class="detail-lbl">رقم الرف / البليت:</span><span class="detail-val" style="color:var(--ink-gold-lt)">الرف ${dataObj.shelfLocation} (${dataObj.plateKind})</span></div>
         </div>
         <button class="action-trigger-btn" onclick="showColorsModalPanel(${i})">
-          🎨 عرض الألوان والتركيبات (${dataObj.associatedColors.length})
+          🎨 كشف درجات الألوان والتركيبات (${dataObj.associatedColors.length})
         </button>
       </div>`;
   }
@@ -278,7 +274,7 @@ function showColorsModalPanel(index) {
   const currentObj = DISPLAY_LABELS[index];
   if (!currentObj) return;
 
-  document.getElementById("modalHeaderTitle").innerText = `ليبل: ${currentObj.labelName}`;
+  document.getElementById("modalHeaderTitle").innerText = `تفاصيل ألوان ليبل: ${currentObj.labelName}`;
   
   let modalHtml = "";
   if (currentObj.associatedColors.length === 0) {
@@ -287,8 +283,11 @@ function showColorsModalPanel(index) {
     currentObj.associatedColors.forEach(item => {
       modalHtml += `
         <div class="color-row-item">
-          <div class="color-name-hdr">🎨 ${item.color}</div>
-          <div class="formula-text-block">${item.formula ? item.formula : "تم رصد اللون بنجاح وبانتظار تعبئة الخلطة"}</div>
+          <div class="color-name-hdr">
+            <span>🎨 كود الحبر: <b style="color:var(--ink-gold-lt)">${item.code}</b></span>
+            <span style="font-size:11px; color:var(--ink-silver)">${item.name}</span>
+          </div>
+          <div class="formula-text-block">النسبة المعتمدة: ${item.ratio} | الكمية: ${item.quantity}\nالملاحظات المرفقة: ${item.notes}</div>
         </div>`;
     });
   }
@@ -307,7 +306,8 @@ function runLiveFilter(searchVal) {
                         item.itemCode.toLowerCase().includes(filterKey) || 
                         item.companyName.toLowerCase().includes(filterKey) || 
                         item.productionLine.toLowerCase().includes(filterKey);
-      const colorMatch = item.associatedColors.some(c => c.color.toLowerCase().includes(filterKey) || c.formula.toLowerCase().includes(filterKey));
+                        
+      const colorMatch = item.associatedColors.some(c => c.code.toLowerCase().includes(filterKey) || c.name.toLowerCase().includes(filterKey) || c.notes.toLowerCase().includes(filterKey));
       return mainMatch || colorMatch;
     });
   }
@@ -319,12 +319,16 @@ function readExcelFileCleanly(event) {
   const selectedFile = event.target.files[0];
   if (!selectedFile) return;
 
+  pushToastNotification("جاري فك وقراءة ملف رويال إنك الضخم... يرجى الانتظار ثوانٍ", "success");
+
   const fileReader = new FileReader();
   fileReader.onload = function(e) {
     try {
       const bufferData = new Uint8Array(e.target.result);
       const parsedWorkbook = XLSX.read(bufferData, { type: 'array' });
-      const targetSheet = parsedWorkbook.SheetNames[0];
+      
+      // استهداف ورقة السجلات المجمعة الرئيسية SHEET1
+      const targetSheet = parsedWorkbook.SheetNames[0]; 
       const parsedJson = XLSX.utils.sheet_to_json(parsedWorkbook.Sheets[targetSheet], { defval: "" });
 
       if (parsedJson.length === 0) {
@@ -335,10 +339,10 @@ function readExcelFileCleanly(event) {
       localStorage.setItem(DB_MASTER_KEY, JSON.stringify(parsedJson));
       SYSTEM_RECORDS = parsedJson;
       processAndCleanRecords();
-      pushToastNotification("تمت المزامنة بنجاح! السجلات جاهزة للعرض الآن.", "success");
+      pushToastNotification("تمت المزامنة وحفظ قاعدة البيانات بنجاح تام!", "success");
       changeActiveTab('labels');
     } catch (err) {
-      pushToastNotification("حدث خطأ أثناء معالجة ملف الإكسل المرفوع.", "error");
+      pushToastNotification("حدث خطأ أثناء معالجة ملف الإكسل. تأكد من أنه ملف الشركة الأصلي.", "error");
     }
   };
   fileReader.readAsArrayBuffer(selectedFile);
@@ -355,8 +359,8 @@ function changeActiveTab(targetTab) {
 
 function closeGlobalModal() { document.getElementById("globalModalOverlay").classList.remove("active"); }
 function navigatePage(direction) { pageIndex += direction; renderViewUiCards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function showPlaceholderState(msg) { document.getElementById("labels-render-target").innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-dim); font-size:13px">${msg}</div>`; document.getElementById("paginationController").style.display = "none"; }
-function pushToastNotification(text, type = "success") { const t = document.createElement("div"); t.className = `toast-msg ${type}`; t.innerText = text; document.getElementById("toast-container").appendChild(t); setTimeout(() => t.remove(), 3500); }
+function showPlaceholderState(msg) { document.getElementById("labels-render-target").innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-silver); font-size:13px; line-height:1.8;">${msg}</div>`; document.getElementById("paginationController").style.display = "none"; }
+function pushToastNotification(text, type = "success") { const t = document.createElement("div"); t.className = `toast-msg ${type}`; t.innerText = text; document.getElementById("toast-container").appendChild(t); setTimeout(() => t.remove(), 4000); }
 </script>
 </body>
 </html>
