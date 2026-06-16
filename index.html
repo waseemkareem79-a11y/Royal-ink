@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام رويال إنك - الحفظ الدائم والفلترة الفورية</title>
+    <title>نظام رويال إنك - الفلترة الشاملة ورقم الرف</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
         
-        /* تأثير الزر النشط عند الفلترة */
+        /* تأثير الزر النشط والمحدد عند الفلترة اللحظية */
         .btn-active {
             background-color: #1d4ed8 !important;
             color: #ffffff !important;
@@ -25,9 +25,9 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-wide flex items-center gap-2 text-amber-400">
-                    <span>👑</span> رويال إنك - قاعدة البيانات المحفوظة تلقائياً
+                    <span>👑</span> رويال إنك - لوحة التحكم والمطابقة الفنية
                 </h1>
-                <p class="text-slate-300 text-xs md:text-sm mt-1">يحتفظ النظام بالبيانات بشكل دائم حتى بعد إغلاق الموقع، وتتحدث تلقائياً عند رفع أي ملف جديد</p>
+                <p class="text-slate-300 text-xs md:text-sm mt-1">فلترة فورية حسب (الخط، الشركة، القياس) مع عرض مباشر لأرقام الرفوف والبليت وأكواد الألوان</p>
             </div>
             
             <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
@@ -42,31 +42,41 @@
         <div class="bg-slate-900/80 border-t border-slate-700/50 px-4 py-3">
             <div class="max-w-4xl mx-auto relative">
                 <input type="text" id="system-search" oninput="liveRender()" 
-                       placeholder="🔍 ابحث هنا فوراً عن (اسم شركة، ليبل، كود لون، حبر، رف، بليت)..." 
+                       placeholder="🔍 ابحث هنا فوراً عن (اسم شركة، ليبل، كود لون، حبر، رقم رف، بليت)..." 
                        class="w-full p-3.5 pr-12 rounded-xl border-0 shadow-lg text-slate-900 focus:ring-4 focus:ring-amber-400 bg-white placeholder-slate-400 text-sm md:text-base outline-none transition">
                 <div class="absolute right-4 top-3.5 text-xl text-slate-400">🔍</div>
             </div>
         </div>
     </header>
 
-    <section class="bg-white border-b border-slate-200/80 shadow-sm py-4 px-4 sticky top-[138px] z-40">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <section class="bg-white border-b border-slate-200 shadow-sm py-4 px-4 sticky top-[138px] z-40 max-h-[220px] overflow-y-auto">
+        <div class="max-w-7xl mx-auto space-y-3">
             
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                <span class="text-xs font-bold text-slate-400 ml-2">⛓️ خطوط الإنتاج:</span>
-                <button onclick="filterByLine('LINE-1', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الأول (LINE-1)</button>
-                <button onclick="filterByLine('LINE-2', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الثاني (LINE-2)</button>
-                <button onclick="filterByLine('LINE-3', this)" class="line-btn px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs md:text-sm rounded-xl transition cursor-pointer">الخط الثالث (LINE-3)</button>
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-400 ml-1">⛓️ الخطوط:</span>
+                    <button onclick="filterByLine('LINE-1', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 1</button>
+                    <button onclick="filterByLine('LINE-2', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 2</button>
+                    <button onclick="filterByLine('LINE-3', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 3</button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-xs font-bold text-slate-400 ml-1">📏 القياسات:</span>
+                    <button onclick="filterBySize('185', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">185</button>
+                    <button onclick="filterBySize('250', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">250</button>
+                    <button onclick="filterBySize('300', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">300</button>
+                    <button onclick="filterBySize('330', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">330</button>
+                    <button onclick="clearAllFilters()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition cursor-pointer mr-2">تصفير الفلاتر 🔄</button>
+                </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
-                <span class="text-xs font-bold text-slate-400 ml-2">📏 القياسات والحجم:</span>
-                <button onclick="filterBySize('185', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">185</button>
-                <button onclick="filterBySize('250', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">250</button>
-                <button onclick="filterBySize('300', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">300</button>
-                <button onclick="filterBySize('330', this)" class="size-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">330</button>
-                <button onclick="clearAllFilters()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition cursor-pointer mr-2">تصفير الفلاتر 🔄</button>
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-400 ml-1">🏢 فلترة حسب الشركة:</span>
+                <div id="companies-buttons-container" class="flex flex-wrap gap-1.5 items-center">
+                    <span class="text-slate-400 italic text-xs">ارفع الملف لتظهر شركاتك هنا...</span>
+                </div>
             </div>
+
         </div>
     </section>
 
@@ -75,20 +85,20 @@
         <div class="lg:col-span-2 flex flex-col gap-4">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
                 <h2 class="text-sm md:text-base font-bold text-slate-700 flex items-center gap-2">📦 الشركات والليبلات النشطة حالياً</h2>
-                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">تحقق من ذاكرة النظام...</span>
+                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">تحقق من ذاكرة المتصفح...</span>
             </div>
 
             <div id="welcome-box" class="bg-white p-16 text-center text-slate-400 rounded-2xl border border-slate-200 shadow-sm">
                 <span class="text-6xl block mb-4">📥</span>
                 <h3 class="text-lg font-bold text-slate-700 mb-1">ذاكرة النظام فارغة حالياً</h3>
-                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">يرجى الضغط على <span class="text-blue-600 font-bold">"مزامنة وتحديث ملف الإكسل"</span> في الأعلى لتنزيل البيانات وحفظها في هذا المتصفح بشكل دائم.</p>
+                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">يرجى الضغط على <span class="text-blue-600 font-bold">"مزامنة وتحديث ملف الإكسل"</span> بالأعلى لحفظ وقراءة بيانات المصنع بشكل دائم ومباشر.</p>
             </div>
 
             <div id="labels-live-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
         </div>
 
         <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sticky top-[220px] hidden lg:block min-h-[350px]">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sticky top-[365px] hidden lg:block min-h-[350px]">
                 <div id="panel-empty" class="text-center py-24 text-slate-400 flex flex-col items-center justify-center gap-2">
                     <span class="text-5xl">🔬</span>
                     <p class="font-bold text-xs text-slate-600">لوحة فحص الأوزان والخلطات</p>
@@ -102,7 +112,7 @@
     <div id="formula-modal" class="fixed inset-0 bg-slate-950/60 z-50 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300">
         <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modal-box">
             <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
-                <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">🧪 تفاصيل ونسب خلطة الألوان الفنية الكاملة</h3>
+                <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">🧪 نسب الخلطة الفنية للألوان بالتفصيل</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-xl cursor-pointer">&times;</button>
             </div>
             <div class="p-5 max-h-[75vh] overflow-y-auto" id="modal-body"></div>
@@ -113,18 +123,19 @@
     </div>
 
     <footer class="bg-slate-900 text-slate-500 text-center py-4 text-xs border-t border-slate-800 mt-auto">
-        لوحة تحكم رويال إنك المطورة - تخزين محلي دائم (LocalStorage) ومزامنة متجددة تلقائياً.
+        نظام رويال إنك المطور - فلترة مخصصة حسب الشركات وعرض مباشر للرفوف والبليت.
     </footer>
 
     <script>
-        let labelsData = [];       // مصفوفة المنتجات الأساسية
+        let labelsData = [];       // مصفوفة المنتجات والرفوف الأساسية
         let formulasData = {};     // قاموس الخلطات والأحبار الكاملة
         
-        // متغيرات الفلاتر النشطة حالياً
+        // متغيرات الفلاتر الثلاثية النشطة حالياً لتشغيل الفورية اللحظية
         let currentSelectedLine = null;
         let currentSelectedSize = null;
+        let currentSelectedCompany = null; // فلتر الشركة المضافة حديثاً
 
-        // عند فتح الموقع: التحقق فوراً مما إذا كانت هناك بيانات محفوظة سابقاً في المتصفح وعرضها فوراً
+        // عند فتح الموقع: استرجاع وقراءة الذاكرة فوراً وبناء أزرار الشركات تلقائياً
         window.onload = function() {
             const savedLabels = localStorage.getItem('royal_labels_data');
             const savedFormulas = localStorage.getItem('royal_formulas_data');
@@ -133,18 +144,48 @@
                 labelsData = JSON.parse(savedLabels);
                 formulasData = JSON.parse(savedFormulas);
                 
-                // إخفاء صندوق الترحيب وتفعيل العرض التلقائي فوراً
                 document.getElementById('welcome-box').style.display = 'none';
                 document.getElementById('labels-live-container').classList.remove('hidden');
                 
-                liveRender();
-                console.log("🎯 تم استرجاع البيانات المحفوظة بنجاح من ذاكرة المتصفح المحلية!");
+                buildCompanyButtons(); // بناء قائمة أزرار الشركات المحفوظة
+                liveRender();          // العرض الفوري
             } else {
                 document.getElementById('counter-meta').innerText = "بانتظار رفع ملف المزامنة الأول...";
             }
         };
 
-        // دالة قراءة ومعالجة ومزامنة الإكسل وحفظها دائمياً بالمتصفح تلقائياً
+        // دالة ديناميكية ذكية لبناء أزرار تصفية الشركات بناءً على الأسماء المتوفرة في الملف المرفوع
+        function buildCompanyButtons() {
+            const container = document.getElementById('companies-buttons-container');
+            container.innerHTML = '';
+
+            // استخراج أسماء الشركات الفريدة والغير مكررة وفرزها
+            const companies = [...new Set(labelsData.map(item => item.company))].filter(Boolean).sort();
+
+            if(companies.length === 0) {
+                container.innerHTML = '<span class="text-slate-400 italic text-xs">لا توجد شركات مسجلة</span>';
+                return;
+            }
+
+            companies.forEach(comp => {
+                const btn = document.createElement('button');
+                btn.className = "company-btn px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-[11px] rounded-lg transition cursor-pointer";
+                btn.innerText = comp;
+                btn.onclick = function() {
+                    document.querySelectorAll('.company-btn').forEach(b => b.classList.remove('btn-active'));
+                    if (currentSelectedCompany === comp) {
+                        currentSelectedCompany = null; // إلغاء الفلترة عند الضغط المكرر
+                    } else {
+                        currentSelectedCompany = comp;
+                        btn.classList.add('btn-active');
+                    }
+                    liveRender(); // تحديث النتائج فوراً بلحظتها
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // دالة قراءة ومزامنة وتفكيك الإكسل وحفظها دائمياً داخل المتصفح
         function loadAndProcessExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -156,7 +197,7 @@
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                // 1. معالجة وتخزين جدول خلطات الأحبار (INK MIX)
+                // 1. تفكيك وهيكلة جدول خلطات الأحبار (INK MIX)
                 formulasData = {};
                 if (workbook.Sheets['INK MIX']) {
                     const sheet = workbook.Sheets['INK MIX'];
@@ -187,7 +228,7 @@
                     }
                 }
 
-                // 2. معالجة وتخزين جدول الليبلات والمنتجات (SHEET1)
+                // 2. تفكيك وأرشفة جدول السجلات والرفوف والبليت (SHEET1)
                 labelsData = [];
                 if (workbook.Sheets['SHEET1']) {
                     const sheet = workbook.Sheets['SHEET1'];
@@ -209,62 +250,54 @@
                             code: row[2] ? String(row[2]).trim() : '-',
                             size: row[3] ? String(row[3]).trim().toUpperCase() : '-',
                             line: row[4] ? String(row[4]).trim().toUpperCase() : '-',
-                            shelf: row[5] ? String(row[5]).trim() : '-',
-                            plate: row[6] ? String(row[6]).trim() : '-',
+                            shelf: row[5] ? String(row[5]).trim() : '-', // سحب رقم الرف
+                            plate: row[6] ? String(row[6]).trim() : '-', // سحب رقم البليت
                             colors: colorCodes
                         });
                     }
                 }
 
-                // 🔥 الخطوة السحرية: حفظ البيانات المحدثة والمزامنة داخل ذاكرة المتصفح دائمياً
+                // حفظ فوري في قاعدة بيانات المتصفح للزيارات القادمة
                 localStorage.setItem('royal_labels_data', JSON.stringify(labelsData));
                 localStorage.setItem('royal_formulas_data', JSON.stringify(formulasData));
 
-                // إخفاء صندوق الترحيب وتفعيل شبكة البيانات المحدثة
                 document.getElementById('welcome-box').style.display = 'none';
                 document.getElementById('labels-live-container').classList.remove('hidden');
                 
-                // الرندرة الفورية والشاملة
-                liveRender();
-                alert(`🎯 تم الحفظ والمزامنة الدائمة بنجاح!\nتمت أرشفة وحفظ ${labelsData.length} منتج و ${Object.keys(formulasData).length} كود لون فني داخل المتصفح تلقائياً.`);
+                buildCompanyButtons(); // بناء قائمة الشركات فوراً للملف الجديد
+                liveRender();          // الرندرة الفورية
+                alert(`🎯 تمت المزامنة وتحديث الفلاتر!\nتم حفظ ${labelsData.length} ليبل مع أرقام الرفوف، وفهرستها بنجاح حسب الشركات.`);
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // دالة الفلترة الفورية بمجرد كبس زر اللاين والخطوط
+        // فلترة فورية حسب الخطوط
         function filterByLine(lineName, btnElement) {
             document.querySelectorAll('.line-btn').forEach(btn => btn.classList.remove('btn-active'));
-            if (currentSelectedLine === lineName) {
-                currentSelectedLine = null; 
-            } else {
-                currentSelectedLine = lineName;
-                btnElement.classList.add('btn-active');
-            }
+            if (currentSelectedLine === lineName) { currentSelectedLine = null; } 
+            else { currentSelectedLine = lineName; btnElement.classList.add('btn-active'); }
             liveRender(); 
         }
 
-        // دالة الفلترة الفورية بمجرد كبس زر قياس العلبة
+        // فلترة فورية حسب القياسات
         function filterBySize(sizeName, btnElement) {
             document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('btn-active'));
-            if (currentSelectedSize === sizeName) {
-                currentSelectedSize = null;
-            } else {
-                currentSelectedSize = sizeName;
-                btnElement.classList.add('btn-active');
-            }
+            if (currentSelectedSize === sizeName) { currentSelectedSize = null; } 
+            else { currentSelectedSize = sizeName; btnElement.classList.add('btn-active'); }
             liveRender(); 
         }
 
-        // تصفير كافة الأزرار والفلاتر والبحث لتنظيف لوحة العرض
+        // تصفير وتنظيف كافة الفلاتر الفورية والعودة للوضع الشامل الكامل
         function clearAllFilters() {
             currentSelectedLine = null;
             currentSelectedSize = null;
+            currentSelectedCompany = null;
             document.getElementById('system-search').value = '';
-            document.querySelectorAll('.line-btn, .size-btn').forEach(btn => btn.classList.remove('btn-active'));
+            document.querySelectorAll('.line-btn, .size-btn, .company-btn').forEach(btn => btn.classList.remove('btn-active'));
             liveRender();
         }
 
-        // تخمين لوني تقريبي لسهولة التعرف البصري الفوري
+        // تخمين لوني للمعاينة الميدانية السريعة
         function getColorHex(colorName, colorCode) {
             const name = (colorName || '').toUpperCase();
             const code = (colorCode || '').toUpperCase();
@@ -281,7 +314,7 @@
             return '#cbd5e1';
         }
 
-        // محرك البحث والفلترة الفوري والذكي الهجين
+        // محرك الرندرة والفلترة الفوري والذكي المشترك (ربط رباعي الأبعاد للبيانات)
         function liveRender() {
             const container = document.getElementById('labels-live-container');
             const query = document.getElementById('system-search').value.trim().toLowerCase();
@@ -289,9 +322,11 @@
 
             if (labelsData.length === 0) return;
 
+            // إجراء التصفية اللحظية الفورية بناء على الخط، الحجم، الشركة، ومربع البحث السريع الشامل
             let filtered = labelsData.filter(item => {
                 if (currentSelectedLine && !item.line.includes(currentSelectedLine)) return false;
                 if (currentSelectedSize && !item.size.includes(currentSelectedSize)) return false;
+                if (currentSelectedCompany && item.company !== currentSelectedCompany) return false;
                 
                 if (query !== '') {
                     return item.name.toLowerCase().includes(query) ||
@@ -299,6 +334,8 @@
                            item.code.toLowerCase().includes(query) ||
                            item.line.toLowerCase().includes(query) ||
                            item.size.toLowerCase().includes(query) ||
+                           item.shelf.toLowerCase().includes(query) ||
+                           item.plate.toLowerCase().includes(query) ||
                            item.colors.some(c => c.toLowerCase().includes(query)) ||
                            item.colors.some(c => formulasData[c] && formulasData[c].color_name.toLowerCase().includes(query));
                 }
@@ -307,12 +344,13 @@
 
             document.getElementById('counter-meta').innerText = `المعروض حالياً: ${filtered.length} سجل مطابق`;
 
-            // رسم بطاقات الليبل والمنتجات مع كوداتها كاملة ومقروءة
+            // بناء الكروت وعرض الرفوف والبليت والألوان بشكل كامل وفوري
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200/70 hover:shadow-md hover:border-blue-400 transition cursor-pointer flex flex-col justify-between";
                 card.onclick = () => showLabelDetailsInSidebar(item);
 
+                // تجهيز أسماء وأكواد الألوان الكاملة داخل البطاقة
                 let colorsListHtml = '';
                 item.colors.forEach(c => {
                     const formula = formulasData[c];
@@ -330,20 +368,26 @@
                     `;
                 });
 
+                // كود الكرت المحدث لعرض رقم الرف والبليت فوراً بالواجهة
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <h3 class="font-bold text-slate-900 text-sm md:text-base truncate">${item.name}</h3>
                             <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-blue-100 shrink-0">كود ${item.code}</span>
                         </div>
-                        <div class="text-xs text-slate-500 space-y-1 mb-3">
+                        
+                        <div class="text-xs text-slate-500 space-y-1.5 mb-3">
                             <div>🏢 الشركة: <span class="text-slate-900 font-bold">${item.company}</span></div>
-                            <div class="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded-md mt-1 text-[11px]">
-                                <div>⛓️ <span class="text-blue-700 font-bold">${item.line}</span></div>
-                                <div>📏 قياس: <span class="text-amber-600 font-bold">${item.size}</span></div>
+                            
+                            <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                                <div class="text-slate-600">⛓️ الخط: <span class="text-blue-700 font-bold">${item.line}</span></div>
+                                <div class="text-slate-600">📏 القياس: <span class="text-amber-600 font-bold">${item.size}</span></div>
+                                <div class="text-slate-600 bg-amber-50/60 px-1 rounded border border-amber-100/50">📍 الرف: <span class="text-slate-900 font-bold">${item.shelf}</span></div>
+                                <div class="text-slate-600 bg-emerald-50/60 px-1 rounded border border-emerald-100/50">📦 بليت: <span class="text-slate-900 font-bold">${item.plate}</span></div>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="border-t border-slate-100 pt-3">
                         <div class="text-[11px] text-slate-400 font-bold mb-1.5">🎨 الألوان والكودات الكاملة لها:</div>
                         <div class="grid grid-cols-1 gap-1.5">${colorsListHtml || '<span class="text-slate-400 italic text-xs">لا توجد أحبار مسجلة</span>'}</div>
@@ -353,13 +397,13 @@
             });
         }
 
-        // فحص واستعراض نسب تركيب الحبر الفنية كاملة ومقروءة بالأوزان
+        // استعراض وفحص نسب تركيب أوزان الأحبار ومكوناتها المعملية
         window.viewFullInkFormula = function(colorCode) {
             const formula = formulasData[colorCode];
             let html = '';
 
             if (!formula) {
-                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في جدول خلطات الأحبار الفني الحالي.</div>`;
+                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في خلطات الأحبار الفنية الحالية.</div>`;
             } else {
                 let tableRows = '';
                 formula.ingredients.forEach(ing => {
@@ -407,7 +451,7 @@
             setTimeout(() => document.getElementById('modal-box').classList.remove('scale-95', 'opacity-0'), 50);
         }
 
-        // تفاصيل كرت الليبل الكامل في اللوحة الجانبية الكبيرة
+        // تفاصيل بطاقة الليبل الشاملة في اللوحة الجانبية عند النقر على الكرت
         function showLabelDetailsInSidebar(item) {
             let innerColorsRows = '';
             item.colors.forEach(c => {
@@ -436,8 +480,8 @@
                         <div>🔢 الكود: <strong class="text-slate-900">${item.code}</strong></div>
                         <div>⛓️ الخط: <strong class="text-blue-600 font-bold">${item.line}</strong></div>
                         <div>📏 القياس: <strong class="text-amber-600 font-bold">${item.size}</strong></div>
-                        <div>📍 رقم الرف: <strong class="text-slate-900">${item.shelf}</strong></div>
-                        <div>📦 البليت: <strong class="text-slate-900">${item.plate}</strong></div>
+                        <div>📍 رقم الرف: <strong class="text-slate-900 font-bold">${item.shelf}</strong></div>
+                        <div>📦 البليت: <strong class="text-slate-900 font-bold">${item.plate}</strong></div>
                     </div>
                 </div>
                 <h4 class="text-xs font-bold text-slate-400 mb-2">الأحبار المعتمدة المكونة للطباعة (${item.colors.length}):</h4>
@@ -453,7 +497,7 @@
             }
         }
 
-        // إغلاق المنبثق بنعومة
+        // إغلاق المنبثق بسلاسة
         window.closeModal = function() {
             document.getElementById('modal-box').classList.add('scale-95', 'opacity-0');
             setTimeout(() => document.getElementById('formula-modal').classList.add('hidden'), 150);
