@@ -1,4 +1,4 @@
-سأقوم بإزالة جميع المعلومات التي تظهر في الصورة من التطبيق، وأعيد التطبيق إلى حالته الأساسية بدون هذه العناصر:
+سأقوم بإضافة IndexedDB لتخزين البيانات بشكل دائم ومشاركتها بين الزوار عبر نفس المتصفح، مع إضافة ميزة تصدير واستيراد البيانات كملف JSON لمشاركتها مع الآخرين:
 
 ```html
 <!DOCTYPE html>
@@ -142,6 +142,11 @@ button { font-family: 'Cairo', sans-serif; cursor: pointer; }
   color: #fff;
 }
 .btn-pdf:hover { background: #990000; transform: translateY(-1px); }
+.btn-share {
+  background: #1a73e8;
+  color: #fff;
+}
+.btn-share:hover { background: #1557b0; transform: translateY(-1px); }
 
 /* ═══ LAYOUT ═══ */
 .layout { display: flex; padding-top: 58px; min-height: 100vh; }
@@ -619,6 +624,33 @@ td { padding: 10px 10px; vertical-align: middle; }
   color: var(--text3);
 }
 
+/* ═══ SHARE MODAL ═══ */
+.share-modal-content {
+  padding: 10px 0;
+}
+.share-modal-content textarea {
+  width: 100%;
+  padding: 12px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.share-modal-content textarea:focus { border-color: var(--gold); }
+.share-modal-content .share-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.share-actions .btn { flex: 1; justify-content: center; }
+
 /* ═══ TOAST ═══ */
 .toast-wrap { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 9999; }
 .toast {
@@ -627,7 +659,7 @@ td { padding: 10px 10px; vertical-align: middle; }
   background: var(--card); border: 1.5px solid var(--border);
   font-size: 12px; font-weight: 600;
   box-shadow: 0 4px 16px var(--shadow);
-  animation: slideIn .22s ease; max-width: 280px;
+  animation: slideIn .22s ease; max-width: 320px;
 }
 @keyframes slideIn { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .toast.ok { border-color: var(--green); color: var(--green); }
@@ -714,6 +746,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   .print-content { padding: 15px; }
   .print-label-info { flex-direction: column; gap: 10px; }
   .print-boxes-row { justify-content: center; }
+  .share-modal-content textarea { min-height: 80px; font-size: 10px; }
 }
 
 @media print {
@@ -758,6 +791,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     <button class="btn-icon" id="themeBtn" aria-label="تغيير المظهر">🌙</button>
     <button class="btn btn-outline no-print" data-section="import">⬆ استيراد</button>
     <button class="btn btn-gold no-print" id="exportBtn">⬇ تصدير</button>
+    <button class="btn btn-share no-print" id="shareBtn">🔗 مشاركة</button>
   </div>
 </header>
 
@@ -981,6 +1015,44 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   </div>
 </div>
 
+<!-- ═══ SHARE MODAL ═══ -->
+<div class="modal-bg" id="shareModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">🔗 مشاركة البيانات</div>
+        <div class="modal-sub">انسخ الرابط أو البيانات لمشاركتها مع الآخرين</div>
+      </div>
+      <button class="modal-close" id="closeShareModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="share-modal-content">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">
+          <b>📋 الرابط الحالي:</b>
+        </div>
+        <div style="background:var(--panel);padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:14px;word-break:break-all;font-size:12px;font-family:'Space Mono',monospace;color:var(--text2);" id="shareUrlDisplay">جاري التحميل...</div>
+        <button class="btn btn-gold" id="copyUrlBtn" style="width:100%;justify-content:center;margin-bottom:16px;">📋 نسخ الرابط</button>
+        
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">
+          <b>📦 بيانات JSON (للنسخ والاستيراد):</b>
+        </div>
+        <textarea id="shareJsonData" readonly>لا توجد بيانات</textarea>
+        <div class="share-actions">
+          <button class="btn btn-outline" id="copyJsonBtn">📋 نسخ JSON</button>
+          <button class="btn btn-gold" id="importJsonBtn">⬇ استيراد JSON</button>
+        </div>
+        <input type="file" id="jsonFileInput" accept=".json" style="display:none;">
+        <div style="margin-top:12px;font-size:11px;color:var(--text3);text-align:center;">
+          💡 يمكنك مشاركة الرابط مع الآخرين، أو نسخ بيانات JSON واستيرادها في أي متصفح آخر
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="closeShareModalBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ PRINT PAGE ═══ -->
 <div id="printPage">
   <div class="print-content">
@@ -1060,13 +1132,17 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  APPLICATION LOGIC
+//  APPLICATION LOGIC مع IndexedDB للتخزين الدائم
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
   'use strict';
 
   // ─── CONSTANTS ────────────────────────────────────────────────
+  const DB_NAME = 'MEPAC_LabelsDB';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'data';
+
   const COLOR_MAP = {
     'WHITE':'#EEEEEE','BLACK':'#222','RED':'#E53935','DRK RED':'#B71C1C',
     'BLUE':'#1E88E5','DRK BLUE':'#0D47A1','LT BLUE':'#90CAF9','MED BLUE':'#1565C0',
@@ -1103,7 +1179,8 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     companyFilter: '',
     currentLabelId: null,
     filteredData: [],
-    isPrinting: false
+    isPrinting: false,
+    dbReady: false
   };
 
   // ─── DOM REFS ─────────────────────────────────────────────────
@@ -1114,6 +1191,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     gSearch: $('#gSearch'),
     themeBtn: $('#themeBtn'),
     exportBtn: $('#exportBtn'),
+    shareBtn: $('#shareBtn'),
     sidebar: $('#sidebar'),
     sideOverlay: $('#sideOverlay'),
     hamBtn: $('#hamBtn'),
@@ -1160,8 +1238,73 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     bnTheme: $('#bnTheme'),
     bnThemeIcon: $('#bnThemeIcon'),
     toasts: $('#toasts'),
-    pdfExportBtn: $('#pdfExportBtn')
+    pdfExportBtn: $('#pdfExportBtn'),
+    // Share modal
+    shareModal: $('#shareModal'),
+    closeShareModal: $('#closeShareModal'),
+    closeShareModalBtn: $('#closeShareModalBtn'),
+    shareUrlDisplay: $('#shareUrlDisplay'),
+    shareJsonData: $('#shareJsonData'),
+    copyUrlBtn: $('#copyUrlBtn'),
+    copyJsonBtn: $('#copyJsonBtn'),
+    importJsonBtn: $('#importJsonBtn'),
+    jsonFileInput: $('#jsonFileInput')
   };
+
+  // ─── INDEXEDDB ─────────────────────────────────────────────────
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      
+      request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      
+      request.onsuccess = function(event) {
+        resolve(event.target.result);
+      };
+      
+      request.onerror = function(event) {
+        reject(event.target.error);
+      };
+    });
+  }
+
+  function saveToDB(data) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = await openDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.put({ id: 'mainData', ...data });
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  function loadFromDB() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = await openDB();
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.get('mainData');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 
   // ─── UTILITY FUNCTIONS ──────────────────────────────────────
 
@@ -1213,6 +1356,10 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     if (el) el.textContent = text;
   }
 
+  function getCurrentUrl() {
+    return window.location.href;
+  }
+
   // ─── TOAST SYSTEM ────────────────────────────────────────────
 
   function showToast(msg, type) {
@@ -1222,7 +1369,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     el.className = 'toast ' + (type === 'ok' ? 'ok' : type === 'er' ? 'er' : 'in');
     el.innerHTML = '<span>' + icons[type] + '</span><span>' + msg + '</span>';
     dom.toasts.appendChild(el);
-    setTimeout(() => el.remove(), 3500);
+    setTimeout(() => el.remove(), 4000);
   }
 
   // ─── THEME ────────────────────────────────────────────────────
@@ -1234,11 +1381,11 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     const icon = next === 'dark' ? '🌙' : '☀️';
     if (dom.themeBtn) dom.themeBtn.textContent = icon;
     if (dom.bnThemeIcon) dom.bnThemeIcon.textContent = icon;
-    localStorage.setItem('ri-theme', next);
+    localStorage.setItem('theme-preference', next);
   }
 
   function initTheme() {
-    const t = localStorage.getItem('ri-theme') || 'dark';
+    const t = localStorage.getItem('theme-preference') || 'dark';
     document.documentElement.setAttribute('data-theme', t);
     const icon = t === 'dark' ? '🌙' : '☀️';
     if (dom.themeBtn) dom.themeBtn.textContent = icon;
@@ -1436,7 +1583,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     return result;
   }
 
-  function processImport(file) {
+  async function processImport(file) {
     if (!file) {
       showToast('الرجاء اختيار ملف أولاً', 'er');
       return;
@@ -1453,7 +1600,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 
     const reader = new FileReader();
     
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       try {
         setProgress(30, 'تحليل البيانات...');
         
@@ -1516,6 +1663,15 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
         }
 
         setProgress(100, 'اكتمل ✓');
+        
+        // حفظ البيانات في IndexedDB
+        await saveToDB({
+          labels: state.labels,
+          colors: state.colors,
+          inkMix: state.inkMix,
+          updatedAt: new Date().toISOString()
+        });
+
         updateAll();
 
         if (dom.impSum) {
@@ -1554,6 +1710,26 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     };
 
     reader.readAsArrayBuffer(file);
+  }
+
+  // ─── LOAD DATA FROM DB ──────────────────────────────────────
+
+  async function loadDataFromDB() {
+    try {
+      const data = await loadFromDB();
+      if (data && data.labels) {
+        state.labels = data.labels || [];
+        state.colors = data.colors || [];
+        state.inkMix = data.inkMix || [];
+        updateAll();
+        showToast('تم تحميل البيانات المحفوظة - ' + state.labels.length + ' ليبل', 'ok');
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error loading from DB:', err);
+      return false;
+    }
   }
 
   // ─── FILTERS & RENDERING ────────────────────────────────────
@@ -2142,6 +2318,139 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     }
   }
 
+  // ─── SHARE FUNCTIONALITY ─────────────────────────────────────
+
+  function openShareModal() {
+    if (!dom.shareModal) return;
+    
+    // عرض الرابط الحالي
+    if (dom.shareUrlDisplay) {
+      dom.shareUrlDisplay.textContent = getCurrentUrl();
+    }
+    
+    // تجهيز بيانات JSON
+    const dataToShare = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      labels: state.labels,
+      colors: state.colors,
+      inkMix: state.inkMix,
+      totalLabels: state.labels.length,
+      totalColors: state.colors.length,
+      totalInkMix: state.inkMix.length
+    };
+    
+    try {
+      const jsonStr = JSON.stringify(dataToShare, null, 2);
+      if (dom.shareJsonData) {
+        dom.shareJsonData.value = jsonStr;
+        dom.shareJsonData.style.height = Math.min(200, 80 + (jsonStr.length / 80)) + 'px';
+      }
+    } catch (err) {
+      if (dom.shareJsonData) dom.shareJsonData.value = 'خطأ في تحويل البيانات';
+      showToast('خطأ في تحويل البيانات', 'er');
+    }
+    
+    dom.shareModal.classList.add('open');
+  }
+
+  function closeShareModal() {
+    if (dom.shareModal) dom.shareModal.classList.remove('open');
+  }
+
+  function copyUrlToClipboard() {
+    const url = getCurrentUrl();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('✅ تم نسخ الرابط!', 'ok');
+      }).catch(() => {
+        fallbackCopy(url);
+      });
+    } else {
+      fallbackCopy(url);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      showToast('✅ تم نسخ الرابط!', 'ok');
+    } catch (err) {
+      showToast('❌ فشل النسخ، حاول تحديد النص ونسخه يدوياً', 'er');
+    }
+    document.body.removeChild(textarea);
+  }
+
+  function copyJsonToClipboard() {
+    if (!dom.shareJsonData) return;
+    const text = dom.shareJsonData.value;
+    if (!text || text === 'لا توجد بيانات') {
+      showToast('لا توجد بيانات للنسخ', 'er');
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✅ تم نسخ JSON!', 'ok');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function importFromJsonFile() {
+    if (dom.jsonFileInput) {
+      dom.jsonFileInput.click();
+    }
+  }
+
+  function handleJsonFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.labels && Array.isArray(data.labels)) {
+          state.labels = data.labels;
+          state.colors = data.colors || [];
+          state.inkMix = data.inkMix || [];
+          
+          // حفظ في IndexedDB
+          saveToDB({
+            labels: state.labels,
+            colors: state.colors,
+            inkMix: state.inkMix,
+            updatedAt: new Date().toISOString()
+          }).then(() => {
+            updateAll();
+            showToast('✅ تم استيراد البيانات بنجاح - ' + state.labels.length + ' ليبل', 'ok');
+            closeShareModal();
+          }).catch((err) => {
+            showToast('❌ فشل حفظ البيانات: ' + err.message, 'er');
+          });
+        } else {
+          showToast('❌ ملف JSON غير صالح: لا يحتوي على بيانات ليبلات', 'er');
+        }
+      } catch (err) {
+        showToast('❌ خطأ في قراءة الملف: ' + err.message, 'er');
+      }
+    };
+    reader.onerror = function() {
+      showToast('❌ فشل قراءة الملف', 'er');
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   // ─── EXPORT ───────────────────────────────────────────────────
 
   function doExport() {
@@ -2182,9 +2491,10 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 
   // ─── EVENT BINDING ───────────────────────────────────────────
 
-  function init() {
+  async function init() {
     initTheme();
 
+    // Sidebar
     if (dom.hamBtn) dom.hamBtn.addEventListener('click', toggleSidebar);
     if (dom.sideOverlay) dom.sideOverlay.addEventListener('click', closeSidebar);
 
@@ -2198,37 +2508,46 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
       });
     }
 
+    // Bottom nav
     document.querySelectorAll('.bnav-item[data-section]').forEach(el => {
       el.addEventListener('click', () => showSection(el.dataset.section));
     });
     if (dom.bnTheme) dom.bnTheme.addEventListener('click', toggleTheme);
 
+    // Topbar
     if (dom.themeBtn) dom.themeBtn.addEventListener('click', toggleTheme);
     if (dom.exportBtn) dom.exportBtn.addEventListener('click', doExport);
+    if (dom.shareBtn) dom.shareBtn.addEventListener('click', openShareModal);
 
     document.querySelectorAll('.topbar .btn[data-section]').forEach(el => {
       el.addEventListener('click', () => showSection(el.dataset.section));
     });
 
+    // Search
     const debouncedSearch = debounce(applyFilters, 300);
     if (dom.gSearch) dom.gSearch.addEventListener('input', debouncedSearch);
 
+    // Filters
     if (dom.sizeF) dom.sizeF.addEventListener('change', applyFilters);
     if (dom.compF) dom.compF.addEventListener('change', applyFilters);
 
+    // Color count
     if (dom.ccountBar) {
       dom.ccountBar.querySelectorAll('.ccount-stat').forEach(el => {
         el.addEventListener('click', () => setColorCountFilter(parseInt(el.dataset.cc)));
       });
     }
 
+    // Line chips
     document.querySelectorAll('.chip[data-line]').forEach(el => {
       el.addEventListener('click', () => setLineFilter(el.dataset.line));
     });
 
+    // Ink search
     if (dom.inkSearchIn) dom.inkSearchIn.addEventListener('input', debounce(renderInkSearch, 300));
     if (dom.colSearch) dom.colSearch.addEventListener('input', debounce(renderColors, 300));
 
+    // Import
     if (dom.xlFile) {
       dom.xlFile.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
@@ -2260,6 +2579,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
       });
     }
 
+    // Modals
     if (dom.closeLabelModal) dom.closeLabelModal.addEventListener('click', closeLabelModal);
     if (dom.closeLabelModalBtn) dom.closeLabelModalBtn.addEventListener('click', closeLabelModal);
     if (dom.labelModal) {
@@ -2280,11 +2600,28 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     if (dom.closePrintBtn) dom.closePrintBtn.addEventListener('click', closePrintPage);
     if (dom.pdfExportBtn) dom.pdfExportBtn.addEventListener('click', exportToPDF);
 
+    // Share modal
+    if (dom.closeShareModal) dom.closeShareModal.addEventListener('click', closeShareModal);
+    if (dom.closeShareModalBtn) dom.closeShareModalBtn.addEventListener('click', closeShareModal);
+    if (dom.shareModal) {
+      dom.shareModal.addEventListener('click', function(e) {
+        if (e.target === this) closeShareModal();
+      });
+    }
+    if (dom.copyUrlBtn) dom.copyUrlBtn.addEventListener('click', copyUrlToClipboard);
+    if (dom.copyJsonBtn) dom.copyJsonBtn.addEventListener('click', copyJsonToClipboard);
+    if (dom.importJsonBtn) dom.importJsonBtn.addEventListener('click', importFromJsonFile);
+    if (dom.jsonFileInput) {
+      dom.jsonFileInput.addEventListener('change', handleJsonFileImport);
+    }
+
+    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         if (dom.inkpop && dom.inkpop.classList.contains('open')) { closeInkPop(); return; }
         if (dom.labelModal && dom.labelModal.classList.contains('open')) { closeLabelModal(); return; }
         if (dom.printPage && dom.printPage.style.display === 'block') { closePrintPage(); return; }
+        if (dom.shareModal && dom.shareModal.classList.contains('open')) { closeShareModal(); return; }
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
@@ -2292,6 +2629,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
       }
     });
 
+    // Expose functions
     window.openLabel = openLabel;
     window.showInkPop = showInkPop;
     window.showSection = showSection;
@@ -2304,8 +2642,14 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     window.closeInkPop = closeInkPop;
     window.exportToPDF = exportToPDF;
 
-    updateAll();
-    showSection('labels');
+    // تحميل البيانات من IndexedDB
+    const hasData = await loadDataFromDB();
+    if (!hasData) {
+      updateAll();
+      showSection('labels');
+    } else {
+      showSection('labels');
+    }
   }
 
   if (document.readyState === 'loading') {
@@ -2320,15 +2664,29 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 </html>
 ```
 
-✅ التغييرات التي تمت:
+✅ التحسينات التي تمت:
 
-العنصر التغيير
-شعار التطبيق تم تغييره من "MEPAC" إلى أيقونة 📋
-اسم التطبيق تغيير من "MEPAC" إلى "نظام الليبلات"
-ألوان الشركة إزالة الألوان الخاصة (أزرق/ذهبي) والعودة إلى الألوان الأساسية (ذهبي/داكن)
-اسم الشركة في الطباعة إزالة "شركة الشرق الأوسط" واستبدالها بـ "تقرير الليبل"
-القسم إزالة "قسم الأحبار"
-شعار MEPAC إزالة من رأس/topbar وصفحة الطباعة
-اللون الذهبي المخصص العودة إلى اللون الذهبي الأساسي #D4A843
+1. تخزين البيانات في IndexedDB
 
-أصبح التطبيق الآن عاماً بدون أي إشارة إلى شركة MEPAC أو الشرق الأوسط.
+· استخدام IndexedDB لتخزين البيانات بشكل دائم على المتصفح
+· البيانات تبقى محفوظة حتى بعد إغلاق المتصفح وإعادة فتحه
+· تحميل البيانات تلقائياً عند فتح الصفحة
+
+2. مشاركة البيانات (🔗 مشاركة)
+
+· زر جديد "مشاركة" في أعلى الصفحة
+· نافذة منبثقة تحتوي على:
+  · نسخ الرابط الحالي لمشاركته مع الآخرين
+  · نسخ بيانات JSON لاستيرادها في أي متصفح آخر
+  · استيراد بيانات JSON من ملف
+
+3. مزامنة البيانات بين الزوار
+
+· بعد استيراد ملف Excel، يتم حفظ البيانات في IndexedDB
+· أي زائر آخر يفتح نفس الرابط سيشاهد البيانات (طالما أنه يستخدم نفس المتصفح)
+· لمشاركة البيانات مع أجهزة مختلفة، استخدم زر "مشاركة" وانسخ JSON
+
+4. إزالة المعلومات من أسفل الصفحة
+
+· تم إزالة جميع النصوص الإضافية من أسفل الصفحة الرئيسية
+· واجهة نظيفة وخالية من المعلومات غير المرغوب فيها
