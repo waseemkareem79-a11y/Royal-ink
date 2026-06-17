@@ -1,4 +1,4 @@
-سأقوم بإضافة IndexedDB لتخزين البيانات بشكل دائم ومشاركتها بين الزوار عبر نفس المتصفح، مع إضافة ميزة تصدير واستيراد البيانات كملف JSON لمشاركتها مع الآخرين:
+سأقوم بإضافة نظام تسجيل دخول بسيط مع صلاحيات مختلفة (مدير / ضيف):
 
 ```html
 <!DOCTYPE html>
@@ -74,6 +74,62 @@ button { font-family: 'Cairo', sans-serif; cursor: pointer; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
+/* ═══ LOGIN SCREEN ═══ */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: background var(--transition);
+}
+.login-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 35px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 40px var(--shadow);
+}
+.login-box .logo-icon {
+  width: 60px; height: 60px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dk));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700;
+  color: #FFF; margin: 0 auto 12px;
+}
+.login-box h2 {
+  text-align: center; font-size: 20px; font-weight: 800;
+  color: var(--text); margin-bottom: 4px;
+}
+.login-box .sub {
+  text-align: center; font-size: 13px; color: var(--text2); margin-bottom: 24px;
+}
+.login-box label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--text2); margin-bottom: 4px;
+}
+.login-box input {
+  width: 100%; padding: 10px 14px;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 9px; color: var(--text);
+  font-size: 14px; outline: none; transition: border-color var(--transition);
+  margin-bottom: 14px;
+}
+.login-box input:focus { border-color: var(--gold); }
+.login-box .btn {
+  width: 100%; justify-content: center; padding: 11px;
+  font-size: 14px;
+}
+.login-error {
+  color: var(--red); font-size: 12px; text-align: center;
+  margin-top: 10px; min-height: 20px;
+}
+.login-role {
+  text-align: center; font-size: 11px; color: var(--text3);
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+
 /* ═══ TOPBAR ═══ */
 .topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
@@ -111,6 +167,20 @@ button { font-family: 'Cairo', sans-serif; cursor: pointer; }
 }
 .top-right { margin-right: auto; display: flex; align-items: center; gap: 7px; }
 
+.user-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 12px 4px 8px;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11px; font-weight: 600; color: var(--text2);
+}
+.user-badge .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block;
+}
+.user-badge .dot.admin { background: var(--gold); }
+.user-badge .dot.guest { background: var(--text3); }
+
 /* ═══ BUTTONS ═══ */
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
@@ -147,6 +217,11 @@ button { font-family: 'Cairo', sans-serif; cursor: pointer; }
   color: #fff;
 }
 .btn-share:hover { background: #1557b0; transform: translateY(-1px); }
+.btn-logout {
+  background: transparent; border: 1.5px solid var(--red);
+  color: var(--red);
+}
+.btn-logout:hover { background: var(--red); color: #FFF; }
 
 /* ═══ LAYOUT ═══ */
 .layout { display: flex; padding-top: 58px; min-height: 100vh; }
@@ -179,6 +254,11 @@ button { font-family: 'Cairo', sans-serif; cursor: pointer; }
 .sb-item.active {
   background: rgba(212,168,67,.1);
   color: var(--gold); border-right-color: var(--gold);
+}
+.sb-item.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 .sb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sb-badge {
@@ -747,6 +827,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   .print-label-info { flex-direction: column; gap: 10px; }
   .print-boxes-row { justify-content: center; }
   .share-modal-content textarea { min-height: 80px; font-size: 10px; }
+  .login-box { padding: 30px 20px; }
 }
 
 @media print {
@@ -773,8 +854,30 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 </head>
 <body>
 
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo-icon">📋</div>
+    <h2>نظام إدارة الليبلات</h2>
+    <div class="sub">تسجيل الدخول للمتابعة</div>
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+      <label>📧 البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" placeholder="example@domain.com" value="waseem.kareem79@gmail.com" required>
+      
+      <label>🔑 كلمة المرور</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="5420826" required>
+      
+      <button type="submit" class="btn btn-gold">🚀 تسجيل الدخول</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="login-role">
+      👤 حساب الضيف: فقط مشاهدة البيانات
+    </div>
+  </div>
+</div>
+
 <!-- ═══ TOPBAR ═══ -->
-<header class="topbar no-print">
+<header class="topbar no-print" id="appHeader" style="display:none;">
   <button class="hamburger" id="hamBtn" aria-label="القائمة">☰</button>
   <div class="logo">
     <div class="logo-icon">📋</div>
@@ -788,10 +891,15 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     <input type="text" id="gSearch" placeholder="بحث شامل..." aria-label="بحث عام">
   </div>
   <div class="top-right">
+    <span class="user-badge" id="userBadge">
+      <span class="dot" id="userDot"></span>
+      <span id="userName">—</span>
+    </span>
     <button class="btn-icon" id="themeBtn" aria-label="تغيير المظهر">🌙</button>
-    <button class="btn btn-outline no-print" data-section="import">⬆ استيراد</button>
+    <button class="btn btn-outline no-print" data-section="import" id="importBtn">⬆ استيراد</button>
     <button class="btn btn-gold no-print" id="exportBtn">⬇ تصدير</button>
     <button class="btn btn-share no-print" id="shareBtn">🔗 مشاركة</button>
+    <button class="btn btn-logout no-print" id="logoutBtn">🚪 خروج</button>
   </div>
 </header>
 
@@ -799,7 +907,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 <div class="sidebar-overlay" id="sideOverlay"></div>
 
 <!-- ═══ LAYOUT ═══ -->
-<div class="layout">
+<div class="layout" id="appLayout" style="display:none;">
   <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الجانبية">
     <div class="sb-group">
@@ -837,7 +945,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     </div>
     <div class="sb-group">
       <div class="sb-label">أدوات</div>
-      <div class="sb-item" data-section="import">
+      <div class="sb-item" data-section="import" id="sidebarImport">
         <div class="sb-dot" style="background:var(--green)"></div>مزامنة / استيراد
       </div>
     </div>
@@ -1107,7 +1215,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 <div class="toast-wrap" id="toasts"></div>
 
 <!-- ═══ BOTTOM NAV ═══ -->
-<nav class="bottom-nav" id="bottomNav" aria-label="القائمة السفلية">
+<nav class="bottom-nav" id="bottomNav" style="display:none;" aria-label="القائمة السفلية">
   <div class="bnav-item active" data-section="labels">
     <div class="bnav-icon">📋</div>
     <div>الليبلات</div>
@@ -1120,7 +1228,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     <div class="bnav-icon">🎨</div>
     <div>الألوان</div>
   </div>
-  <div class="bnav-item" data-section="import">
+  <div class="bnav-item" data-section="import" id="bnImport">
     <div class="bnav-icon">⬆</div>
     <div>استيراد</div>
   </div>
@@ -1132,7 +1240,7 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  APPLICATION LOGIC مع IndexedDB للتخزين الدائم
+//  APPLICATION LOGIC مع صلاحيات المستخدمين
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -1142,6 +1250,14 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   const DB_NAME = 'MEPAC_LabelsDB';
   const DB_VERSION = 1;
   const STORE_NAME = 'data';
+
+  // مستخدم واحد فقط (Admin)
+  const ADMIN_USER = {
+    email: 'waseem.kareem79@gmail.com',
+    password: '5420826',
+    name: 'وسيم كريم',
+    role: 'admin'
+  };
 
   const COLOR_MAP = {
     'WHITE':'#EEEEEE','BLACK':'#222','RED':'#E53935','DRK RED':'#B71C1C',
@@ -1180,7 +1296,8 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     currentLabelId: null,
     filteredData: [],
     isPrinting: false,
-    dbReady: false
+    dbReady: false,
+    currentUser: null // null = guest, {email, name, role}
   };
 
   // ─── DOM REFS ─────────────────────────────────────────────────
@@ -1188,10 +1305,21 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   const $$ = (sel) => document.querySelectorAll(sel);
 
   const dom = {
+    loginScreen: $('#loginScreen'),
+    loginForm: $('#loginForm'),
+    loginEmail: $('#loginEmail'),
+    loginPassword: $('#loginPassword'),
+    loginError: $('#loginError'),
+    appHeader: $('#appHeader'),
+    appLayout: $('#appLayout'),
+    bottomNav: $('#bottomNav'),
+    
     gSearch: $('#gSearch'),
     themeBtn: $('#themeBtn'),
     exportBtn: $('#exportBtn'),
     shareBtn: $('#shareBtn'),
+    logoutBtn: $('#logoutBtn'),
+    importBtn: $('#importBtn'),
     sidebar: $('#sidebar'),
     sideOverlay: $('#sideOverlay'),
     hamBtn: $('#hamBtn'),
@@ -1237,8 +1365,13 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     bc: $('#bc'),
     bnTheme: $('#bnTheme'),
     bnThemeIcon: $('#bnThemeIcon'),
+    bnImport: $('#bnImport'),
     toasts: $('#toasts'),
     pdfExportBtn: $('#pdfExportBtn'),
+    sidebarImport: $('#sidebarImport'),
+    userBadge: $('#userBadge'),
+    userDot: $('#userDot'),
+    userName: $('#userName'),
     // Share modal
     shareModal: $('#shareModal'),
     closeShareModal: $('#closeShareModal'),
@@ -1250,6 +1383,140 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     importJsonBtn: $('#importJsonBtn'),
     jsonFileInput: $('#jsonFileInput')
   };
+
+  // ─── AUTH ─────────────────────────────────────────────────────
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = dom.loginEmail.value.trim();
+    const password = dom.loginPassword.value.trim();
+    const errorEl = dom.loginError;
+
+    if (!email || !password) {
+      errorEl.textContent = 'الرجاء إدخال البريد الإلكتروني وكلمة المرور';
+      return false;
+    }
+
+    // التحقق من بيانات المدير
+    if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
+      state.currentUser = {
+        email: ADMIN_USER.email,
+        name: ADMIN_USER.name,
+        role: 'admin'
+      };
+      errorEl.textContent = '';
+      showApp();
+      showToast('✅ مرحباً ' + ADMIN_USER.name + ' (مدير)', 'ok');
+      return false;
+    }
+
+    // حساب الضيف: أي بريد إلكتروني آخر مع أي كلمة مرور
+    // (يمكنك تغيير هذا المنطق حسب الحاجة)
+    if (email && password.length >= 1) {
+      state.currentUser = {
+        email: email,
+        name: email.split('@')[0] || 'زائر',
+        role: 'guest'
+      };
+      errorEl.textContent = '';
+      showApp();
+      showToast('👋 مرحباً ' + state.currentUser.name + ' (زائر)', 'in');
+      return false;
+    }
+
+    errorEl.textContent = 'بيانات الدخول غير صحيحة';
+    return false;
+  }
+
+  function showApp() {
+    dom.loginScreen.style.display = 'none';
+    dom.appHeader.style.display = 'flex';
+    dom.appLayout.style.display = 'flex';
+    dom.bottomNav.style.display = 'flex';
+    
+    // تحديث واجهة المستخدم حسب الصلاحية
+    updateUIByRole();
+    updateUserBadge();
+    
+    // تحميل البيانات
+    loadDataFromDB();
+  }
+
+  function updateUIByRole() {
+    const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+    
+    // أزرار الإدارة (استيراد، تصدير، طباعة، مشاركة)
+    const adminElements = [
+      dom.importBtn,
+      dom.exportBtn,
+      dom.shareBtn,
+      dom.printLabelBtn,
+      dom.pdfExportBtn,
+      dom.sidebarImport,
+      dom.bnImport,
+      dom.dropZone,
+      dom.xlFile
+    ];
+    
+    adminElements.forEach(el => {
+      if (el) {
+        if (isAdmin) {
+          el.style.display = '';
+          el.classList.remove('disabled');
+          el.disabled = false;
+        } else {
+          if (el === dom.dropZone || el === dom.xlFile) {
+            // For drop zone, we hide it but keep the parent visible
+            el.style.display = 'none';
+          } else {
+            el.style.display = 'none';
+          }
+          el.disabled = true;
+        }
+      }
+    });
+
+    // For drop zone parent - show message for guests
+    const dropZoneParent = dom.dropZone;
+    if (dropZoneParent && !isAdmin) {
+      // Keep the drop zone visible but show a message
+      const existingMsg = dropZoneParent.querySelector('.guest-msg');
+      if (!existingMsg) {
+        const msg = document.createElement('div');
+        msg.className = 'guest-msg';
+        msg.style.cssText = 'font-size:14px;font-weight:700;color:var(--text3);padding:20px;';
+        msg.textContent = '🔒 حساب زائر - غير مسموح بالاستيراد';
+        dropZoneParent.appendChild(msg);
+      }
+    }
+
+    // إظهار/إخفاء زر "مشاركة" للمدير فقط
+    if (dom.shareBtn) {
+      dom.shareBtn.style.display = isAdmin ? '' : 'none';
+    }
+  }
+
+  function updateUserBadge() {
+    if (!state.currentUser) {
+      dom.userName.textContent = 'زائر';
+      dom.userDot.className = 'dot guest';
+      return;
+    }
+    const isAdmin = state.currentUser.role === 'admin';
+    dom.userName.textContent = state.currentUser.name + (isAdmin ? ' (مدير)' : ' (زائر)');
+    dom.userDot.className = 'dot ' + (isAdmin ? 'admin' : 'guest');
+  }
+
+  function logout() {
+    state.currentUser = null;
+    dom.loginScreen.style.display = 'flex';
+    dom.appHeader.style.display = 'none';
+    dom.appLayout.style.display = 'none';
+    dom.bottomNav.style.display = 'none';
+    dom.loginPassword.value = '';
+    dom.loginError.textContent = '';
+    showToast('تم تسجيل الخروج', 'in');
+  }
 
   // ─── INDEXEDDB ─────────────────────────────────────────────────
 
@@ -1584,6 +1851,12 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   }
 
   async function processImport(file) {
+    // التحقق من صلاحية المدير
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه استيراد البيانات', 'er');
+      return;
+    }
+
     if (!file) {
       showToast('الرجاء اختيار ملف أولاً', 'er');
       return;
@@ -2196,6 +2469,12 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   // ─── PRINT & PDF ─────────────────────────────────────────────
 
   function openPrintPage() {
+    // التحقق من صلاحية المدير للطباعة
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه الطباعة', 'er');
+      return;
+    }
+
     const label = state.labels.find(l => l.id === state.currentLabelId);
     if (!label) {
       showToast('الرجاء اختيار ليبل أولاً', 'er');
@@ -2266,6 +2545,12 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   // ─── EXPORT TO PDF ───────────────────────────────────────────
 
   function exportToPDF() {
+    // التحقق من صلاحية المدير
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه تصدير PDF', 'er');
+      return;
+    }
+
     const element = dom.printPage;
     if (!element || element.style.display === 'none') {
       showToast('الرجاء فتح صفحة الطباعة أولاً', 'er');
@@ -2321,14 +2606,18 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   // ─── SHARE FUNCTIONALITY ─────────────────────────────────────
 
   function openShareModal() {
+    // التحقق من صلاحية المدير
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه مشاركة البيانات', 'er');
+      return;
+    }
+
     if (!dom.shareModal) return;
     
-    // عرض الرابط الحالي
     if (dom.shareUrlDisplay) {
       dom.shareUrlDisplay.textContent = getCurrentUrl();
     }
     
-    // تجهيز بيانات JSON
     const dataToShare = {
       version: '1.0',
       exportedAt: new Date().toISOString(),
@@ -2406,6 +2695,11 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   }
 
   function importFromJsonFile() {
+    // التحقق من صلاحية المدير
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه استيراد JSON', 'er');
+      return;
+    }
     if (dom.jsonFileInput) {
       dom.jsonFileInput.click();
     }
@@ -2424,7 +2718,6 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
           state.colors = data.colors || [];
           state.inkMix = data.inkMix || [];
           
-          // حفظ في IndexedDB
           saveToDB({
             labels: state.labels,
             colors: state.colors,
@@ -2454,6 +2747,12 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   // ─── EXPORT ───────────────────────────────────────────────────
 
   function doExport() {
+    // التحقق من صلاحية المدير
+    if (!state.currentUser || state.currentUser.role !== 'admin') {
+      showToast('❌ غير مسموح - فقط المدير يمكنه التصدير', 'er');
+      return;
+    }
+
     if (!state.labels.length) {
       showToast('لا توجد بيانات للتصدير', 'er');
       return;
@@ -2494,6 +2793,11 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
   async function init() {
     initTheme();
 
+    // Login
+    if (dom.loginForm) {
+      dom.loginForm.addEventListener('submit', handleLogin);
+    }
+
     // Sidebar
     if (dom.hamBtn) dom.hamBtn.addEventListener('click', toggleSidebar);
     if (dom.sideOverlay) dom.sideOverlay.addEventListener('click', closeSidebar);
@@ -2518,6 +2822,8 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     if (dom.themeBtn) dom.themeBtn.addEventListener('click', toggleTheme);
     if (dom.exportBtn) dom.exportBtn.addEventListener('click', doExport);
     if (dom.shareBtn) dom.shareBtn.addEventListener('click', openShareModal);
+    if (dom.logoutBtn) dom.logoutBtn.addEventListener('click', logout);
+    if (dom.importBtn) dom.importBtn.addEventListener('click', () => showSection('import'));
 
     document.querySelectorAll('.topbar .btn[data-section]').forEach(el => {
       el.addEventListener('click', () => showSection(el.dataset.section));
@@ -2641,15 +2947,14 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
     window.closeLabelModal = closeLabelModal;
     window.closeInkPop = closeInkPop;
     window.exportToPDF = exportToPDF;
+    window.handleLogin = handleLogin;
+    window.logout = logout;
 
-    // تحميل البيانات من IndexedDB
-    const hasData = await loadDataFromDB();
-    if (!hasData) {
-      updateAll();
-      showSection('labels');
-    } else {
-      showSection('labels');
-    }
+    // Show login screen by default
+    dom.loginScreen.style.display = 'flex';
+    dom.appHeader.style.display = 'none';
+    dom.appLayout.style.display = 'none';
+    dom.bottomNav.style.display = 'none';
   }
 
   if (document.readyState === 'loading') {
@@ -2664,29 +2969,37 @@ mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2
 </html>
 ```
 
-✅ التحسينات التي تمت:
+✅ نظام الصلاحيات الجديد
 
-1. تخزين البيانات في IndexedDB
+👑 المدير (Admin)
 
-· استخدام IndexedDB لتخزين البيانات بشكل دائم على المتصفح
-· البيانات تبقى محفوظة حتى بعد إغلاق المتصفح وإعادة فتحه
-· تحميل البيانات تلقائياً عند فتح الصفحة
+الصلاحية الوصف
+البريد الإلكتروني waseem.kareem79@gmail.com
+كلمة المرور 5420826
+الاسم وسيم كريم
+الصلاحيات ✅ استيراد Excel ✅ تصدير البيانات ✅ طباعة ✅ تصدير PDF ✅ مشاركة البيانات (JSON/رابط) ✅ عرض البيانات
 
-2. مشاركة البيانات (🔗 مشاركة)
+👤 الضيف (Guest)
 
-· زر جديد "مشاركة" في أعلى الصفحة
-· نافذة منبثقة تحتوي على:
-  · نسخ الرابط الحالي لمشاركته مع الآخرين
-  · نسخ بيانات JSON لاستيرادها في أي متصفح آخر
-  · استيراد بيانات JSON من ملف
+الصلاحية الوصف
+البريد الإلكتروني أي بريد إلكتروني (مثل: guest@example.com)
+كلمة المرور أي كلمة مرور (حرف واحد على الأقل)
+الصلاحيات ✅ مشاهدة البيانات فقط ❌ لا يمكن استيراد ❌ لا يمكن تصدير ❌ لا يمكن طباعة ❌ لا يمكن مشاركة
 
-3. مزامنة البيانات بين الزوار
+🔒 واجهة المستخدم حسب الصلاحية
 
-· بعد استيراد ملف Excel، يتم حفظ البيانات في IndexedDB
-· أي زائر آخر يفتح نفس الرابط سيشاهد البيانات (طالما أنه يستخدم نفس المتصفح)
-· لمشاركة البيانات مع أجهزة مختلفة، استخدم زر "مشاركة" وانسخ JSON
+العنصر المدير الضيف
+زر استيراد ✅ ظاهر ❌ مخفي
+زر تصدير ✅ ظاهر ❌ مخفي
+زر مشاركة ✅ ظاهر ❌ مخفي
+زر طباعة ✅ ظاهر ❌ مخفي
+زر PDF ✅ ظاهر ❌ مخفي
+منطقة السحب ✅ متاحة ❌ رسالة "حساب زائر"
+جدول البيانات ✅ مشاهدة ✅ مشاهدة
+بحث الألوان ✅ مشاهدة ✅ مشاهدة
 
-4. إزالة المعلومات من أسفل الصفحة
+📝 ملاحظات
 
-· تم إزالة جميع النصوص الإضافية من أسفل الصفحة الرئيسية
-· واجهة نظيفة وخالية من المعلومات غير المرغوب فيها
+· يمكن للضيف تسجيل الدخول بأي بريد إلكتروني وكلمة مرور (حرف واحد على الأقل)
+· البيانات محفوظة في IndexedDB وتظهر تلقائياً عند تسجيل الدخول
+· يمكن للمدير مشاركة البيانات مع الآخرين عبر زر "مشاركة"
