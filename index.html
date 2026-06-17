@@ -1,507 +1,2334 @@
+سأقوم بإزالة جميع المعلومات التي تظهر في الصورة من التطبيق، وأعيد التطبيق إلى حالته الأساسية بدون هذه العناصر:
+
+```html
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام رويال إنك - الفلترة الشاملة ورقم الرف</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
-        
-        /* تأثير الزر النشط والمحدد عند الفلترة اللحظية */
-        .btn-active {
-            background-color: #1d4ed8 !important;
-            color: #ffffff !important;
-            border-color: #1d4ed8 !important;
-            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة الليبلات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════
+   STYLES (محسّن)
+   ═══════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg: #0D0D12;
+  --dp: #12121A;
+  --panel: #18181F;
+  --card: #1E1E28;
+  --border: #2A2A3A;
+  --border2: #363650;
+  --gold: #D4A843;
+  --gold-lt: #F0C96A;
+  --gold-dk: #8B6F2A;
+  --text: #EEECf8;
+  --text2: #9898B8;
+  --text3: #555570;
+  --l1: #3ECFCC;
+  --l2: #FF6B9D;
+  --l3: #8B7FFF;
+  --green: #3DDC84;
+  --red: #FF4F4F;
+  --shadow: rgba(0,0,0,0.5);
+  --inp-bg: #12121A;
+  --radius: 12px;
+  --transition: 0.2s ease;
+}
+
+[data-theme="light"] {
+  --bg: #F2F2F7;
+  --dp: #FFFFFF;
+  --panel: #F8F8FB;
+  --card: #FFFFFF;
+  --border: #E0E0EA;
+  --border2: #CCCCDE;
+  --gold: #B8860B;
+  --gold-lt: #D4A017;
+  --gold-dk: #7A5800;
+  --text: #1A1A2E;
+  --text2: #555570;
+  --text3: #AAAABC;
+  --l1: #009B99;
+  --l2: #E0186A;
+  --l3: #5B50CC;
+  --green: #1A9E55;
+  --red: #CC2222;
+  --shadow: rgba(0,0,0,0.12);
+  --inp-bg: #FFFFFF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+button { font-family: 'Cairo', sans-serif; cursor: pointer; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 58px; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  background: var(--dp);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px var(--shadow);
+  transition: background var(--transition), border-color var(--transition);
+}
+.logo { display: flex; align-items: center; gap: 9px; flex-shrink: 0; text-decoration: none; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dk));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+  color: #FFF; flex-shrink: 0;
+}
+.logo-text { font-size: 14px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.logo-sub { font-size: 10px; color: var(--text2); }
+
+.top-search { flex: 1; max-width: 420px; position: relative; }
+.top-search input {
+  width: 100%; padding: 8px 14px 8px 36px;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 9px; color: var(--text);
+  font-size: 13px; outline: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+.top-search input:focus { border-color: var(--gold); background: var(--inp-bg); }
+.top-search input::placeholder { color: var(--text3); }
+.search-ico {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); font-size: 15px; pointer-events: none;
+}
+.top-right { margin-right: auto; display: flex; align-items: center; gap: 7px; }
+
+/* ═══ BUTTONS ═══ */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 700; border: none;
+  transition: all var(--transition); white-space: nowrap;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dk));
+  color: #FFF;
+}
+.btn-gold:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; border: 1.5px solid var(--border2);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.btn-icon {
+  width: 34px; height: 34px; padding: 0;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; transition: all var(--transition);
+}
+.btn-icon:hover { border-color: var(--gold); color: var(--gold); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-pdf {
+  background: #cc0000;
+  color: #fff;
+}
+.btn-pdf:hover { background: #990000; transform: translateY(-1px); }
+
+/* ═══ LAYOUT ═══ */
+.layout { display: flex; padding-top: 58px; min-height: 100vh; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--dp);
+  border-left: 1px solid var(--border);
+  padding: 16px 0;
+  position: sticky; top: 58px;
+  height: calc(100vh - 58px);
+  overflow-y: auto;
+  transition: background var(--transition);
+  z-index: 100;
+}
+.sb-label {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.8px;
+  color: var(--text3); padding: 10px 16px 5px;
+  text-transform: uppercase;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 16px; cursor: pointer;
+  color: var(--text2); font-size: 13px; font-weight: 600;
+  transition: all var(--transition);
+  border-right: 3px solid transparent;
+}
+.sb-item:hover { background: var(--panel); color: var(--text); }
+.sb-item.active {
+  background: rgba(212,168,67,.1);
+  color: var(--gold); border-right-color: var(--gold);
+}
+.sb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sb-badge {
+  margin-right: auto;
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--text3); font-size: 10px; font-weight: 700;
+  padding: 1px 7px; border-radius: 20px;
+}
+
+/* ═══ MOBILE ═══ */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; z-index: 99;
+  background: rgba(0,0,0,.5);
+}
+.sidebar-overlay.open { display: block; }
+.hamburger {
+  display: none; width: 34px; height: 34px;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 8px; cursor: pointer; flex-shrink: 0;
+  align-items: center; justify-content: center; font-size: 16px;
+  color: var(--text2);
+}
+
+/* ═══ MAIN ═══ */
+.main { flex: 1; padding: 20px; min-width: 0; }
+
+/* ═══ STATS ═══ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 20px;
+}
+.stat {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  position: relative; overflow: hidden;
+  transition: background var(--transition), border-color var(--transition);
+}
+.stat::after {
+  content: ''; position: absolute;
+  top: 0; right: 0; width: 3px; height: 100%;
+  background: var(--ac, var(--gold));
+}
+.stat-lbl { font-size: 11px; color: var(--text2); font-weight: 700; margin-bottom: 6px; }
+.stat-val { font-size: 28px; font-weight: 900; line-height: 1; color: var(--text); }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ═══ FILTER BAR ═══ */
+.fbar {
+  display: flex; gap: 7px; align-items: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.fbar-lbl { font-size: 11px; color: var(--text2); font-weight: 700; white-space: nowrap; }
+.chip {
+  padding: 5px 13px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card); color: var(--text2);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.chip:hover { border-color: var(--gold); color: var(--gold-lt); }
+.chip.active { background: rgba(212,168,67,.15); border-color: var(--gold); color: var(--gold-lt); }
+.chip.l1.active { background: rgba(62,207,204,.12); border-color: var(--l1); color: var(--l1); }
+.chip.l2.active { background: rgba(255,107,157,.12); border-color: var(--l2); color: var(--l2); }
+.chip.l3.active { background: rgba(139,127,255,.12); border-color: var(--l3); color: var(--l3); }
+.fsel {
+  padding: 6px 10px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--card); color: var(--text2);
+  font-size: 12px; font-weight: 600;
+  outline: none; cursor: pointer;
+  transition: border-color var(--transition);
+}
+.fsel:focus { border-color: var(--gold); }
+
+/* ═══ TABLE ═══ */
+.tcard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: background var(--transition);
+}
+.tcard-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.tcard-title { font-size: 14px; font-weight: 800; }
+.tcard-count { font-size: 12px; color: var(--text2); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  background: var(--panel); padding: 9px 10px;
+  text-align: right; color: var(--text2);
+  font-size: 10px; font-weight: 800; letter-spacing: .6px;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+  position: sticky; top: 0;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background var(--transition);
+}
+tbody tr:hover { background: rgba(212,168,67,.05); }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 10px 10px; vertical-align: middle; }
+.td-muted { color: var(--text2); font-size: 11px; }
+.td-code { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); }
+.lbadge {
+  display: inline-flex; padding: 2px 8px;
+  border-radius: 5px; font-size: 10px; font-weight: 800;
+}
+.lbadge.L1 { background: rgba(62,207,204,.12); color: var(--l1); }
+.lbadge.L2 { background: rgba(255,107,157,.12); color: var(--l2); }
+.lbadge.L3 { background: rgba(139,127,255,.12); color: var(--l3); }
+.pills { display: flex; gap: 3px; flex-wrap: wrap; }
+.pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 6px; border-radius: 4px; font-size: 10px;
+  background: var(--panel); border: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+}
+.sw { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ═══ EMPTY ═══ */
+.empty { padding: 50px 20px; text-align: center; color: var(--text3); }
+.empty-i { font-size: 38px; margin-bottom: 10px; opacity: .5; }
+.empty-t { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+.empty-s { font-size: 12px; }
+
+/* ═══ MODAL ═══ */
+.modal-bg {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; max-width: 680px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  animation: slideUp .22s ease;
+  transition: background var(--transition);
+}
+@keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  position: sticky; top: 0; background: var(--card); z-index: 1;
+}
+.modal-title { font-size: 17px; font-weight: 800; }
+.modal-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.modal-close {
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 7px; color: var(--text2);
+  width: 30px; height: 30px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--transition);
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+.modal-body { padding: 18px 20px; }
+.modal-foot {
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; justify-content: flex-end;
+  position: sticky; bottom: 0; background: var(--card);
+}
+.msec { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.info-box { background: var(--panel); border-radius: 9px; padding: 10px 13px; border: 1px solid var(--border); }
+.info-lbl { font-size: 10px; color: var(--text3); font-weight: 700; margin-bottom: 3px; }
+.info-val { font-size: 13px; font-weight: 700; }
+.info-val.mono { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold); }
+
+/* ═══ COLOR TABLE ═══ */
+.ctable { width: 100%; border-collapse: collapse; }
+.ctable th { font-size: 10px; color: var(--text3); font-weight: 800; padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--border); }
+.ctable td { padding: 9px 8px; font-size: 12px; border-bottom: 1px solid rgba(42,42,58,.4); }
+.ctable tbody tr { cursor: pointer; transition: background var(--transition); }
+.ctable tbody tr:hover { background: rgba(212,168,67,.08); }
+.pnum {
+  display: inline-flex; width: 20px; height: 20px;
+  align-items: center; justify-content: center;
+  background: var(--border); border-radius: 4px;
+  font-size: 10px; font-weight: 800; color: var(--text2);
+  font-family: 'Space Mono', monospace;
+}
+.mix-btn {
+  background: rgba(212,168,67,.15); color: var(--gold);
+  border: 1px solid var(--gold-dk); border-radius: 5px;
+  padding: 2px 8px; font-size: 10px; font-weight: 800;
+  cursor: pointer; transition: background var(--transition);
+}
+.mix-btn:hover { background: rgba(212,168,67,.3); }
+
+/* ═══ INK POPUP ═══ */
+.inkpop-bg {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.inkpop-bg.open { display: flex; }
+.inkpop {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; max-width: 500px; width: 100%;
+  max-height: 88vh; overflow-y: auto;
+  animation: slideUp .22s ease;
+}
+.comp-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 9px; padding: 12px 14px; margin-bottom: 8px;
+}
+.comp-bar { background: var(--border); border-radius: 3px; height: 6px; overflow: hidden; margin: 6px 0 4px; }
+.comp-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+/* ═══ INK SEARCH ═══ */
+.ink-search-box {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 20px; margin-bottom: 18px;
+  transition: background var(--transition);
+}
+.ink-search-input {
+  width: 100%; padding: 12px 16px;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-size: 15px; outline: none;
+  transition: border-color var(--transition); margin-bottom: 12px;
+}
+.ink-search-input:focus { border-color: var(--gold); }
+.ink-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; }
+.ink-card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  transition: all var(--transition);
+}
+.ink-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow); }
+.ink-prev { height: 56px; }
+.ink-body { padding: 10px 13px; }
+.ink-code { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); }
+.ink-name { font-size: 13px; font-weight: 700; margin-top: 2px; }
+.ink-has-mix { font-size: 10px; color: var(--green); margin-top: 3px; }
+
+/* ═══ IMPORT ═══ */
+.drop-zone {
+  border: 2px dashed var(--border2); border-radius: 14px;
+  padding: 40px 24px; text-align: center; cursor: pointer;
+  transition: all var(--transition); position: relative;
+}
+.drop-zone:hover, .drop-zone.drag { border-color: var(--gold); background: rgba(212,168,67,.04); }
+.drop-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0;
+  cursor: pointer; width: 100%; height: 100%;
+}
+.pbar-wrap { background: var(--panel); border-radius: 5px; height: 6px; overflow: hidden; margin: 10px 0; }
+.pbar { height: 100%; background: var(--gold); transition: width .3s; width: 0; }
+
+/* ═══ COLORS GRID ═══ */
+.colors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; }
+.color-card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 11px; overflow: hidden; cursor: pointer;
+  transition: all var(--transition);
+}
+.color-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.color-prev { height: 52px; }
+.color-body { padding: 9px 11px; }
+.color-code { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); }
+.color-name { font-size: 12px; font-weight: 700; margin-top: 2px; }
+
+/* ═══ SEARCH RESULT BAR ═══ */
+.search-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(212,168,67,.08); border: 1.5px solid var(--gold-dk);
+  border-radius: 10px; padding: 9px 14px; margin-bottom: 14px;
+  font-size: 12px;
+}
+.search-bar b { color: var(--gold); }
+
+/* ═══ COLOR COUNT BAR ═══ */
+.ccount-bar {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+  padding: 12px 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 11px;
+}
+.ccount-stat {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; cursor: pointer; padding: 8px 12px;
+  border-radius: 9px; border: 1.5px solid transparent;
+  transition: all var(--transition); min-width: 54px;
+}
+.ccount-stat:hover { background: var(--panel); border-color: var(--border2); }
+.ccount-stat.active { background: var(--panel); border-color: var(--gold); }
+.ccount-stat .cs-num { font-size: 18px; font-weight: 900; line-height: 1; }
+.ccount-stat .cs-lbl { font-size: 9px; color: var(--text3); font-weight: 700; white-space: nowrap; }
+.ccount-sep { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+.cbadge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 26px; height: 22px; border-radius: 6px;
+  font-size: 11px; font-weight: 800; padding: 0 6px;
+  font-family: 'Space Mono', monospace;
+}
+.cbadge.c2 { background: rgba(62,207,204,.12); color: var(--l1); border: 1px solid rgba(62,207,204,.25); }
+.cbadge.c3 { background: rgba(212,168,67,.12); color: var(--gold); border: 1px solid rgba(212,168,67,.25); }
+.cbadge.c4 { background: rgba(255,107,157,.12); color: var(--l2); border: 1px solid rgba(255,107,157,.25); }
+.cbadge.c5 { background: rgba(139,127,255,.12); color: var(--l3); border: 1px solid rgba(139,127,255,.25); }
+.cbadge.c6 { background: rgba(61,220,132,.12); color: var(--green); border: 1px solid rgba(61,220,132,.25); }
+.cbadge.c7 { background: rgba(255,79,79,.12); color: var(--red); border: 1px solid rgba(255,79,79,.25); }
+.cbadge.c8 { background: rgba(212,168,67,.2); color: var(--gold-lt); border: 1px solid rgba(212,168,67,.3); }
+
+/* ═══ PRINT PAGE ═══ */
+#printPage {
+  display: none;
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  overflow-y: auto; padding: 24px;
+}
+.print-topbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+}
+.print-content {
+  max-width: 900px; 
+  margin: 0 auto;
+  background: var(--card);
+  padding: 30px 35px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+/* ═══ PRINT HEADER ═══ */
+.print-header-section {
+  text-align: center;
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 2px solid var(--border);
+}
+.print-title-main {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text);
+}
+.print-sub-info {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+.print-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+.print-label-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: var(--panel);
+  border-radius: 8px;
+  border-right: 4px solid var(--gold);
+}
+.print-label-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+.print-label-meta {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.8;
+}
+.print-label-meta b { color: var(--text); }
+
+.print-boxes-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.print-box-item {
+  padding: 4px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+/* ═══ PRINT TABLE ═══ */
+.print-table-wrap {
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.print-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.print-table-wrap thead th {
+  background: var(--panel);
+  color: var(--text2);
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.print-table-wrap tbody td {
+  padding: 9px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
+}
+.print-table-wrap tbody tr:last-child td { border-bottom: none; }
+.print-table-wrap tbody tr:nth-child(even) { background: var(--panel); }
+.print-table-wrap .ink-color-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* ═══ PRINT FOOTER ═══ */
+.print-footer-section {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* ═══ TOAST ═══ */
+.toast-wrap { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 9999; }
+.toast {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 9px;
+  background: var(--card); border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 600;
+  box-shadow: 0 4px 16px var(--shadow);
+  animation: slideIn .22s ease; max-width: 280px;
+}
+@keyframes slideIn { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast.ok { border-color: var(--green); color: var(--green); }
+.toast.er { border-color: var(--red); color: var(--red); }
+.toast.in { border-color: var(--gold); color: var(--gold); }
+
+mark { background: rgba(212,168,67,.35); color: var(--gold-lt); border-radius: 2px; padding: 0 1px; }
+
+/* ═══ UTILITY ═══ */
+.sh { display: none !important; }
+.hidden { display: none !important; }
+
+/* ═══ BOTTOM NAV ═══ */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: var(--dp);
+  border-top: 1.5px solid var(--border);
+  box-shadow: 0 -4px 20px var(--shadow);
+  height: 62px;
+  padding: 0 4px;
+  align-items: stretch;
+  justify-content: space-around;
+}
+.bnav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; flex: 1; cursor: pointer; padding: 6px 2px;
+  color: var(--text3); font-size: 10px; font-weight: 700;
+  transition: all var(--transition); border-top: 2px solid transparent;
+}
+.bnav-item:hover { color: var(--text2); }
+.bnav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(212,168,67,.06); }
+.bnav-item.active .bnav-icon { transform: scale(1.1); }
+.bnav-icon { font-size: 20px; line-height: 1; transition: transform var(--transition); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .sidebar {
+    position: fixed; top: 58px; right: -220px;
+    height: calc(100vh - 58px); transition: right .3s;
+    z-index: 150;
+  }
+  .sidebar.open { right: 0; box-shadow: -6px 0 24px var(--shadow); }
+  .hamburger { display: flex; }
+  .top-search { max-width: 200px; }
+}
+
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .sidebar-overlay { display: none !important; }
+  .hamburger { display: none !important; }
+  .bottom-nav { display: flex !important; }
+  .layout { padding-bottom: 68px; }
+  .topbar { padding: 0 10px; gap: 7px; height: 52px; }
+  .logo-sub { display: none; }
+  .top-search { max-width: 160px; }
+  .top-search input { font-size: 12px; padding: 6px 10px 6px 30px; }
+  .btn { padding: 5px 9px; font-size: 11px; }
+  .layout { padding-top: 52px; }
+  .main { padding: 10px; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { padding: 12px; border-radius: 10px; }
+  .stat-val { font-size: 22px; }
+  .fbar { gap: 5px; }
+  .chip { padding: 4px 10px; font-size: 11px; }
+  .fsel { font-size: 11px; padding: 4px 7px; }
+  .tcard { border-radius: 10px; }
+  thead th { padding: 7px 7px; font-size: 9px; }
+  td { padding: 8px 7px; font-size: 11px; }
+  .modal { border-radius: 14px 14px 0 0; max-height: 92vh; }
+  .modal-bg { align-items: flex-end; padding: 0; }
+  .modal-body { padding: 14px; }
+  .modal-head { padding: 14px; }
+  .modal-foot { padding: 10px 14px; }
+  .info-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .info-box { padding: 8px 10px; }
+  .inkpop { border-radius: 14px 14px 0 0; max-height: 88vh; }
+  .inkpop-bg { align-items: flex-end; padding: 0; }
+  .ink-search-box { padding: 14px; border-radius: 11px; }
+  .ink-search-input { font-size: 14px; padding: 10px 13px; }
+  .ink-results { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 8px; }
+  .colors-grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 8px; }
+  .print-content { padding: 15px; }
+  .print-label-info { flex-direction: column; gap: 10px; }
+  .print-boxes-row { justify-content: center; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .bottom-nav { display: none !important; }
+  body { background: white; color: black; }
+  .topbar, .sidebar { display: none !important; }
+  .layout { padding: 0; }
+  .main { padding: 0; }
+  #printPage {
+    position: relative !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  .print-content {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 20px !important;
+  }
+  .print-topbar { display: none !important; }
+  .print-table-wrap thead th { background: #f0f0f0 !important; }
+}
+</style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-wide flex items-center gap-2 text-amber-400">
-                    <span>👑</span> رويال إنك - لوحة التحكم والمطابقة الفنية
-                </h1>
-                <p class="text-slate-300 text-xs md:text-sm mt-1">فلترة فورية حسب (الخط، الشركة، القياس) مع عرض مباشر لأرقام الرفوف والبليت وأكواد الألوان</p>
-            </div>
-            
-            <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
-                <input type="file" id="excel-file-input" accept=".xlsx, .xls, .xlsm" class="hidden" onchange="loadAndProcessExcel(event)">
-                <button onclick="document.getElementById('excel-file-input').click()" 
-                        class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 transition transform active:scale-95 cursor-pointer text-sm">
-                    🔄 مزامنة وتحديث ملف الإكسل
-                </button>
-            </div>
+<!-- ═══ TOPBAR ═══ -->
+<header class="topbar no-print">
+  <button class="hamburger" id="hamBtn" aria-label="القائمة">☰</button>
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    <div>
+      <div class="logo-text">نظام الليبلات</div>
+      <div class="logo-sub">إدارة الإنتاج</div>
+    </div>
+  </div>
+  <div class="top-search">
+    <span class="search-ico">⌕</span>
+    <input type="text" id="gSearch" placeholder="بحث شامل..." aria-label="بحث عام">
+  </div>
+  <div class="top-right">
+    <button class="btn-icon" id="themeBtn" aria-label="تغيير المظهر">🌙</button>
+    <button class="btn btn-outline no-print" data-section="import">⬆ استيراد</button>
+    <button class="btn btn-gold no-print" id="exportBtn">⬇ تصدير</button>
+  </div>
+</header>
+
+<!-- ═══ SIDEBAR OVERLAY ═══ -->
+<div class="sidebar-overlay" id="sideOverlay"></div>
+
+<!-- ═══ LAYOUT ═══ -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الجانبية">
+    <div class="sb-group">
+      <div class="sb-label">القوائم الرئيسية</div>
+      <div class="sb-item active" data-section="labels">
+        <div class="sb-dot" style="background:var(--gold)"></div>
+        الليبلات
+        <span class="sb-badge" id="bl">—</span>
+      </div>
+      <div class="sb-item" data-section="inksearch">
+        <div class="sb-dot" style="background:var(--l1)"></div>
+        بحث عن حبر
+        <span class="sb-badge" id="bm">—</span>
+      </div>
+      <div class="sb-item" data-section="colors">
+        <div class="sb-dot" style="background:var(--l2)"></div>
+        قاموس الألوان
+        <span class="sb-badge" id="bc">—</span>
+      </div>
+    </div>
+    <div class="sb-group">
+      <div class="sb-label">تصفية الخطوط</div>
+      <div class="sb-item active" data-line="ALL">
+        <div class="sb-dot" style="background:var(--text3)"></div>كل الخطوط
+      </div>
+      <div class="sb-item" data-line="LINE-1">
+        <div class="sb-dot" style="background:var(--l1)"></div>LINE-1
+      </div>
+      <div class="sb-item" data-line="LINE-2">
+        <div class="sb-dot" style="background:var(--l2)"></div>LINE-2
+      </div>
+      <div class="sb-item" data-line="LINE-3">
+        <div class="sb-dot" style="background:var(--l3)"></div>LINE-3
+      </div>
+    </div>
+    <div class="sb-group">
+      <div class="sb-label">أدوات</div>
+      <div class="sb-item" data-section="import">
+        <div class="sb-dot" style="background:var(--green)"></div>مزامنة / استيراد
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ═══ LABELS ═══ -->
+    <section id="sec-labels">
+      <div class="stats" id="statsRow">
+        <div class="stat"><div class="stat-lbl">الليبلات</div><div class="stat-val" style="color:var(--gold)">—</div><div class="stat-sub">استورد Excel للبدء</div></div>
+        <div class="stat" style="--ac:var(--l1)"><div class="stat-lbl">LINE-1</div><div class="stat-val">—</div><div class="stat-sub">ليبل</div></div>
+        <div class="stat" style="--ac:var(--l2)"><div class="stat-lbl">LINE-2</div><div class="stat-val">—</div><div class="stat-sub">ليبل</div></div>
+        <div class="stat" style="--ac:var(--l3)"><div class="stat-lbl">LINE-3</div><div class="stat-val">—</div><div class="stat-sub">ليبل</div></div>
+      </div>
+      <div id="searchResultBar"></div>
+      <div class="ccount-bar hidden" id="ccountBar">
+        <span style="font-size:11px;font-weight:800;color:var(--text2);flex-shrink:0">عدد الألوان:</span>
+        <div class="ccount-stat active" data-cc="0">
+          <div class="cs-num" style="color:var(--gold)">الكل</div>
+          <div class="cs-lbl">جميع الليبلات</div>
         </div>
-
-        <div class="bg-slate-900/80 border-t border-slate-700/50 px-4 py-3">
-            <div class="max-w-4xl mx-auto relative">
-                <input type="text" id="system-search" oninput="liveRender()" 
-                       placeholder="🔍 ابحث هنا فوراً عن (اسم شركة، ليبل، كود لون، حبر، رقم رف، بليت)..." 
-                       class="w-full p-3.5 pr-12 rounded-xl border-0 shadow-lg text-slate-900 focus:ring-4 focus:ring-amber-400 bg-white placeholder-slate-400 text-sm md:text-base outline-none transition">
-                <div class="absolute right-4 top-3.5 text-xl text-slate-400">🔍</div>
-            </div>
+        <div class="ccount-sep"></div>
+        <div class="ccount-stat" data-cc="2">
+          <div class="cs-num cbadge c2" id="ccn-2">—</div>
+          <div class="cs-lbl">لونان</div>
         </div>
-    </header>
-
-    <section class="bg-white border-b border-slate-200 shadow-sm py-4 px-4 sticky top-[138px] z-40 max-h-[220px] overflow-y-auto">
-        <div class="max-w-7xl mx-auto space-y-3">
-            
-            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-xs font-bold text-slate-400 ml-1">⛓️ الخطوط:</span>
-                    <button onclick="filterByLine('LINE-1', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 1</button>
-                    <button onclick="filterByLine('LINE-2', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 2</button>
-                    <button onclick="filterByLine('LINE-3', this)" class="line-btn px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">الخط 3</button>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="text-xs font-bold text-slate-400 ml-1">📏 القياسات:</span>
-                    <button onclick="filterBySize('185', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">185</button>
-                    <button onclick="filterBySize('250', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">250</button>
-                    <button onclick="filterBySize('300', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">300</button>
-                    <button onclick="filterBySize('330', this)" class="size-btn px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer">330</button>
-                    <button onclick="clearAllFilters()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition cursor-pointer mr-2">تصفير الفلاتر 🔄</button>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-1.5">
-                <span class="text-xs font-bold text-slate-400 ml-1">🏢 فلترة حسب الشركة:</span>
-                <div id="companies-buttons-container" class="flex flex-wrap gap-1.5 items-center">
-                    <span class="text-slate-400 italic text-xs">ارفع الملف لتظهر شركاتك هنا...</span>
-                </div>
-            </div>
-
+        <div class="ccount-stat" data-cc="3">
+          <div class="cs-num cbadge c3" id="ccn-3">—</div>
+          <div class="cs-lbl">٣ ألوان</div>
         </div>
+        <div class="ccount-stat" data-cc="4">
+          <div class="cs-num cbadge c4" id="ccn-4">—</div>
+          <div class="cs-lbl">٤ ألوان</div>
+        </div>
+        <div class="ccount-stat" data-cc="5">
+          <div class="cs-num cbadge c5" id="ccn-5">—</div>
+          <div class="cs-lbl">٥ ألوان</div>
+        </div>
+        <div class="ccount-stat" data-cc="6">
+          <div class="cs-num cbadge c6" id="ccn-6">—</div>
+          <div class="cs-lbl">٦ ألوان</div>
+        </div>
+        <div class="ccount-stat" data-cc="7">
+          <div class="cs-num cbadge c7" id="ccn-7">—</div>
+          <div class="cs-lbl">٧ ألوان</div>
+        </div>
+        <div class="ccount-stat" data-cc="8">
+          <div class="cs-num cbadge c8" id="ccn-8">—</div>
+          <div class="cs-lbl">٨ ألوان</div>
+        </div>
+      </div>
+      <div class="fbar">
+        <span class="fbar-lbl">الخط:</span>
+        <span class="chip active" data-line="ALL">الكل</span>
+        <span class="chip l1" data-line="LINE-1">LINE-1</span>
+        <span class="chip l2" data-line="LINE-2">LINE-2</span>
+        <span class="chip l3" data-line="LINE-3">LINE-3</span>
+        <select class="fsel" id="sizeF" aria-label="فلتر القياس">
+          <option value="">كل القياسات</option>
+          <option>185-ML</option><option>250-ML</option><option>300-ML</option><option>330-ML</option>
+        </select>
+        <select class="fsel" id="compF" aria-label="فلتر الشركة"><option value="">كل الشركات</option></select>
+      </div>
+      <div class="tcard">
+        <div class="tcard-head">
+          <span class="tcard-title">جدول الليبلات</span>
+          <span class="tcard-count" id="rCount">—</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>اسم الليبل</th><th>الشركة</th><th>الكود</th>
+                <th>القياس</th><th>الخط</th><th>رقم الرف</th><th>البليت</th>
+                <th>عدد الألوان</th><th>الألوان</th>
+              </tr>
+            </thead>
+            <tbody id="labBody">
+              <tr><td colspan="10"><div class="empty"><div class="empty-i">📊</div><div class="empty-t">لا توجد بيانات</div><div class="empty-s">استورد ملف Excel للبدء</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <div class="lg:col-span-2 flex flex-col gap-4">
-            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-                <h2 class="text-sm md:text-base font-bold text-slate-700 flex items-center gap-2">📦 الشركات والليبلات النشطة حالياً</h2>
-                <span id="counter-meta" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-bold border border-blue-100">تحقق من ذاكرة المتصفح...</span>
-            </div>
+    <!-- ═══ INK SEARCH ═══ -->
+    <section id="sec-inksearch" class="sh">
+      <div class="ink-search-box">
+        <div style="font-size:18px;font-weight:900;margin-bottom:6px">🔬 بحث عن تركيبة حبر</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">ابحث عن أي حبر لمعرفة مكوناته ونسبه بالتفصيل</div>
+        <input class="ink-search-input" type="text" id="inkSearchIn" placeholder="اكتب كود الحبر أو اسم اللون..." aria-label="بحث عن حبر">
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="inkQuickFilters"></div>
+      </div>
+      <div class="ink-results" id="inkResults">
+        <div class="empty" style="grid-column:1/-1"><div class="empty-i">🎨</div><div class="empty-t">اكتب للبحث عن حبر</div></div>
+      </div>
+    </section>
 
-            <div id="welcome-box" class="bg-white p-16 text-center text-slate-400 rounded-2xl border border-slate-200 shadow-sm">
-                <span class="text-6xl block mb-4">📥</span>
-                <h3 class="text-lg font-bold text-slate-700 mb-1">ذاكرة النظام فارغة حالياً</h3>
-                <p class="text-xs max-w-sm mx-auto text-slate-400 leading-relaxed">يرجى الضغط على <span class="text-blue-600 font-bold">"مزامنة وتحديث ملف الإكسل"</span> بالأعلى لحفظ وقراءة بيانات المصنع بشكل دائم ومباشر.</p>
-            </div>
+    <!-- ═══ COLORS ═══ -->
+    <section id="sec-colors" class="sh">
+      <div class="fbar">
+        <input type="text" id="colSearch" placeholder="ابحث عن لون أو كود..." aria-label="بحث عن لون"
+          style="padding:8px 13px;background:var(--card);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;outline:none;min-width:240px;transition:border-color var(--transition)">
+      </div>
+      <div class="colors-grid" id="colorsGrid">
+        <div class="empty" style="grid-column:1/-1"><div class="empty-i">🎨</div><div class="empty-t">لا توجد بيانات</div></div>
+      </div>
+    </section>
 
-            <div id="labels-live-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
+    <!-- ═══ IMPORT ═══ -->
+    <section id="sec-import" class="sh">
+      <div style="max-width:540px;margin:0 auto">
+        <div style="margin-bottom:20px">
+          <div style="font-size:20px;font-weight:900;margin-bottom:6px">⬆ مزامنة البيانات</div>
+          <div style="font-size:13px;color:var(--text2)">استورد ملف Excel لتحديث جميع البيانات تلقائياً</div>
         </div>
-
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sticky top-[365px] hidden lg:block min-h-[350px]">
-                <div id="panel-empty" class="text-center py-24 text-slate-400 flex flex-col items-center justify-center gap-2">
-                    <span class="text-5xl">🔬</span>
-                    <p class="font-bold text-xs text-slate-600">لوحة فحص الأوزان والخلطات</p>
-                    <p class="text-[11px] text-slate-400">عند الضغط على أي ليبل أو كود لون، ستظهر لك المكونات كاملة بالنسب المئوية المعتمدة هنا.</p>
-                </div>
-                <div id="panel-content" class="hidden"></div>
-            </div>
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="xlFile" accept=".xlsx,.xlsm,.xls" aria-label="اختر ملف Excel">
+          <div style="font-size:36px;margin-bottom:12px">📂</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:6px">اسحب ملف Excel هنا أو انقر للاختيار</div>
+          <div style="font-size:12px;color:var(--text2)">يدعم .xlsm و .xlsx و .xls</div>
         </div>
-    </main>
-
-    <div id="formula-modal" class="fixed inset-0 bg-slate-950/60 z-50 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300">
-        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modal-box">
-            <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
-                <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">🧪 نسب الخلطة الفنية للألوان بالتفصيل</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-xl cursor-pointer">&times;</button>
-            </div>
-            <div class="p-5 max-h-[75vh] overflow-y-auto" id="modal-body"></div>
-            <div class="bg-slate-50 px-5 py-3 flex justify-end border-t border-slate-100">
-                <button onclick="closeModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-sm cursor-pointer">إغلاق النافذة</button>
-            </div>
+        <div id="impProg" style="display:none;margin-top:14px">
+          <div class="pbar-wrap"><div class="pbar" id="pBar"></div></div>
+          <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:4px" id="pText">جاري المعالجة...</div>
         </div>
+        <div id="impSum" style="display:none;margin-top:16px"></div>
+        <div style="margin-top:22px;padding:14px;background:var(--panel);border-radius:11px;border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:8px">الأوراق المدعومة في الملف</div>
+          <div style="font-size:12px;color:var(--text2);line-height:2.2">
+            📋 <b>البيانات الرئيسية</b> — الليبلات الرئيسية<br>
+            🎨 <b>colors</b> — قاموس الأحبار<br>
+            🧪 <b>INK MIX</b> — تركيبات الأحبار المركبة
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+<div class="modal-bg" id="labelModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="mTitle">—</div>
+        <div class="modal-sub" id="mSub">—</div>
+      </div>
+      <button class="modal-close" id="closeLabelModal">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="closeLabelModalBtn">← رجوع</button>
+      <button class="btn btn-gold" id="printLabelBtn">🖨 طباعة</button>
+    </div>
+  </div>
+</div>
+
+<div class="inkpop-bg" id="inkpop">
+  <div class="inkpop">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="ipTitle">—</div>
+        <div class="modal-sub" id="ipCode">—</div>
+      </div>
+      <button class="modal-close" id="closeInkPop">✕</button>
+    </div>
+    <div class="modal-body" id="ipBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="closeInkPopBtn">← رجوع</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRINT PAGE ═══ -->
+<div id="printPage">
+  <div class="print-content">
+    <div class="print-topbar no-print">
+      <button class="btn btn-outline" id="closePrintBtn">← رجوع إلى القائمة</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-pdf" id="pdfExportBtn" onclick="exportToPDF()">📄 تصدير PDF</button>
+      <button class="btn btn-gold" onclick="window.print()">🖨 طباعة</button>
     </div>
 
-    <footer class="bg-slate-900 text-slate-500 text-center py-4 text-xs border-t border-slate-800 mt-auto">
-        نظام رويال إنك المطور - فلترة مخصصة حسب الشركات وعرض مباشر للرفوف والبليت.
-    </footer>
+    <!-- ═══ HEADER ═══ -->
+    <div class="print-header-section">
+      <div class="print-title-main">تقرير الليبل</div>
+      <div class="print-sub-info">نظام إدارة الليبلات</div>
+      <div class="print-divider"></div>
+    </div>
 
-    <script>
-        let labelsData = [];       // مصفوفة المنتجات والرفوف الأساسية
-        let formulasData = {};     // قاموس الخلطات والأحبار الكاملة
+    <!-- ═══ LABEL INFO ═══ -->
+    <div class="print-label-info">
+      <div>
+        <div class="print-label-title" id="pTitle">—</div>
+        <div class="print-label-meta" id="pMeta">—</div>
+      </div>
+      <div class="print-boxes-row" id="pBoxes"></div>
+    </div>
+
+    <!-- ═══ TABLE ═══ -->
+    <div class="print-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:8%">#</th>
+            <th style="width:22%">كود الحبر</th>
+            <th style="width:25%">اسم اللون</th>
+            <th style="width:15%">النسبة %</th>
+            <th style="width:15%">الكمية</th>
+            <th style="width:15%">رقم البليت</th>
+          </tr>
+        </thead>
+        <tbody id="pBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="print-footer-section">
+      <div id="pFooter" style="margin-top:4px;font-size:11px;">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOASTS ═══ -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="bottom-nav" id="bottomNav" aria-label="القائمة السفلية">
+  <div class="bnav-item active" data-section="labels">
+    <div class="bnav-icon">📋</div>
+    <div>الليبلات</div>
+  </div>
+  <div class="bnav-item" data-section="inksearch">
+    <div class="bnav-icon">🔬</div>
+    <div>بحث حبر</div>
+  </div>
+  <div class="bnav-item" data-section="colors">
+    <div class="bnav-icon">🎨</div>
+    <div>الألوان</div>
+  </div>
+  <div class="bnav-item" data-section="import">
+    <div class="bnav-icon">⬆</div>
+    <div>استيراد</div>
+  </div>
+  <div class="bnav-item" id="bnTheme">
+    <div class="bnav-icon" id="bnThemeIcon">🌙</div>
+    <div>المظهر</div>
+  </div>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  APPLICATION LOGIC
+// ═══════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  // ─── CONSTANTS ────────────────────────────────────────────────
+  const COLOR_MAP = {
+    'WHITE':'#EEEEEE','BLACK':'#222','RED':'#E53935','DRK RED':'#B71C1C',
+    'BLUE':'#1E88E5','DRK BLUE':'#0D47A1','LT BLUE':'#90CAF9','MED BLUE':'#1565C0',
+    'GREEN':'#43A047','MED GREEN':'#388E3C','DRK GREEN':'#1B5E20','LT GREEN':'#A5D6A7',
+    'BREEN':'#2E7D32','LET GREEN':'#C8E6C9',
+    'YELLOW':'#FDD835','DRK YELLOW':'#F9A825','LT YELLOW':'#FFF176',
+    'ORANGE':'#FB8C00','DRK ORANGE':'#E65100','LT ORANGE':'#FFCC80',
+    'PROSS ORANGE':'#FF6D00','PRCS ORANGE':'#FF6D00','PROCESS ORANGE':'#FF6D00',
+    'PINK':'#F48FB1','DRK PINK':'#AD1457',
+    'VIOLET':'#7B1FA2','DRK VIOLET':'#4A148C','MED VIOLET':'#6A1B9A',
+    'PURPLE':'#6A1B9A','GOLD':'#D4A017','DRK GOLD':'#9E7B0D','LT GOLD':'#FFD54F',
+    'GRAY':'#9E9E9E','LT GRAY':'#E0E0E0','DRK GRAY':'#616161',
+    'BROWN':'#4E342E','LT BROWN':'#795548','SILVER':'#BDBDBD',
+    'CYAN':'#00ACC1','DRK CYAN':'#00838F','TURQUOISE':'#00897B','MAGENTA':'#AD1457',
+    'PROCESS RED':'#C62828','WARM RED':'#D32F2F','MILORI BLUE':'#1A237E',
+    'DYE BLUE':'#283593','PROCESS GREEN':'#2E7D32','PROCESS BLUE':'#1565C0',
+    'PROCESS VIOLET':'#6A1B9A','PROCESS BLACK':'#212121',
+    'TRANSPARENT WHITE':'#F5F5F5','OPAQUE WHITE':'#FAFAFA',
+    'BLUE PEPSI':'#1565C0','PEPSI BLUE':'#0D3B8E'
+  };
+  const SEGC = ['#D4A843','#3ECFCC','#FF6B9D','#8B7FFF','#3DDC84','#FF4F4F','#90CAF9','#FDD835'];
+  const MAX_COLORS_PER_LABEL = 8;
+  const INK_COLS_PER_COLOR = 5;
+
+  // ─── STATE ────────────────────────────────────────────────────
+  const state = {
+    labels: [],
+    colors: [],
+    inkMix: [],
+    activeLine: 'ALL',
+    activeColorCount: 0,
+    searchQuery: '',
+    sizeFilter: '',
+    companyFilter: '',
+    currentLabelId: null,
+    filteredData: [],
+    isPrinting: false
+  };
+
+  // ─── DOM REFS ─────────────────────────────────────────────────
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  const dom = {
+    gSearch: $('#gSearch'),
+    themeBtn: $('#themeBtn'),
+    exportBtn: $('#exportBtn'),
+    sidebar: $('#sidebar'),
+    sideOverlay: $('#sideOverlay'),
+    hamBtn: $('#hamBtn'),
+    statsRow: $('#statsRow'),
+    searchResultBar: $('#searchResultBar'),
+    ccountBar: $('#ccountBar'),
+    labBody: $('#labBody'),
+    rCount: $('#rCount'),
+    sizeF: $('#sizeF'),
+    compF: $('#compF'),
+    inkSearchIn: $('#inkSearchIn'),
+    inkResults: $('#inkResults'),
+    colSearch: $('#colSearch'),
+    colorsGrid: $('#colorsGrid'),
+    dropZone: $('#dropZone'),
+    xlFile: $('#xlFile'),
+    impProg: $('#impProg'),
+    pBar: $('#pBar'),
+    pText: $('#pText'),
+    impSum: $('#impSum'),
+    labelModal: $('#labelModal'),
+    mTitle: $('#mTitle'),
+    mSub: $('#mSub'),
+    mBody: $('#mBody'),
+    closeLabelModal: $('#closeLabelModal'),
+    closeLabelModalBtn: $('#closeLabelModalBtn'),
+    printLabelBtn: $('#printLabelBtn'),
+    inkpop: $('#inkpop'),
+    ipTitle: $('#ipTitle'),
+    ipCode: $('#ipCode'),
+    ipBody: $('#ipBody'),
+    closeInkPop: $('#closeInkPop'),
+    closeInkPopBtn: $('#closeInkPopBtn'),
+    printPage: $('#printPage'),
+    closePrintBtn: $('#closePrintBtn'),
+    pTitle: $('#pTitle'),
+    pMeta: $('#pMeta'),
+    pBoxes: $('#pBoxes'),
+    pBody: $('#pBody'),
+    pFooter: $('#pFooter'),
+    bl: $('#bl'),
+    bm: $('#bm'),
+    bc: $('#bc'),
+    bnTheme: $('#bnTheme'),
+    bnThemeIcon: $('#bnThemeIcon'),
+    toasts: $('#toasts'),
+    pdfExportBtn: $('#pdfExportBtn')
+  };
+
+  // ─── UTILITY FUNCTIONS ──────────────────────────────────────
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function getColorHex(name) {
+    if (!name) return '#445';
+    const upper = String(name).toUpperCase().trim();
+    let best = '';
+    let bestLen = 0;
+    for (const key in COLOR_MAP) {
+      if (upper.includes(key) && key.length > bestLen) {
+        best = COLOR_MAP[key];
+        bestLen = key.length;
+      }
+    }
+    return best || '#c9a84c';
+  }
+
+  function highlight(text, query) {
+    if (!query || !text) return esc(text);
+    const t = esc(text);
+    const q = esc(query);
+    const idx = t.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return t;
+    return t.substring(0, idx) + '<mark>' + t.substring(idx, idx + q.length) + '</mark>' + t.substring(idx + q.length);
+  }
+
+  function colorCountBadge(n) {
+    const cls = n === 2 ? 'c2' : n === 3 ? 'c3' : n === 4 ? 'c4' : n === 5 ? 'c5' : n === 6 ? 'c6' : n === 7 ? 'c7' : 'c8';
+    return '<span class="cbadge ' + cls + '">' + n + '</span>';
+  }
+
+  function getLineClass(line) {
+    return line === 'LINE-1' ? 'L1' : line === 'LINE-2' ? 'L2' : 'L3';
+  }
+
+  function debounce(fn, delay) {
+    let timer;
+    return function(...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  }
+
+  function safeText(el, text) {
+    if (el) el.textContent = text;
+  }
+
+  // ─── TOAST SYSTEM ────────────────────────────────────────────
+
+  function showToast(msg, type) {
+    type = type || 'in';
+    const icons = { ok: '✓', er: '✕', in: 'ℹ' };
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type === 'ok' ? 'ok' : type === 'er' ? 'er' : 'in');
+    el.innerHTML = '<span>' + icons[type] + '</span><span>' + msg + '</span>';
+    dom.toasts.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  // ─── THEME ────────────────────────────────────────────────────
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    const icon = next === 'dark' ? '🌙' : '☀️';
+    if (dom.themeBtn) dom.themeBtn.textContent = icon;
+    if (dom.bnThemeIcon) dom.bnThemeIcon.textContent = icon;
+    localStorage.setItem('ri-theme', next);
+  }
+
+  function initTheme() {
+    const t = localStorage.getItem('ri-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    const icon = t === 'dark' ? '🌙' : '☀️';
+    if (dom.themeBtn) dom.themeBtn.textContent = icon;
+    if (dom.bnThemeIcon) dom.bnThemeIcon.textContent = icon;
+  }
+
+  // ─── SIDEBAR ──────────────────────────────────────────────────
+
+  function toggleSidebar() {
+    if (dom.sidebar) dom.sidebar.classList.toggle('open');
+    if (dom.sideOverlay) dom.sideOverlay.classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    if (dom.sidebar) dom.sidebar.classList.remove('open');
+    if (dom.sideOverlay) dom.sideOverlay.classList.remove('open');
+  }
+
+  // ─── NAVIGATION ──────────────────────────────────────────────
+
+  function showSection(section) {
+    const sections = ['labels', 'inksearch', 'colors', 'import'];
+    sections.forEach(s => {
+      const el = document.getElementById('sec-' + s);
+      if (el) el.classList.toggle('sh', s !== section);
+    });
+
+    if (dom.sidebar) {
+      dom.sidebar.querySelectorAll('.sb-item[data-section]').forEach(el => {
+        el.classList.toggle('active', el.dataset.section === section);
+      });
+    }
+
+    document.querySelectorAll('.bnav-item[data-section]').forEach(el => {
+      el.classList.toggle('active', el.dataset.section === section);
+    });
+
+    if (section === 'inksearch') renderInkSearch();
+    if (section === 'colors') renderColors();
+
+    closeSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── DATA IMPORT ─────────────────────────────────────────────
+
+  function setProgress(pct, text) {
+    if (dom.pBar) dom.pBar.style.width = pct + '%';
+    if (dom.pText) dom.pText.textContent = text || 'جاري المعالجة...';
+  }
+
+  function findSheetByName(wb, names) {
+    for (const name of names) {
+      for (const sheetName of wb.SheetNames) {
+        if (sheetName.trim().toLowerCase() === name.toLowerCase()) {
+          return sheetName;
+        }
+        if (sheetName.toLowerCase().includes(name.toLowerCase())) {
+          return sheetName;
+        }
+      }
+    }
+    for (const sheetName of wb.SheetNames) {
+      const ws = wb.Sheets[sheetName];
+      if (ws && ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        if (range.e.r > 2) return sheetName;
+      }
+    }
+    return wb.SheetNames[0] || null;
+  }
+
+  function parseLabelsFromSheet(rows) {
+    const result = [];
+    let startRow = 0;
+    for (let i = 0; i < Math.min(rows.length, 15); i++) {
+      const row = rows[i];
+      if (!row) continue;
+      const firstCell = String(row[0] || '').trim();
+      const headers = ['اسم الليبل', 'label name', 'name', 'الاسم', 'اسم'];
+      if (headers.some(h => firstCell.toLowerCase().includes(h.toLowerCase()))) {
+        startRow = i + 1;
+        break;
+      }
+      if (row.length >= 5 && row.some(c => c && String(c).trim() !== '')) {
+        if (i > 2) { startRow = i; break; }
+      }
+    }
+
+    for (let r = startRow; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row) continue;
+      const name = String(row[0] || '').trim();
+      if (!name) continue;
+
+      const label = {
+        id: r,
+        labelName: name,
+        company: String(row[1] || '').trim(),
+        code: String(row[2] || '').trim(),
+        size: String(row[3] || '').trim(),
+        line: String(row[4] || '').trim(),
+        rack: String(row[5] || '').trim(),
+        pltType: String(row[6] || '').trim(),
+        colors: []
+      };
+
+      for (let g = 0; g < MAX_COLORS_PER_LABEL; g++) {
+        const baseIdx = 7 + g * INK_COLS_PER_COLOR;
+        const inkCode = String(row[baseIdx] || '').trim();
+        if (!inkCode) continue;
+        label.colors.push({
+          inkCode: inkCode,
+          pct: String(row[baseIdx + 1] || '').trim(),
+          qty: String(row[baseIdx + 2] || '').trim(),
+          colorName: String(row[baseIdx + 3] || '').trim(),
+          plateNo: String(row[baseIdx + 4] || '').trim()
+        });
+      }
+      result.push(label);
+    }
+    return result;
+  }
+
+  function parseColorsFromSheet(rows) {
+    const result = [];
+    let startRow = 0;
+    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+      const row = rows[i];
+      if (!row) continue;
+      const first = String(row[0] || '').trim().toLowerCase();
+      if (first === 'كود' || first === 'code' || first === 'ink code' || first === 'كود الحبر') {
+        startRow = i + 1;
+        break;
+      }
+    }
+
+    for (let r = startRow; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row) continue;
+      const code = String(row[0] || '').trim();
+      const name = String(row[1] || '').trim();
+      if (code && name) result.push({ code, name });
+    }
+    return result;
+  }
+
+  function parseInkMixFromSheet(rows) {
+    const result = [];
+    let startRow = 0;
+    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+      const row = rows[i];
+      if (!row) continue;
+      const first = String(row[0] || '').trim().toLowerCase();
+      if (first === 'ink code' || first === 'كود الحبر' || first === 'code') {
+        startRow = i + 1;
+        break;
+      }
+    }
+    if (startRow === 0) startRow = 2;
+
+    for (let r = startRow; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row || !row[0]) continue;
+      const code = String(row[0] || '').trim();
+      const colorName = String(row[1] || '').trim();
+      if (!code || !colorName || code === 'Ink Code :' || code === 'Ink Code') continue;
+
+      const comps = [];
+      for (let g = 0; g < 8; g++) {
+        const baseIdx = 3 + g * 4;
+        const inkBase = String(row[baseIdx] || '').trim();
+        const desc = String(row[baseIdx + 1] || '').trim();
+        const pct = parseFloat(row[baseIdx + 2]) || 0;
+        const qty = parseFloat(row[baseIdx + 3]) || 0;
+        if (!inkBase || pct === 0) continue;
+        comps.push({ inkBase, desc, pct, qty });
+      }
+
+      let tPct = parseFloat(row[35]) || 0;
+      let tQty = parseFloat(row[36]) || 0;
+      if (tPct === 0 && comps.length) {
+        tPct = comps.reduce((sum, c) => sum + c.pct, 0);
+        tQty = comps.reduce((sum, c) => sum + c.qty, 0);
+      }
+
+      result.push({
+        code,
+        colorName,
+        comps,
+        tPct: Math.round(tPct * 100) / 100,
+        tQty: Math.round(tQty * 100) / 100
+      });
+    }
+    return result;
+  }
+
+  function processImport(file) {
+    if (!file) {
+      showToast('الرجاء اختيار ملف أولاً', 'er');
+      return;
+    }
+
+    if (!file.name.match(/\.(xlsx|xlsm|xls)$/i)) {
+      showToast('الملف غير مدعوم. الرجاء اختيار ملف Excel (.xlsx, .xlsm, .xls)', 'er');
+      return;
+    }
+
+    if (dom.impProg) dom.impProg.style.display = 'block';
+    if (dom.impSum) dom.impSum.style.display = 'none';
+    setProgress(10, 'قراءة الملف...');
+
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      try {
+        setProgress(30, 'تحليل البيانات...');
         
-        // متغيرات الفلاتر الثلاثية النشطة حالياً لتشغيل الفورية اللحظية
-        let currentSelectedLine = null;
-        let currentSelectedSize = null;
-        let currentSelectedCompany = null; // فلتر الشركة المضافة حديثاً
+        let data;
+        if (e.target.result instanceof ArrayBuffer) {
+          data = new Uint8Array(e.target.result);
+        } else {
+          data = e.target.result;
+        }
+        
+        const wb = XLSX.read(data, { 
+          type: e.target.result instanceof ArrayBuffer ? 'array' : 'binary',
+          cellDates: false,
+          cellNF: false,
+          cellText: false
+        });
+        
+        setProgress(50, 'استخراج الليبلات...');
 
-        // عند فتح الموقع: استرجاع وقراءة الذاكرة فوراً وبناء أزرار الشركات تلقائياً
-        window.onload = function() {
-            const savedLabels = localStorage.getItem('royal_labels_data');
-            const savedFormulas = localStorage.getItem('royal_formulas_data');
-
-            if (savedLabels && savedFormulas) {
-                labelsData = JSON.parse(savedLabels);
-                formulasData = JSON.parse(savedFormulas);
-                
-                document.getElementById('welcome-box').style.display = 'none';
-                document.getElementById('labels-live-container').classList.remove('hidden');
-                
-                buildCompanyButtons(); // بناء قائمة أزرار الشركات المحفوظة
-                liveRender();          // العرض الفوري
-            } else {
-                document.getElementById('counter-meta').innerText = "بانتظار رفع ملف المزامنة الأول...";
+        const mainSheetNames = ['البيانات الرئيسية', 'SHEET1', 'Sheet1', 'Main', 'Data', 'Labels'];
+        let sheetName = findSheetByName(wb, mainSheetNames);
+        
+        if (!sheetName) {
+          for (const name of wb.SheetNames) {
+            const ws = wb.Sheets[name];
+            if (ws && ws['!ref']) {
+              const range = XLSX.utils.decode_range(ws['!ref']);
+              if (range.e.r > 3) {
+                sheetName = name;
+                break;
+              }
             }
-        };
+          }
+        }
+        if (!sheetName) sheetName = wb.SheetNames[0];
 
-        // دالة ديناميكية ذكية لبناء أزرار تصفية الشركات بناءً على الأسماء المتوفرة في الملف المرفوع
-        function buildCompanyButtons() {
-            const container = document.getElementById('companies-buttons-container');
-            container.innerHTML = '';
+        const labelRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { 
+          header: 1, 
+          defval: '',
+          blankrows: false 
+        });
+        state.labels = parseLabelsFromSheet(labelRows);
 
-            // استخراج أسماء الشركات الفريدة والغير مكررة وفرزها
-            const companies = [...new Set(labelsData.map(item => item.company))].filter(Boolean).sort();
-
-            if(companies.length === 0) {
-                container.innerHTML = '<span class="text-slate-400 italic text-xs">لا توجد شركات مسجلة</span>';
-                return;
-            }
-
-            companies.forEach(comp => {
-                const btn = document.createElement('button');
-                btn.className = "company-btn px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-[11px] rounded-lg transition cursor-pointer";
-                btn.innerText = comp;
-                btn.onclick = function() {
-                    document.querySelectorAll('.company-btn').forEach(b => b.classList.remove('btn-active'));
-                    if (currentSelectedCompany === comp) {
-                        currentSelectedCompany = null; // إلغاء الفلترة عند الضغط المكرر
-                    } else {
-                        currentSelectedCompany = comp;
-                        btn.classList.add('btn-active');
-                    }
-                    liveRender(); // تحديث النتائج فوراً بلحظتها
-                };
-                container.appendChild(btn);
-            });
+        setProgress(70, 'استخراج الألوان...');
+        let colorsSheet = findSheetByName(wb, ['colors', 'Colors', 'ألوان', 'الوان']);
+        if (colorsSheet) {
+          const colorRows = XLSX.utils.sheet_to_json(wb.Sheets[colorsSheet], { header: 1, defval: '' });
+          state.colors = parseColorsFromSheet(colorRows);
+        } else {
+          state.colors = [];
         }
 
-        // دالة قراءة ومزامنة وتفكيك الإكسل وحفظها دائمياً داخل المتصفح
-        function loadAndProcessExcel(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            document.getElementById('counter-meta').innerText = "جاري قراءة وتحديث البيانات الفورية...";
-            
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                
-                // 1. تفكيك وهيكلة جدول خلطات الأحبار (INK MIX)
-                formulasData = {};
-                if (workbook.Sheets['INK MIX']) {
-                    const sheet = workbook.Sheets['INK MIX'];
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    
-                    for (let i = 3; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (!row || !row[0]) continue;
-
-                        const inkCode = String(row[0]).trim();
-                        const inkName = row[1] ? String(row[1]).trim() : 'حبر ملون معتمد';
-
-                        let ingredients = [];
-                        for (let bIdx = 3; bIdx < 35; bIdx += 4) {
-                            if (row[bIdx]) {
-                                ingredients.push({
-                                    base: String(row[bIdx]).trim(),
-                                    desc: row[bIdx+1] ? String(row[bIdx+1]).trim() : 'حبر أساسي',
-                                    percentage: row[bIdx+2] !== undefined ? String(row[bIdx+2]).trim() : '0'
-                                });
-                            }
-                        }
-
-                        formulasData[inkCode] = {
-                            color_name: inkName,
-                            ingredients: ingredients
-                        };
-                    }
-                }
-
-                // 2. تفكيك وأرشفة جدول السجلات والرفوف والبليت (SHEET1)
-                labelsData = [];
-                if (workbook.Sheets['SHEET1']) {
-                    const sheet = workbook.Sheets['SHEET1'];
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    
-                    for (let i = 3; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (!row || !row[0]) continue;
-
-                        let colorCodes = [];
-                        const cols = [7, 12, 17, 22, 27, 32, 37, 42]; 
-                        cols.forEach(idx => {
-                            if (row[idx]) colorCodes.push(String(row[idx]).trim());
-                        });
-
-                        labelsData.push({
-                            name: String(row[0]).trim(),
-                            company: row[1] ? String(row[1]).trim() : 'غير محدد',
-                            code: row[2] ? String(row[2]).trim() : '-',
-                            size: row[3] ? String(row[3]).trim().toUpperCase() : '-',
-                            line: row[4] ? String(row[4]).trim().toUpperCase() : '-',
-                            shelf: row[5] ? String(row[5]).trim() : '-', // سحب رقم الرف
-                            plate: row[6] ? String(row[6]).trim() : '-', // سحب رقم البليت
-                            colors: colorCodes
-                        });
-                    }
-                }
-
-                // حفظ فوري في قاعدة بيانات المتصفح للزيارات القادمة
-                localStorage.setItem('royal_labels_data', JSON.stringify(labelsData));
-                localStorage.setItem('royal_formulas_data', JSON.stringify(formulasData));
-
-                document.getElementById('welcome-box').style.display = 'none';
-                document.getElementById('labels-live-container').classList.remove('hidden');
-                
-                buildCompanyButtons(); // بناء قائمة الشركات فوراً للملف الجديد
-                liveRender();          // الرندرة الفورية
-                alert(`🎯 تمت المزامنة وتحديث الفلاتر!\nتم حفظ ${labelsData.length} ليبل مع أرقام الرفوف، وفهرستها بنجاح حسب الشركات.`);
-            };
-            reader.readAsArrayBuffer(file);
+        setProgress(85, 'استخراج تركيبات الأحبار...');
+        let mixSheet = findSheetByName(wb, ['INK MIX', 'Ink Mix', 'mix', 'تركيبة', 'مكس']);
+        if (mixSheet) {
+          const mixRows = XLSX.utils.sheet_to_json(wb.Sheets[mixSheet], { header: 1, defval: '' });
+          state.inkMix = parseInkMixFromSheet(mixRows);
+        } else {
+          state.inkMix = [];
         }
 
-        // فلترة فورية حسب الخطوط
-        function filterByLine(lineName, btnElement) {
-            document.querySelectorAll('.line-btn').forEach(btn => btn.classList.remove('btn-active'));
-            if (currentSelectedLine === lineName) { currentSelectedLine = null; } 
-            else { currentSelectedLine = lineName; btnElement.classList.add('btn-active'); }
-            liveRender(); 
+        setProgress(100, 'اكتمل ✓');
+        updateAll();
+
+        if (dom.impSum) {
+          dom.impSum.style.display = 'block';
+          const companies = new Set(state.labels.map(l => l.company).filter(Boolean));
+          dom.impSum.innerHTML =
+            '<div style="background:rgba(61,220,132,.07);border:1.5px solid var(--green);border-radius:10px;padding:13px 17px">' +
+            '<div style="color:var(--green);font-weight:800;margin-bottom:8px">✓ تم الاستيراد بنجاح</div>' +
+            '<div style="font-size:12px;color:var(--text2);line-height:2.2">' +
+            '📋 ليبلات: <b style="color:var(--text)">' + state.labels.length + '</b> &nbsp; ' +
+            '🎨 أحبار: <b style="color:var(--text)">' + state.colors.length + '</b> &nbsp; ' +
+            '🧪 تركيبات: <b style="color:var(--text)">' + state.inkMix.length + '</b> &nbsp; ' +
+            '🏢 شركات: <b style="color:var(--text)">' + companies.size + '</b>' +
+            '</div></div>';
         }
 
-        // فلترة فورية حسب القياسات
-        function filterBySize(sizeName, btnElement) {
-            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('btn-active'));
-            if (currentSelectedSize === sizeName) { currentSelectedSize = null; } 
-            else { currentSelectedSize = sizeName; btnElement.classList.add('btn-active'); }
-            liveRender(); 
+        setTimeout(() => {
+          if (dom.impProg) dom.impProg.style.display = 'none';
+          showSection('labels');
+        }, 800);
+
+        showToast('تم الاستيراد بنجاح — ' + state.labels.length + ' ليبل', 'ok');
+
+      } catch (err) {
+        console.error('Import error details:', err);
+        setProgress(0, 'خطأ في القراءة');
+        showToast('خطأ في الاستيراد: ' + err.message, 'er');
+        if (dom.impProg) dom.impProg.style.display = 'none';
+      }
+    };
+    
+    reader.onerror = function(e) {
+      console.error('FileReader error:', e);
+      showToast('فشل قراءة الملف', 'er');
+      if (dom.impProg) dom.impProg.style.display = 'none';
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ─── FILTERS & RENDERING ────────────────────────────────────
+
+  function getColorNameLookup() {
+    const map = {};
+    for (const c of state.colors) map[c.code] = c.name;
+    return map;
+  }
+
+  function applyFilters() {
+    const query = (dom.gSearch ? dom.gSearch.value : '').toLowerCase().trim();
+    state.searchQuery = query;
+    state.sizeFilter = dom.sizeF ? dom.sizeF.value : '';
+    state.companyFilter = dom.compF ? dom.compF.value : '';
+
+    const colorNameMap = getColorNameLookup();
+    let result = [];
+
+    for (const label of state.labels) {
+      if (state.activeLine !== 'ALL' && label.line !== state.activeLine) continue;
+      if (state.sizeFilter && label.size !== state.sizeFilter) continue;
+      if (state.companyFilter && label.company !== state.companyFilter) continue;
+
+      if (query) {
+        let haystack = [label.labelName, label.company, label.code, label.rack, label.line, label.size, label.pltType]
+          .join(' ').toLowerCase();
+
+        for (const clr of label.colors) {
+          haystack += ' ' + clr.inkCode.toLowerCase();
+          haystack += ' ' + (clr.colorName || colorNameMap[clr.inkCode] || '').toLowerCase();
+          haystack += ' ' + clr.plateNo.toLowerCase();
         }
+        if (!haystack.includes(query)) continue;
+      }
 
-        // تصفير وتنظيف كافة الفلاتر الفورية والعودة للوضع الشامل الكامل
-        function clearAllFilters() {
-            currentSelectedLine = null;
-            currentSelectedSize = null;
-            currentSelectedCompany = null;
-            document.getElementById('system-search').value = '';
-            document.querySelectorAll('.line-btn, .size-btn, .company-btn').forEach(btn => btn.classList.remove('btn-active'));
-            liveRender();
+      result.push(label);
+    }
+
+    if (state.activeColorCount > 0) {
+      result = result.filter(label => {
+        const cnt = label.colors.length;
+        return cnt === state.activeColorCount;
+      });
+    }
+
+    state.filteredData = result;
+    renderLabels();
+    updateSearchBar(query);
+    updateColorCountStats();
+  }
+
+  function renderLabels() {
+    const data = state.filteredData;
+    const q = state.searchQuery;
+    if (dom.rCount) dom.rCount.textContent = data.length + ' نتيجة';
+
+    if (!dom.labBody) return;
+
+    if (!data.length) {
+      dom.labBody.innerHTML =
+        '<tr><td colspan="10"><div class="empty"><div class="empty-i">' +
+        (state.labels.length ? '🔍' : '📊') +
+        '</div><div class="empty-t">' +
+        (state.labels.length ? 'لا توجد نتائج' : 'لا توجد بيانات') +
+        '</div><div class="empty-s">' +
+        (state.labels.length ? 'جرب تعديل الفلاتر' : 'استورد ملف Excel للبدء') +
+        '</div></div></td></tr>';
+      return;
+    }
+
+    let html = '';
+    for (let i = 0; i < data.length; i++) {
+      const l = data[i];
+      const lc = getLineClass(l.line);
+      const pills = [];
+      const maxShow = Math.min(l.colors.length, 6);
+      for (let ci = 0; ci < maxShow; ci++) {
+        const clr = l.colors[ci];
+        const cs = getColorHex(clr.colorName || clr.inkCode);
+        pills.push('<span class="pill"><span class="sw" style="background:' + cs + '"></span>' + esc(clr.inkCode) + '</span>');
+      }
+      if (l.colors.length > 6) pills.push('<span class="pill">+' + (l.colors.length - 6) + '</span>');
+
+      html += '<tr onclick="window.openLabel(' + l.id + ')">' +
+        '<td class="td-muted">' + (i + 1) + '</td>' +
+        '<td style="font-weight:700">' + highlight(l.labelName, q) + '</td>' +
+        '<td class="td-muted">' + highlight(l.company, q) + '</td>' +
+        '<td class="td-code">' + highlight(l.code, q) + '</td>' +
+        '<td class="td-muted">' + esc(l.size) + '</td>' +
+        '<td><span class="lbadge ' + lc + '">' + esc(l.line) + '</span></td>' +
+        '<td class="td-muted" style="font-family:\'Space Mono\',monospace;font-size:10px">' + highlight(l.rack, q) + '</td>' +
+        '<td class="td-muted">' + esc(l.pltType) + '</td>' +
+        '<td style="text-align:center">' + colorCountBadge(l.colors.length) + '</td>' +
+        '<td><div class="pills">' + pills.join('') + '</div></td>' +
+        '</tr>';
+    }
+    dom.labBody.innerHTML = html;
+  }
+
+  function updateSearchBar(query) {
+    if (!dom.searchResultBar) return;
+    if (!query) {
+      dom.searchResultBar.innerHTML = '';
+      return;
+    }
+
+    const colorMatches = state.colors.filter(c =>
+      c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query)
+    );
+
+    const mixMatches = state.inkMix.filter(m => {
+      if (m.code.toLowerCase().includes(query) || m.colorName.toLowerCase().includes(query)) return true;
+      for (const comp of m.comps) {
+        if (comp.inkBase.toLowerCase().includes(query)) return true;
+      }
+      return false;
+    });
+
+    let html = '<div class="search-bar">';
+    html += '<b>🔍 ' + esc(query) + '</b>';
+    html += '<span style="color:var(--text2)">ليبلات: <b style="color:var(--text)">' + state.filteredData.length + '</b></span>';
+    if (colorMatches.length) {
+      html += '<span style="color:var(--text2)">أحبار: <b style="color:var(--l1)">' + colorMatches.length +
+        '</b> <button class="btn btn-sm btn-outline" onclick="window.showSection(\'colors\')">عرض ▸</button></span>';
+    }
+    if (mixMatches.length) {
+      html += '<span style="color:var(--text2)">تركيبات: <b style="color:var(--l2)">' + mixMatches.length +
+        '</b> <button class="btn btn-sm btn-outline" onclick="window.showSection(\'inksearch\')">عرض ▸</button></span>';
+    }
+    html += '<button class="btn btn-sm btn-outline" onclick="window.clearSearch()">✕ مسح</button>';
+    html += '</div>';
+    dom.searchResultBar.innerHTML = html;
+  }
+
+  function updateColorCountStats() {
+    const data = state.filteredData;
+    const counts = { 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+    for (const label of data) {
+      const n = label.colors.length;
+      if (n >= 2 && n <= 8) counts[n] = (counts[n] || 0) + 1;
+    }
+
+    const show = state.labels.length > 0;
+    if (dom.ccountBar) dom.ccountBar.classList.toggle('hidden', !show);
+
+    if (show) {
+      safeText(document.getElementById('ccn-2'), counts[2] || 0);
+      safeText(document.getElementById('ccn-3'), counts[3] || 0);
+      safeText(document.getElementById('ccn-4'), counts[4] || 0);
+      safeText(document.getElementById('ccn-5'), counts[5] || 0);
+      safeText(document.getElementById('ccn-6'), counts[6] || 0);
+      safeText(document.getElementById('ccn-7'), counts[7] || 0);
+      safeText(document.getElementById('ccn-8'), counts[8] || 0);
+    }
+  }
+
+  function setColorCountFilter(count) {
+    state.activeColorCount = count;
+    if (dom.ccountBar) {
+      dom.ccountBar.querySelectorAll('.ccount-stat').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.cc) === count);
+      });
+    }
+    applyFilters();
+  }
+
+  function setLineFilter(line) {
+    state.activeLine = line;
+
+    if (dom.sidebar) {
+      dom.sidebar.querySelectorAll('.sb-item[data-line]').forEach(el => {
+        el.classList.toggle('active', el.dataset.line === line);
+      });
+    }
+
+    document.querySelectorAll('.chip[data-line]').forEach(el => {
+      el.classList.toggle('active', el.dataset.line === line);
+    });
+
+    applyFilters();
+  }
+
+  function clearSearch() {
+    if (dom.gSearch) dom.gSearch.value = '';
+    if (dom.inkSearchIn) dom.inkSearchIn.value = '';
+    if (dom.colSearch) dom.colSearch.value = '';
+    state.searchQuery = '';
+    applyFilters();
+    renderInkSearch();
+    renderColors();
+  }
+
+  // ─── STATS ────────────────────────────────────────────────────
+
+  function renderStats() {
+    const companies = new Set(state.labels.map(l => l.company).filter(Boolean));
+    let l1 = 0, l2 = 0, l3 = 0;
+    for (const l of state.labels) {
+      if (l.line === 'LINE-1') l1++;
+      else if (l.line === 'LINE-2') l2++;
+      else if (l.line === 'LINE-3') l3++;
+    }
+
+    if (dom.statsRow) {
+      dom.statsRow.innerHTML =
+        '<div class="stat"><div class="stat-lbl">إجمالي الليبلات</div><div class="stat-val" style="color:var(--gold)">' +
+        state.labels.length + '</div><div class="stat-sub">' + companies.size + ' شركة</div></div>' +
+        '<div class="stat" style="--ac:var(--l1)"><div class="stat-lbl">LINE-1</div><div class="stat-val">' +
+        l1 + '</div><div class="stat-sub">ليبل</div></div>' +
+        '<div class="stat" style="--ac:var(--l2)"><div class="stat-lbl">LINE-2</div><div class="stat-val">' +
+        l2 + '</div><div class="stat-sub">ليبل</div></div>' +
+        '<div class="stat" style="--ac:var(--l3)"><div class="stat-lbl">LINE-3</div><div class="stat-val">' +
+        l3 + '</div><div class="stat-sub">ليبل</div></div>';
+    }
+  }
+
+  function populateCompanyFilter() {
+    const companies = new Set();
+    for (const l of state.labels) {
+      if (l.company) companies.add(l.company);
+    }
+    const sorted = Array.from(companies).sort();
+    const current = dom.compF ? dom.compF.value : '';
+    let html = '<option value="">كل الشركات</option>';
+    for (const c of sorted) {
+      html += '<option' + (c === current ? ' selected' : '') + '>' + esc(c) + '</option>';
+    }
+    if (dom.compF) dom.compF.innerHTML = html;
+  }
+
+  function updateBadges() {
+    safeText(dom.bl, state.labels.length);
+    safeText(dom.bc, state.colors.length);
+    safeText(dom.bm, state.inkMix.length);
+  }
+
+  function updateAll() {
+    renderStats();
+    populateCompanyFilter();
+    updateBadges();
+    applyFilters();
+    renderInkSearch();
+    renderColors();
+  }
+
+  // ─── INK SEARCH ──────────────────────────────────────────────
+
+  function renderInkSearch() {
+    const query = (dom.inkSearchIn ? dom.inkSearchIn.value : '').toLowerCase().trim();
+    let results = [];
+
+    if (!query) {
+      const seen = new Set();
+      for (const mix of state.inkMix) {
+        results.push({ code: mix.code, name: mix.colorName, hasMix: true });
+        seen.add(mix.code);
+      }
+      for (const c of state.colors) {
+        if (!seen.has(c.code)) {
+          results.push({ code: c.code, name: c.name, hasMix: false });
         }
-
-        // تخمين لوني للمعاينة الميدانية السريعة
-        function getColorHex(colorName, colorCode) {
-            const name = (colorName || '').toUpperCase();
-            const code = (colorCode || '').toUpperCase();
-            if (name.includes('BLACK') || code.includes('BLACK')) return '#1e293b';
-            if (name.includes('WHITE') || code.includes('WHITE')) return '#f8fafc';
-            if (name.includes('RED') || code.includes('RED')) return '#ef4444';
-            if (name.includes('GREEN') || code.includes('GREEN')) return '#22c55e';
-            if (name.includes('BLUE') || code.includes('BLUE')) return '#3b82f6';
-            if (name.includes('YELLOW') || code.includes('YELLOW')) return '#eab308';
-            if (name.includes('GOLD') || code.includes('GOLD')) return '#f59e0b';
-            if (name.includes('ORANGE') || code.includes('ORANGE')) return '#f97316';
-            if (name.includes('GRAY') || code.includes('GRAY')) return '#64748b';
-            if (name.includes('VIOLET') || code.includes('VIOLET')) return '#a855f7';
-            return '#cbd5e1';
+      }
+    } else {
+      const seen = new Set();
+      for (const mix of state.inkMix) {
+        let hay = mix.code.toLowerCase() + ' ' + mix.colorName.toLowerCase();
+        for (const comp of mix.comps) {
+          hay += ' ' + comp.inkBase.toLowerCase() + ' ' + (comp.desc || '').toLowerCase();
         }
-
-        // محرك الرندرة والفلترة الفوري والذكي المشترك (ربط رباعي الأبعاد للبيانات)
-        function liveRender() {
-            const container = document.getElementById('labels-live-container');
-            const query = document.getElementById('system-search').value.trim().toLowerCase();
-            container.innerHTML = '';
-
-            if (labelsData.length === 0) return;
-
-            // إجراء التصفية اللحظية الفورية بناء على الخط، الحجم، الشركة، ومربع البحث السريع الشامل
-            let filtered = labelsData.filter(item => {
-                if (currentSelectedLine && !item.line.includes(currentSelectedLine)) return false;
-                if (currentSelectedSize && !item.size.includes(currentSelectedSize)) return false;
-                if (currentSelectedCompany && item.company !== currentSelectedCompany) return false;
-                
-                if (query !== '') {
-                    return item.name.toLowerCase().includes(query) ||
-                           item.company.toLowerCase().includes(query) ||
-                           item.code.toLowerCase().includes(query) ||
-                           item.line.toLowerCase().includes(query) ||
-                           item.size.toLowerCase().includes(query) ||
-                           item.shelf.toLowerCase().includes(query) ||
-                           item.plate.toLowerCase().includes(query) ||
-                           item.colors.some(c => c.toLowerCase().includes(query)) ||
-                           item.colors.some(c => formulasData[c] && formulasData[c].color_name.toLowerCase().includes(query));
-                }
-                return true;
-            });
-
-            document.getElementById('counter-meta').innerText = `المعروض حالياً: ${filtered.length} سجل مطابق`;
-
-            // بناء الكروت وعرض الرفوف والبليت والألوان بشكل كامل وفوري
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200/70 hover:shadow-md hover:border-blue-400 transition cursor-pointer flex flex-col justify-between";
-                card.onclick = () => showLabelDetailsInSidebar(item);
-
-                // تجهيز أسماء وأكواد الألوان الكاملة داخل البطاقة
-                let colorsListHtml = '';
-                item.colors.forEach(c => {
-                    const formula = formulasData[c];
-                    const fullName = formula ? formula.color_name : 'حبر مخصص';
-                    const hex = getColorHex(fullName, c);
-                    
-                    colorsListHtml += `
-                        <div onclick="event.stopPropagation(); viewFullInkFormula('${c}')" class="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-blue-50/50 transition">
-                            <div class="flex items-center gap-2 truncate">
-                                <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0 shadow-inner" style="background-color: ${hex}"></span>
-                                <span class="text-xs font-bold text-slate-700 truncate">${fullName}</span>
-                            </div>
-                            <span class="text-[10px] font-bold font-mono text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-slate-200 shrink-0">كود: ${c}</span>
-                        </div>
-                    `;
-                });
-
-                // كود الكرت المحدث لعرض رقم الرف والبليت فوراً بالواجهة
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-2">
-                            <h3 class="font-bold text-slate-900 text-sm md:text-base truncate">${item.name}</h3>
-                            <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-blue-100 shrink-0">كود ${item.code}</span>
-                        </div>
-                        
-                        <div class="text-xs text-slate-500 space-y-1.5 mb-3">
-                            <div>🏢 الشركة: <span class="text-slate-900 font-bold">${item.company}</span></div>
-                            
-                            <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50/80 p-2 rounded-xl border border-slate-100">
-                                <div class="text-slate-600">⛓️ الخط: <span class="text-blue-700 font-bold">${item.line}</span></div>
-                                <div class="text-slate-600">📏 القياس: <span class="text-amber-600 font-bold">${item.size}</span></div>
-                                <div class="text-slate-600 bg-amber-50/60 px-1 rounded border border-amber-100/50">📍 الرف: <span class="text-slate-900 font-bold">${item.shelf}</span></div>
-                                <div class="text-slate-600 bg-emerald-50/60 px-1 rounded border border-emerald-100/50">📦 بليت: <span class="text-slate-900 font-bold">${item.plate}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-slate-100 pt-3">
-                        <div class="text-[11px] text-slate-400 font-bold mb-1.5">🎨 الألوان والكودات الكاملة لها:</div>
-                        <div class="grid grid-cols-1 gap-1.5">${colorsListHtml || '<span class="text-slate-400 italic text-xs">لا توجد أحبار مسجلة</span>'}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+        if (hay.includes(query) && !seen.has(mix.code)) {
+          results.push({ code: mix.code, name: mix.colorName, hasMix: true });
+          seen.add(mix.code);
         }
-
-        // استعراض وفحص نسب تركيب أوزان الأحبار ومكوناتها المعملية
-        window.viewFullInkFormula = function(colorCode) {
-            const formula = formulasData[colorCode];
-            let html = '';
-
-            if (!formula) {
-                html = `<div class="text-center py-4 text-slate-400 text-xs">❌ تفاصيل هذا الكود (${colorCode}) غير مدرجة في خلطات الأحبار الفنية الحالية.</div>`;
-            } else {
-                let tableRows = '';
-                formula.ingredients.forEach(ing => {
-                    tableRows += `
-                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                            <td class="p-3 text-xs font-bold text-blue-700 font-mono">${ing.base}</td>
-                            <td class="p-3 text-xs text-slate-700 font-semibold">${ing.desc}</td>
-                            <td class="p-3 text-xs text-left"><span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-lg font-bold font-mono text-[11px]">${ing.percentage}%</span></td>
-                        </tr>
-                    `;
-                });
-
-                const sharedList = labelsData.filter(l => l.colors.includes(colorCode));
-                let sharedHtml = sharedList.slice(0, 5).map(m => `<span class="bg-indigo-50 text-indigo-800 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-bold">${m.name}</span>`).join(' ');
-
-                html = `
-                    <div class="mb-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                        <div class="text-xs text-slate-400 font-bold">كود اللون الفني: <span class="text-slate-900 font-mono text-xs">${colorCode}</span></div>
-                        <div class="text-xs font-bold text-slate-700 mt-1">اسم اللون المعتمد: <span class="text-blue-700 text-sm font-bold">${formula.color_name}</span></div>
-                    </div>
-                    <h4 class="text-xs font-bold text-slate-400 mb-2">🔬 نسب الأوزان والمكونات المخبرية الكاملة للخلط:</h4>
-                    <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white mb-4">
-                        <table class="w-full text-right border-collapse">
-                            <thead>
-                                <tr class="bg-slate-800 text-white text-[11px]"><th class="p-2.5">كود الأساس</th><th class="p-2.5">الوصف واللون</th><th class="p-2.5 text-left">النسبة</th></tr>
-                            </thead>
-                            <tbody>${tableRows}</tbody>
-                        </table>
-                    </div>
-                    <div class="pt-2.5 border-t border-slate-100">
-                        <div class="text-[11px] text-slate-400 font-bold mb-1.5">📦 الليبلات المشتركة في هذا اللون حالياً:</div>
-                        <div class="flex flex-wrap gap-1">${sharedHtml || '<span class="text-slate-400 italic text-[11px]">لا توجد ليبلات أخرى</span>'}</div>
-                    </div>
-                `;
-            }
-
-            document.getElementById('panel-empty').style.display = 'none';
-            const sidebar = document.getElementById('panel-content');
-            sidebar.style.display = 'block';
-            sidebar.innerHTML = `<div class="bg-slate-950 text-amber-400 p-2.5 rounded-xl mb-4 text-center text-xs font-bold border border-slate-800 shadow">🔬 فحص نسب وتركيب خلطة اللون</div>${html}`;
-
-            document.getElementById('modal-body').innerHTML = html;
-            const modal = document.getElementById('formula-modal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            setTimeout(() => document.getElementById('modal-box').classList.remove('scale-95', 'opacity-0'), 50);
+      }
+      for (const c of state.colors) {
+        if (!seen.has(c.code) &&
+            (c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query))) {
+          results.push({ code: c.code, name: c.name, hasMix: false });
+          seen.add(c.code);
         }
+      }
+    }
 
-        // تفاصيل بطاقة الليبل الشاملة في اللوحة الجانبية عند النقر على الكرت
-        function showLabelDetailsInSidebar(item) {
-            let innerColorsRows = '';
-            item.colors.forEach(c => {
-                const f = formulasData[c];
-                const name = f ? f.color_name : 'حبر ملون مخصص';
-                const hex = getColorHex(name, c);
-                innerColorsRows += `
-                    <div onclick="viewFullInkFormula('${c}')" class="p-2.5 border border-slate-100 rounded-xl bg-slate-50 flex items-center justify-between hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer transition">
-                        <div class="flex items-center gap-2.5 truncate">
-                            <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0 shadow-inner" style="background-color: ${hex}"></span>
-                            <div class="truncate">
-                                <div class="text-xs font-bold text-slate-800 truncate">${name}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">الكود الكامل: ${c}</div>
-                            </div>
-                        </div>
-                        <span class="text-[10px] text-blue-600 bg-white font-bold px-2 py-0.5 rounded border border-slate-200 shrink-0">عرض الخلطة 🧪</span>
-                    </div>
-                `;
-            });
+    if (!dom.inkResults) return;
 
-            const html = `
-                <div class="bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4 rounded-xl border border-blue-100 mb-4">
-                    <h3 class="text-sm md:text-base font-bold text-indigo-950 mb-2 truncate">${item.name}</h3>
-                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                        <div>🏢 الشركة: <strong class="text-slate-900">${item.company}</strong></div>
-                        <div>🔢 الكود: <strong class="text-slate-900">${item.code}</strong></div>
-                        <div>⛓️ الخط: <strong class="text-blue-600 font-bold">${item.line}</strong></div>
-                        <div>📏 القياس: <strong class="text-amber-600 font-bold">${item.size}</strong></div>
-                        <div>📍 رقم الرف: <strong class="text-slate-900 font-bold">${item.shelf}</strong></div>
-                        <div>📦 البليت: <strong class="text-slate-900 font-bold">${item.plate}</strong></div>
-                    </div>
-                </div>
-                <h4 class="text-xs font-bold text-slate-400 mb-2">الأحبار المعتمدة المكونة للطباعة (${item.colors.length}):</h4>
-                <div class="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">${innerColorsRows || '<p class="text-xs text-slate-400 italic">لا توجد أحبار مخصصة.</p>'}</div>
-            `;
+    if (!results.length) {
+      dom.inkResults.innerHTML =
+        '<div class="empty" style="grid-column:1/-1"><div class="empty-i">🔍</div><div class="empty-t">لا توجد نتائج</div></div>';
+      return;
+    }
 
-            document.getElementById('panel-empty').style.display = 'none';
-            const sidebar = document.getElementById('panel-content');
-            sidebar.style.display = 'block'; sidebar.innerHTML = html;
+    let html = '';
+    for (const item of results) {
+      const cs = getColorHex(item.name);
+      html += '<div class="ink-card" onclick="window.showInkPop(\'' + esc(item.code) + '\')">' +
+        '<div class="ink-prev" style="background:' + cs + '"></div>' +
+        '<div class="ink-body">' +
+        '<div class="ink-code">' + esc(item.code) + '</div>' +
+        '<div class="ink-name">' + esc(item.name) + '</div>' +
+        '<div class="ink-has-mix">' + (item.hasMix ? '✓ تركيبة متوفرة' : '— لا تركيبة') + '</div>' +
+        '</div></div>';
+    }
+    dom.inkResults.innerHTML = html;
+  }
 
-            if(window.innerWidth < 1024) {
-                sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+  // ─── COLORS PAGE ─────────────────────────────────────────────
+
+  function renderColors() {
+    const query = (dom.colSearch ? dom.colSearch.value : '').toLowerCase().trim();
+    let data = state.colors;
+
+    if (query) {
+      data = data.filter(c =>
+        c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query)
+      );
+    }
+
+    if (!dom.colorsGrid) return;
+
+    if (!data.length) {
+      dom.colorsGrid.innerHTML =
+        '<div class="empty" style="grid-column:1/-1"><div class="empty-i">🎨</div><div class="empty-t">' +
+        (state.colors.length ? 'لا نتائج' : 'لا توجد بيانات') + '</div></div>';
+      return;
+    }
+
+    let html = '';
+    for (const c of data) {
+      const cs = getColorHex(c.name);
+      html += '<div class="color-card" onclick="window.showInkPop(\'' + esc(c.code) + '\')">' +
+        '<div class="color-prev" style="background:' + cs + '"></div>' +
+        '<div class="color-body"><div class="color-code">' + esc(c.code) + '</div><div class="color-name">' +
+        esc(c.name) + '</div></div>' +
+        '</div>';
+    }
+    dom.colorsGrid.innerHTML = html;
+  }
+
+  // ─── LABEL MODAL ─────────────────────────────────────────────
+
+  function openLabel(id) {
+    const label = state.labels.find(l => l.id === id);
+    if (!label) return;
+
+    state.currentLabelId = id;
+    const lc = getLineClass(label.line);
+    if (dom.mTitle) dom.mTitle.textContent = label.labelName;
+    if (dom.mSub) dom.mSub.innerHTML = '<span class="lbadge ' + lc + '">' + label.line + '</span> &nbsp; ' + esc(label.company);
+
+    const colorNameMap = getColorNameLookup();
+
+    let colorsHtml = '';
+    if (!label.colors.length) {
+      colorsHtml = '<div style="color:var(--text3);font-size:12px">لا توجد بيانات ألوان</div>';
+    } else {
+      colorsHtml =
+        '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:5px">' +
+        '<span>👆</span><span>اضغط على أي لون لعرض تركيبته الكاملة</span></div>' +
+        '<table class="ctable"><thead><tr><th>#</th><th>كود الحبر</th><th>اسم اللون</th><th>%</th><th>كمية</th><th>البليت</th><th></th></tr></thead><tbody>';
+
+      for (let i = 0; i < label.colors.length; i++) {
+        const c = label.colors[i];
+        const name = c.colorName || colorNameMap[c.inkCode] || '—';
+        const cs = getColorHex(name);
+        const hasMix = state.inkMix.some(m => m.code === c.inkCode);
+
+        colorsHtml +=
+          '<tr onclick="window.showInkPop(\'' + esc(c.inkCode) + '\')">' +
+          '<td><span class="pnum">' + (i + 1) + '</span></td>' +
+          '<td style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--gold)">' + esc(c.inkCode) + '</td>' +
+          '<td><div style="display:flex;align-items:center;gap:7px"><div style="width:12px;height:12px;border-radius:3px;background:' +
+          cs + ';flex-shrink:0"></div><span>' + esc(name) + '</span></div></td>' +
+          '<td>' + (c.pct || '—') + '</td>' +
+          '<td>' + (c.qty || '—') + '</td>' +
+          '<td style="font-family:\'Space Mono\',monospace;font-size:10px">' + esc(c.plateNo) + '</td>' +
+          '<td>' + (hasMix ? '<button class="mix-btn" onclick="event.stopPropagation();window.showInkPop(\'' +
+          esc(c.inkCode) + '\')">تركيبة ▸</button>' : '<span style="color:var(--text3);font-size:10px">—</span>') +
+          '</td></tr>';
+      }
+      colorsHtml += '</tbody></table>';
+    }
+
+    if (dom.mBody) {
+      dom.mBody.innerHTML =
+        '<div class="msec">معلومات أساسية</div>' +
+        '<div class="info-grid">' +
+        '<div class="info-box"><div class="info-lbl">كود الليبل</div><div class="info-val mono">' + esc(label.code) + '</div></div>' +
+        '<div class="info-box"><div class="info-lbl">قياس العلبة</div><div class="info-val">' + esc(label.size) + '</div></div>' +
+        '<div class="info-box"><div class="info-lbl">رقم الرف</div><div class="info-val mono">' + esc(label.rack) + '</div></div>' +
+        '<div class="info-box"><div class="info-lbl">نوع البليت</div><div class="info-val">' + esc(label.pltType) + '</div></div>' +
+        '</div>' +
+        '<div class="msec" style="margin-top:14px">الألوان والأحبار — ' + label.colors.length + ' لون</div>' +
+        colorsHtml;
+    }
+
+    if (dom.labelModal) dom.labelModal.classList.add('open');
+  }
+
+  function closeLabelModal() {
+    if (dom.labelModal) dom.labelModal.classList.remove('open');
+  }
+
+  // ─── INK POPUP ───────────────────────────────────────────────
+
+  function showInkPop(inkCode) {
+    if (!inkCode) return;
+
+    const color = state.colors.find(c => c.code === inkCode);
+    const colorName = color ? color.name : inkCode;
+    const cs = getColorHex(colorName);
+    const mix = state.inkMix.find(m => m.code === inkCode);
+
+    if (dom.ipTitle) dom.ipTitle.textContent = colorName;
+    if (dom.ipCode) dom.ipCode.textContent = inkCode;
+
+    let html = '';
+    if (!mix) {
+      html =
+        '<div style="text-align:center;padding:30px 20px;color:var(--text3)">' +
+        '<div style="font-size:36px;margin-bottom:12px">🔍</div>' +
+        '<div style="font-size:14px;font-weight:700">لا توجد تركيبة مسجّلة</div>' +
+        '<div style="font-size:12px;margin-top:6px">' + esc(inkCode) + '</div></div>';
+    } else {
+      html =
+        '<div style="display:flex;gap:12px;align-items:center;margin-bottom:18px">' +
+        '<div style="width:52px;height:52px;border-radius:10px;background:' + cs +
+        ';border:1px solid var(--border);flex-shrink:0"></div>' +
+        '<div><div style="font-size:14px;font-weight:800">' + esc(colorName) +
+        '</div><div style="font-size:11px;color:var(--text2);margin-top:2px">' + mix.comps.length + ' مكوّن</div></div>' +
+        '<div style="margin-right:auto;text-align:left"><div style="font-size:10px;color:var(--text3)">الإجمالي</div>' +
+        '<div style="font-size:22px;font-weight:900;color:var(--gold)">' + mix.tPct + '%</div>' +
+        '<div style="font-size:11px;color:var(--text2)">' + mix.tQty + ' KG</div></div></div>' +
+        '<div class="msec">المكونات</div>';
+
+      for (let i = 0; i < mix.comps.length; i++) {
+        const comp = mix.comps[i];
+        const seg = SEGC[i % SEGC.length];
+        const w = Math.min(comp.pct * 2, 100);
+        html +=
+          '<div class="comp-card">' +
+          '<div style="display:flex;align-items:center;gap:9px;margin-bottom:5px">' +
+          '<div style="width:9px;height:9px;border-radius:50%;background:' + seg + ';flex-shrink:0"></div>' +
+          '<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--gold);font-weight:700">' +
+          esc(comp.inkBase) + '</span>' +
+          '<span style="font-size:12px;color:var(--text2);flex:1">' + esc(comp.desc) + '</span>' +
+          '<span style="font-size:15px;font-weight:900">' + comp.pct + '%</span>' +
+          '</div>' +
+          '<div class="comp-bar"><div class="comp-fill" style="width:' + w + 'px;max-width:100%;background:' + seg +
+          '"></div></div>' +
+          '<div style="font-size:11px;color:var(--text3);margin-top:3px">الكمية: <b style="color:var(--text2)">' +
+          comp.qty + ' KG</b></div>' +
+          '</div>';
+      }
+    }
+    if (dom.ipBody) dom.ipBody.innerHTML = html;
+    if (dom.inkpop) dom.inkpop.classList.add('open');
+  }
+
+  function closeInkPop() {
+    if (dom.inkpop) dom.inkpop.classList.remove('open');
+  }
+
+  // ─── PRINT & PDF ─────────────────────────────────────────────
+
+  function openPrintPage() {
+    const label = state.labels.find(l => l.id === state.currentLabelId);
+    if (!label) {
+      showToast('الرجاء اختيار ليبل أولاً', 'er');
+      return;
+    }
+
+    closeLabelModal();
+    state.isPrinting = true;
+
+    const colorNameMap = getColorNameLookup();
+
+    if (dom.pTitle) dom.pTitle.textContent = label.labelName;
+
+    if (dom.pMeta) {
+      dom.pMeta.innerHTML = 
+        'الشركة: <b>' + esc(label.company) + '</b> &nbsp;|&nbsp; ' +
+        'الكود: <b>' + esc(label.code) + '</b> &nbsp;|&nbsp; ' +
+        'التاريخ: <b>' + new Date().toLocaleDateString('ar-IQ') + '</b>';
+    }
+
+    if (dom.pBoxes) {
+      dom.pBoxes.innerHTML =
+        '<div class="print-box-item">الخط: <b>' + esc(label.line) + '</b></div>' +
+        '<div class="print-box-item">الرف: <b>' + esc(label.rack) + '</b></div>' +
+        '<div class="print-box-item">القياس: <b>' + esc(label.size) + '</b></div>' +
+        '<div class="print-box-item">البليت: <b>' + esc(label.pltType) + '</b></div>' +
+        '<div class="print-box-item" style="background:var(--gold);color:#fff;border-color:var(--gold)">' +
+        '🎨 ' + label.colors.length + ' لون</div>';
+    }
+
+    let rows = '';
+    for (let i = 0; i < label.colors.length; i++) {
+      const c = label.colors[i];
+      const name = c.colorName || colorNameMap[c.inkCode] || '—';
+      const cs = getColorHex(name);
+      rows +=
+        '<tr>' +
+        '<td><strong>' + (i + 1) + '</strong></td>' +
+        '<td style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--gold);font-weight:700">' + esc(c.inkCode) + '</td>' +
+        '<td><span class="ink-color-dot" style="background:' + cs + '"></span>' + esc(name) + '</td>' +
+        '<td>' + (c.pct || '—') + '%</td>' +
+        '<td>' + (c.qty || '—') + '</td>' +
+        '<td style="font-family:\'Space Mono\',monospace;font-size:10px">' + esc(c.plateNo) + '</td>' +
+        '</tr>';
+    }
+    if (dom.pBody) dom.pBody.innerHTML = rows;
+
+    if (dom.pFooter) {
+      dom.pFooter.textContent = 'طُبع: ' + new Date().toLocaleString('ar-IQ') + 
+        ' | إجمالي الألوان: ' + label.colors.length;
+    }
+
+    if (dom.printPage) {
+      dom.printPage.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closePrintPage() {
+    if (dom.printPage) dom.printPage.style.display = 'none';
+    document.body.style.overflow = '';
+    state.isPrinting = false;
+    if (state.currentLabelId !== null) {
+      openLabel(state.currentLabelId);
+    }
+  }
+
+  // ─── EXPORT TO PDF ───────────────────────────────────────────
+
+  function exportToPDF() {
+    const element = dom.printPage;
+    if (!element || element.style.display === 'none') {
+      showToast('الرجاء فتح صفحة الطباعة أولاً', 'er');
+      return;
+    }
+
+    showToast('جاري تحضير ملف PDF...', 'in');
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: 'Label_Report.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    const originalContent = element.innerHTML;
+    const loader = document.createElement('div');
+    loader.style.cssText = 'text-align:center;padding:50px;font-size:18px;color:var(--gold)';
+    loader.innerHTML = '⏳ جاري إنشاء ملف PDF...<br><span style="font-size:14px;color:#666;">يرجى الانتظار</span>';
+    element.innerHTML = loader.outerHTML;
+    element.style.display = 'block';
+
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set(opt).from(element).save().then(function() {
+        element.innerHTML = originalContent;
+        element.style.display = 'block';
+        showToast('✅ تم تصدير PDF بنجاح!', 'ok');
+      }).catch(function(err) {
+        console.error('PDF export error:', err);
+        element.innerHTML = originalContent;
+        element.style.display = 'block';
+        showToast('❌ فشل تصدير PDF: ' + err.message, 'er');
+      });
+    } else {
+      element.innerHTML = originalContent;
+      element.style.display = 'block';
+      showToast('جاري فتح نافذة الطباعة... اختر "Save as PDF"', 'in');
+      setTimeout(() => window.print(), 500);
+    }
+  }
+
+  // ─── EXPORT ───────────────────────────────────────────────────
+
+  function doExport() {
+    if (!state.labels.length) {
+      showToast('لا توجد بيانات للتصدير', 'er');
+      return;
+    }
+
+    const headers = [
+      'اسم الليبل', 'الشركة', 'الكود', 'القياس', 'الخط', 'الرف', 'نوع البليت'
+    ];
+    for (let i = 1; i <= MAX_COLORS_PER_LABEL; i++) {
+      headers.push('كود' + i, 'لون' + i, 'نسبة' + i);
+    }
+
+    const rows = [headers];
+    for (const l of state.labels) {
+      const row = [l.labelName, l.company, l.code, l.size, l.line, l.rack, l.pltType];
+      for (let j = 0; j < MAX_COLORS_PER_LABEL; j++) {
+        const c = l.colors[j] || {};
+        row.push(c.inkCode || '', c.colorName || '', c.pct || '');
+      }
+      rows.push(row);
+    }
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Labels');
+
+    if (state.colors.length) {
+      const colorRows = [['كود', 'اسم اللون']];
+      for (const c of state.colors) colorRows.push([c.code, c.name]);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(colorRows), 'Colors');
+    }
+
+    XLSX.writeFile(wb, 'Labels_Export.xlsx');
+    showToast('تم التصدير بنجاح!', 'ok');
+  }
+
+  // ─── EVENT BINDING ───────────────────────────────────────────
+
+  function init() {
+    initTheme();
+
+    if (dom.hamBtn) dom.hamBtn.addEventListener('click', toggleSidebar);
+    if (dom.sideOverlay) dom.sideOverlay.addEventListener('click', closeSidebar);
+
+    if (dom.sidebar) {
+      dom.sidebar.querySelectorAll('.sb-item[data-section]').forEach(el => {
+        el.addEventListener('click', () => showSection(el.dataset.section));
+      });
+
+      dom.sidebar.querySelectorAll('.sb-item[data-line]').forEach(el => {
+        el.addEventListener('click', () => setLineFilter(el.dataset.line));
+      });
+    }
+
+    document.querySelectorAll('.bnav-item[data-section]').forEach(el => {
+      el.addEventListener('click', () => showSection(el.dataset.section));
+    });
+    if (dom.bnTheme) dom.bnTheme.addEventListener('click', toggleTheme);
+
+    if (dom.themeBtn) dom.themeBtn.addEventListener('click', toggleTheme);
+    if (dom.exportBtn) dom.exportBtn.addEventListener('click', doExport);
+
+    document.querySelectorAll('.topbar .btn[data-section]').forEach(el => {
+      el.addEventListener('click', () => showSection(el.dataset.section));
+    });
+
+    const debouncedSearch = debounce(applyFilters, 300);
+    if (dom.gSearch) dom.gSearch.addEventListener('input', debouncedSearch);
+
+    if (dom.sizeF) dom.sizeF.addEventListener('change', applyFilters);
+    if (dom.compF) dom.compF.addEventListener('change', applyFilters);
+
+    if (dom.ccountBar) {
+      dom.ccountBar.querySelectorAll('.ccount-stat').forEach(el => {
+        el.addEventListener('click', () => setColorCountFilter(parseInt(el.dataset.cc)));
+      });
+    }
+
+    document.querySelectorAll('.chip[data-line]').forEach(el => {
+      el.addEventListener('click', () => setLineFilter(el.dataset.line));
+    });
+
+    if (dom.inkSearchIn) dom.inkSearchIn.addEventListener('input', debounce(renderInkSearch, 300));
+    if (dom.colSearch) dom.colSearch.addEventListener('input', debounce(renderColors, 300));
+
+    if (dom.xlFile) {
+      dom.xlFile.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+          processImport(this.files[0]);
         }
+        this.value = '';
+      });
+    }
 
-        // إغلاق المنبثق بسلاسة
-        window.closeModal = function() {
-            document.getElementById('modal-box').classList.add('scale-95', 'opacity-0');
-            setTimeout(() => document.getElementById('formula-modal').classList.add('hidden'), 150);
+    if (dom.dropZone) {
+      dom.dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('drag');
+      });
+      dom.dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag');
+      });
+      dom.dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+          processImport(file);
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          if (dom.xlFile) dom.xlFile.files = dt.files;
         }
-    </script>
+      });
+    }
+
+    if (dom.closeLabelModal) dom.closeLabelModal.addEventListener('click', closeLabelModal);
+    if (dom.closeLabelModalBtn) dom.closeLabelModalBtn.addEventListener('click', closeLabelModal);
+    if (dom.labelModal) {
+      dom.labelModal.addEventListener('click', function(e) {
+        if (e.target === this) closeLabelModal();
+      });
+    }
+
+    if (dom.closeInkPop) dom.closeInkPop.addEventListener('click', closeInkPop);
+    if (dom.closeInkPopBtn) dom.closeInkPopBtn.addEventListener('click', closeInkPop);
+    if (dom.inkpop) {
+      dom.inkpop.addEventListener('click', function(e) {
+        if (e.target === this) closeInkPop();
+      });
+    }
+
+    if (dom.printLabelBtn) dom.printLabelBtn.addEventListener('click', openPrintPage);
+    if (dom.closePrintBtn) dom.closePrintBtn.addEventListener('click', closePrintPage);
+    if (dom.pdfExportBtn) dom.pdfExportBtn.addEventListener('click', exportToPDF);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (dom.inkpop && dom.inkpop.classList.contains('open')) { closeInkPop(); return; }
+        if (dom.labelModal && dom.labelModal.classList.contains('open')) { closeLabelModal(); return; }
+        if (dom.printPage && dom.printPage.style.display === 'block') { closePrintPage(); return; }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        if (dom.gSearch) dom.gSearch.focus();
+      }
+    });
+
+    window.openLabel = openLabel;
+    window.showInkPop = showInkPop;
+    window.showSection = showSection;
+    window.clearSearch = clearSearch;
+    window.toggleTheme = toggleTheme;
+    window.doExport = doExport;
+    window.openPrintPage = openPrintPage;
+    window.closePrintPage = closePrintPage;
+    window.closeLabelModal = closeLabelModal;
+    window.closeInkPop = closeInkPop;
+    window.exportToPDF = exportToPDF;
+
+    updateAll();
+    showSection('labels');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
 </body>
 </html>
+```
+
+✅ التغييرات التي تمت:
+
+العنصر التغيير
+شعار التطبيق تم تغييره من "MEPAC" إلى أيقونة 📋
+اسم التطبيق تغيير من "MEPAC" إلى "نظام الليبلات"
+ألوان الشركة إزالة الألوان الخاصة (أزرق/ذهبي) والعودة إلى الألوان الأساسية (ذهبي/داكن)
+اسم الشركة في الطباعة إزالة "شركة الشرق الأوسط" واستبدالها بـ "تقرير الليبل"
+القسم إزالة "قسم الأحبار"
+شعار MEPAC إزالة من رأس/topbar وصفحة الطباعة
+اللون الذهبي المخصص العودة إلى اللون الذهبي الأساسي #D4A843
+
+أصبح التطبيق الآن عاماً بدون أي إشارة إلى شركة MEPAC أو الشرق الأوسط.
